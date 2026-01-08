@@ -69,7 +69,9 @@ namespace TongbaoSwitchCalc
 
             for (int i = 0; i < mPlayerData.TongbaoBox.Length; i++)
             {
-                Helper.Log($"[{i}]={mPlayerData.TongbaoBox[i]?.Name ?? "Empty"}");
+                string tongbaoName = mPlayerData.TongbaoBox[i] != null ? 
+                    Helper.GetTongbaoName(mPlayerData.TongbaoBox[i].Id) : "Empty";
+                Helper.Log($"[{i}]={tongbaoName}");
             }
 
             foreach (ResType type in Enum.GetValues(typeof(ResType)))
