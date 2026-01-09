@@ -52,7 +52,6 @@ namespace TongbaoSwitchCalc.DataModel
         {
             SquadType = squadType;
             mSquadDefine = Define.SquadDefines[squadType];
-            SwitchCount = 0;
             if (mSquadDefine.MaxTongbaoCount != MaxTongbaoCount)
             {
                 MaxTongbaoCount = mSquadDefine.MaxTongbaoCount;

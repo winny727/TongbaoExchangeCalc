@@ -244,14 +244,15 @@ namespace TongbaoSwitchCalc
         private void cbSquad_SelectedIndexChanged(object sender, EventArgs e)
         {
             SquadComboBoxItem item = comboBoxSquad.SelectedItem as SquadComboBoxItem;
-            if (mPlayerData.SwitchCount > 0)
-            {
-                var result = MessageBox.Show("切换分队会重置当前交换次数，是否继续？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if (result == DialogResult.No)
-                {
-                    return;
-                }
-            }
+            //if (mPlayerData.SwitchCount > 0)
+            //{
+            //    var result = MessageBox.Show("切换分队会重置当前交换次数，是否继续？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            //    if (result == DialogResult.No)
+            //    {
+            //        return;
+            //    }
+            //    mPlayerData.SwitchCount = 0;
+            //}
 
             mSelectedSquadType = item?.Value ?? SquadType.Flower;
             mPlayerData.SetSquadType(mSelectedSquadType);
@@ -282,14 +283,15 @@ namespace TongbaoSwitchCalc
                 ListViewItem selectedItem = listViewTongbao.SelectedItems[0];
                 int posIndex = listViewTongbao.Items.IndexOf(selectedItem);
 
-                if (mPlayerData.SwitchCount > 0)
-                {
-                    var result = MessageBox.Show("添加/更改通宝会重置当前交换次数，是否继续？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                    if (result == DialogResult.No)
-                    {
-                        return;
-                    }
-                }
+                //if (mPlayerData.SwitchCount > 0)
+                //{
+                //    var result = MessageBox.Show("添加/更改通宝会重置当前交换次数，是否继续？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                //    if (result == DialogResult.No)
+                //    {
+                //        return;
+                //    }
+                //    mPlayerData.SwitchCount = 0;
+                //}
 
                 // 测试，随机添加通宝
                 var configs = TongbaoConfig.GetAllTongbaoConfigs();
