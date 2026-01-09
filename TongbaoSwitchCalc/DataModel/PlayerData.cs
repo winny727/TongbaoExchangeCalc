@@ -11,22 +11,23 @@ namespace TongbaoSwitchCalc.DataModel
 
         public Tongbao[] TongbaoBox { get; private set; }
         public SquadType SquadType { get; private set; }
-        private SquadAttribute mSquadAttribute;
+        private SquadDefine mSquadDefine;
         public int SwitchCount { get; set; } // 已交换次数
         public int MaxTongbaoCount { get; private set; } // 最大通宝数量
-        public bool HasSpecialCollectible { get; set; } // 福祸相依（交换后的通宝如果是厉钱，则获得票券+1）
+        public SpecialConditionFlag SpecialConditionFlag { get; set; } // 福祸相依（交换后的通宝如果是厉钱，则获得票券+1）
 
         public PlayerData(IRandomGenerator random)
         {
             mRandom = random ?? throw new ArgumentNullException(nameof(random));
+            Init(default);
         }
 
-        public void Init(SquadType squadType, Dictionary<ResType, int> resValues)
+        public void Init(SquadType squadType, Dictionary<ResType, int> resValues = null)
         {
             SquadType = squadType;
-            mSquadAttribute = Define.SquadAttributeDefines[squadType];
+            mSquadDefine = Define.SquadDefines[squadType];
             SwitchCount = 0;
-            MaxTongbaoCount = mSquadAttribute.MaxTongbaoCount;
+            MaxTongbaoCount = mSquadDefine.MaxTongbaoCount;
             TongbaoBox = new Tongbao[MaxTongbaoCount];
 
             mResValues.Clear();
@@ -41,6 +42,24 @@ namespace TongbaoSwitchCalc.DataModel
             if (GetResValue(ResType.LifePoint) <= 0)
             {
                 SetResValue(ResType.LifePoint, 1); // 默认1血
+            }
+        }
+
+        public void SetSquadType(SquadType squadType)
+        {
+            SquadType = squadType;
+            mSquadDefine = Define.SquadDefines[squadType];
+            SwitchCount = 0;
+            if (mSquadDefine.MaxTongbaoCount != MaxTongbaoCount)
+            {
+                MaxTongbaoCount = mSquadDefine.MaxTongbaoCount;
+                Tongbao[] newTongbaoBox = new Tongbao[MaxTongbaoCount];
+
+                for (int i = 0; i < TongbaoBox.Length && i < newTongbaoBox.Length; i++)
+                {
+                    newTongbaoBox[i] = TongbaoBox[i];
+                }
+                TongbaoBox = newTongbaoBox;
             }
         }
 
@@ -186,15 +205,27 @@ namespace TongbaoSwitchCalc.DataModel
             return 0;
         }
 
+        public void SetSpecialCondition(SpecialConditionFlag specialCondition, bool enabled)
+        {
+            SpecialConditionFlag = enabled
+                ? SpecialConditionFlag | specialCondition
+                : SpecialConditionFlag & ~specialCondition;
+        }
+
+        public bool HasSpecialCondition(SpecialConditionFlag specialCondition)
+        {
+            return (SpecialConditionFlag & specialCondition) != 0;
+        }
+
         public bool HasEnoughSwitchLife()
         {
-            int costLifePoint = mSquadAttribute.GetCostLifePoint(SwitchCount);
+            int costLifePoint = mSquadDefine.GetCostLifePoint(SwitchCount);
             return GetResValue(ResType.LifePoint) > costLifePoint;
         }
 
         public bool SwitchTongbao(int posIndex, bool force = false)
         {
-            if (mSquadAttribute == null)
+            if (mSquadDefine == null)
             {
                 return false;
             }
@@ -206,7 +237,7 @@ namespace TongbaoSwitchCalc.DataModel
                 return false;
             }
 
-            int costLifePoint = mSquadAttribute.GetCostLifePoint(SwitchCount);
+            int costLifePoint = mSquadDefine.GetCostLifePoint(SwitchCount);
             if (GetResValue(ResType.LifePoint) > costLifePoint || force)
             {
                 int newTongbaoId = SwitchPool.SwitchTongbao(mRandom, this, tongbao);
@@ -219,7 +250,7 @@ namespace TongbaoSwitchCalc.DataModel
                     AddResValue(newTongbao.RandomResType, newTongbao.RandomResCount);
 
                     // 福祸相依
-                    if (HasSpecialCollectible)
+                    if (HasSpecialCondition(SpecialConditionFlag.Collectible_Fortune))
                     {
                         if (newTongbao.Type == TongbaoType.Risk)
                         {

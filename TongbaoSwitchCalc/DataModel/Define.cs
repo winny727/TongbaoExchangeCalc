@@ -5,19 +5,19 @@ namespace TongbaoSwitchCalc.DataModel
 {
     public static class Define
     {
-        public static readonly List<RandomRes> RandomResDefines = new List<RandomRes>()
+        public static readonly List<RandomResDefine> RandomResDefines = new List<RandomResDefine>()
         {
-            new RandomRes(0.0393f, ResType.Shield, 2),
-            new RandomRes(0.0291f, ResType.Hope, 1),
-            new RandomRes(0.0094f, ResType.Candles, 1),
+            new RandomResDefine(0.0393f, ResType.Shield, 2),
+            new RandomResDefine(0.0291f, ResType.Hope, 1),
+            new RandomResDefine(0.0094f, ResType.Candles, 1),
         };
 
-        // 不同分队的钱盒容量
-        public static readonly Dictionary<SquadType, SquadAttribute> SquadAttributeDefines = new Dictionary<SquadType, SquadAttribute>()
+        // 不同分队的钱盒容量/交换消耗生命值
+        public static readonly Dictionary<SquadType, SquadDefine> SquadDefines = new Dictionary<SquadType, SquadDefine>()
         {
-            { SquadType.Flower, new SquadAttribute(10, 1) },
-            { SquadType.Tourist, new SquadAttribute(10, 1, 1, 2, 2, 3) },
-            { SquadType.Other, new SquadAttribute(10, 1, 1, 2, 2, 3) },
+            { SquadType.Flower, new SquadDefine(10, new int[]{ 1 }) },
+            { SquadType.Tourist, new SquadDefine(13, new int[]{ 1, 1, 2, 2, 3 }) },
+            { SquadType.Other, new SquadDefine(10, new int[]{ 1, 1, 2, 2, 3 }) },
         };
     }
 
@@ -39,13 +39,20 @@ namespace TongbaoSwitchCalc.DataModel
         Other = 2, //其它分队
     }
 
-    public class RandomRes
+    [Flags]
+    public enum SpecialConditionFlag
+    {
+        None = 0,
+        Collectible_Fortune = 1 << 0, //福祸相依
+    }
+
+    public class RandomResDefine
     {
         public readonly float Probability;
         public readonly ResType ResType;
         public readonly int ResCount;
 
-        public RandomRes(float probability, ResType resType, int resCount)
+        public RandomResDefine(float probability, ResType resType, int resCount)
         {
             Probability = probability;
             ResType = resType;
@@ -53,12 +60,12 @@ namespace TongbaoSwitchCalc.DataModel
         }
     }
 
-    public class SquadAttribute
+    public class SquadDefine
     {
         public readonly int MaxTongbaoCount;
         public readonly int[] CostLifePoints;
 
-        public SquadAttribute(int maxTongbaoCount, params int[] costLifePoints)
+        public SquadDefine(int maxTongbaoCount, int[] costLifePoints)
         {
             MaxTongbaoCount = maxTongbaoCount;
             CostLifePoints = costLifePoints;

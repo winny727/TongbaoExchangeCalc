@@ -2,12 +2,17 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Drawing;
+using System.Windows.Forms;
+using System.IO;
 
 namespace TongbaoSwitchCalc
 {
     public static class Helper
     {
         public static readonly Dictionary<string, TongbaoConfig> TongbaoNameDict = new Dictionary<string, TongbaoConfig>();
+        public static readonly Dictionary<int, Image> TongbaoImageDict = new Dictionary<int, Image>();
+        public static Image TongbaoSlotImage { get; private set; }
 
         public static TongbaoConfig GetTongbaoConfigByName(string name)
         {
@@ -17,7 +22,16 @@ namespace TongbaoSwitchCalc
             }
             return null;
         }
-        
+
+        public static Image GetTongbaoImage(int id)
+        {
+            if (TongbaoImageDict.TryGetValue(id, out var image))
+            {
+                return image;
+            }
+            return null;
+        }
+
         public static string GetTongbaoName(int id)
         {
             TongbaoConfig config = TongbaoConfig.GetTongbaoConfigById(id);
@@ -92,6 +106,12 @@ namespace TongbaoSwitchCalc
             InitTongbaoNameDict();
         }
 
+        public static void InitResources()
+        {
+            InitTongbaoImage();
+            InitTongbaoSlotImage();
+        }
+
         private static void InitTongbaoNameDict()
         {
             TongbaoNameDict.Clear();
@@ -99,6 +119,45 @@ namespace TongbaoSwitchCalc
             {
                 TongbaoConfig config = item.Value;
                 TongbaoNameDict[config.Name] = config;
+            }
+        }
+
+        private static void InitTongbaoImage()
+        {
+            TongbaoImageDict.Clear();
+            foreach (var item in TongbaoConfig.GetAllTongbaoConfigs())
+            {
+                TongbaoConfig config = item.Value;
+                string path = Environment.CurrentDirectory + $"/Resources/Image/{config.ImgPath}";
+                if (File.Exists(path))
+                {
+                    try
+                    {
+                        Image image = Image.FromFile(path);
+                        TongbaoImageDict[config.Id] = image;
+                    }
+                    catch (Exception ex)
+                    {
+                        Log(ex.ToString());
+                    }
+                }
+            }
+        }
+
+        private static void InitTongbaoSlotImage()
+        {
+            TongbaoSlotImage?.Dispose();
+            string path = Environment.CurrentDirectory + "/Resources/Image/Empty.png";
+            if (File.Exists(path))
+            {
+                try
+                {
+                    TongbaoSlotImage = Image.FromFile(path);
+                }
+                catch (Exception ex)
+                {
+                    Log(ex.ToString());
+                }
             }
         }
 
@@ -117,6 +176,7 @@ namespace TongbaoSwitchCalc
                 int id = line.GetValue<int>("Id");
                 string name = line.GetValue("Name");
                 string description = line.GetValue("Description");
+                string imgPath = line.GetValue("ImgPath");
                 TongbaoType type = line.GetValue<TongbaoType>("Type");
                 int switchInPool = line.GetValue<int>("SwitchInPool");
                 List<int> switchOutPools = ParseList<int>(line.GetValue("SwitchOutPools"));
@@ -128,6 +188,7 @@ namespace TongbaoSwitchCalc
                     Id = id,
                     Name = name,
                     Description = description,
+                    ImgPath = imgPath,
                     Type = type,
                     SwitchInPool = switchInPool,
                     SwitchOutPools = switchOutPools,

@@ -10,6 +10,7 @@ namespace TongbaoSwitchCalc.DataModel
         public int Id;
         public string Name;
         public string Description;
+        public string ImgPath;
         public TongbaoType Type;
         public int SwitchInPool; //交换前池子ID
         public List<int> SwitchOutPools; //交换后池子ID列表
@@ -54,6 +55,7 @@ namespace TongbaoSwitchCalc.DataModel
         public int Id { get; private set; }
         public string Name { get; private set; }
         public string Description { get; private set; }
+        public string ImgPath { get; private set; }
         public TongbaoType Type { get; private set; }
         public int SwitchInPool { get; private set; } //交换前池子ID
         public List<int> SwitchOutPools { get; private set; } //交换后池子ID列表
@@ -81,6 +83,7 @@ namespace TongbaoSwitchCalc.DataModel
                 Id = config.Id,
                 Name = config.Name,
                 Description = config.Description,
+                ImgPath = config.ImgPath,
                 Type = config.Type,
                 SwitchInPool = config.SwitchInPool,
                 SwitchOutPools = config.SwitchOutPools,
@@ -111,7 +114,7 @@ namespace TongbaoSwitchCalc.DataModel
 
             float randomValue = (float)random.NextDouble();
             float cumulativeProbability = 0f;
-            RandomRes randomRes = null;
+            RandomResDefine randomRes = null;
             foreach (var item in Define.RandomResDefines)
             {
                 cumulativeProbability += item.Probability;
