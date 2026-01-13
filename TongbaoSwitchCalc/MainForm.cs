@@ -16,7 +16,9 @@ namespace TongbaoSwitchCalc
         private PlayerData mPlayerData;
         private RandomGenerator mRandom;
         private SwitchSimulator mSwitchSimulator;
-        private DataCollector mDataCollector;
+        private PrintDataCollector mPrintDataCollector;
+        private StatisticDataCollector mStatisticDataCollector;
+        private DataCollectorCollection mDataCollectorCollection;
 
         private SquadType mSelectedSquadType = default;
         private SimulationType mSelectedSimulationType = default;
@@ -59,8 +61,12 @@ namespace TongbaoSwitchCalc
             Helper.InitConfig();
             mRandom = new RandomGenerator();
             mPlayerData = new PlayerData(mRandom);
-            mDataCollector = new DataCollector();
-            mSwitchSimulator = new SwitchSimulator(mPlayerData, mDataCollector);
+            mPrintDataCollector = new PrintDataCollector();
+            mStatisticDataCollector = new StatisticDataCollector();
+            mDataCollectorCollection = new DataCollectorCollection();
+            mDataCollectorCollection.AddDataCollector(mPrintDataCollector);
+            mDataCollectorCollection.AddDataCollector(mStatisticDataCollector);
+            mSwitchSimulator = new SwitchSimulator(mPlayerData, mDataCollectorCollection);
             InitPlayerData();
         }
 
@@ -359,38 +365,38 @@ namespace TongbaoSwitchCalc
 
             mCanRevertPlayerData = false;
             int slotIndex = mSelectedTongbaoSlotIndex;
-            mDataCollector?.OnSwitchStepBegin(new SimulateContext(0, mPlayerData.SwitchCount, slotIndex, mPlayerData));
+            mPrintDataCollector?.OnSwitchStepBegin(new SimulateContext(0, mPlayerData.SwitchCount, slotIndex, mPlayerData));
             if (!mPlayerData.SwitchTongbao(slotIndex, force))
             {
                 Tongbao tongbao = mPlayerData.GetTongbao(slotIndex);
                 if (tongbao == null)
                 {
-                    mDataCollector?.OnSwitchStepEnd(new SimulateContext(0, mPlayerData.SwitchCount, slotIndex, mPlayerData), SwitchStepResult.SelectedEmpty);
+                    mPrintDataCollector?.OnSwitchStepEnd(new SimulateContext(0, mPlayerData.SwitchCount, slotIndex, mPlayerData), SwitchStepResult.SelectedEmpty);
                     MessageBox.Show("交换失败，请先选中一个通宝。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
                 if (!tongbao.CanSwitch())
                 {
-                    mDataCollector?.OnSwitchStepEnd(new SimulateContext(0, mPlayerData.SwitchCount, slotIndex, mPlayerData), SwitchStepResult.TongbaoCanNotSwitch);
+                    mPrintDataCollector?.OnSwitchStepEnd(new SimulateContext(0, mPlayerData.SwitchCount, slotIndex, mPlayerData), SwitchStepResult.TongbaoCanNotSwitch);
                     MessageBox.Show($"交换失败，选中通宝[{Helper.GetTongbaoFullName(tongbao.Id)}]无法交换。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
                 if (!force && !mPlayerData.HasEnoughSwitchLife)
                 {
-                    mDataCollector?.OnSwitchStepEnd(new SimulateContext(0, mPlayerData.SwitchCount, slotIndex, mPlayerData), SwitchStepResult.LifePointNotEnough);
+                    mPrintDataCollector?.OnSwitchStepEnd(new SimulateContext(0, mPlayerData.SwitchCount, slotIndex, mPlayerData), SwitchStepResult.LifePointNotEnough);
                     MessageBox.Show($"交换失败，当前生命值不足", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
-                mDataCollector?.OnSwitchStepEnd(new SimulateContext(0, mPlayerData.SwitchCount, slotIndex, mPlayerData), SwitchStepResult.UnknownError);
+                mPrintDataCollector?.OnSwitchStepEnd(new SimulateContext(0, mPlayerData.SwitchCount, slotIndex, mPlayerData), SwitchStepResult.UnknownError);
                 MessageBox.Show("交换失败，请检查当前配置和状态。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            mDataCollector?.OnSwitchStepEnd(new SimulateContext(0, mPlayerData.SwitchCount, slotIndex, mPlayerData), SwitchStepResult.Success);
-            mOutputResult += $"({mPlayerData.SwitchCount}) {mDataCollector.LastSwitchResult}{Environment.NewLine}";
+            mPrintDataCollector?.OnSwitchStepEnd(new SimulateContext(0, mPlayerData.SwitchCount, slotIndex, mPlayerData), SwitchStepResult.Success);
+            mOutputResult += $"({mPlayerData.SwitchCount}) {mPrintDataCollector.LastSwitchResult}{Environment.NewLine}";
             mOutputResultChanged = true;
             UpdateTongbaoView(slotIndex);
             UpdateView();
@@ -407,7 +413,7 @@ namespace TongbaoSwitchCalc
             mSwitchSimulator.MinimumLifePoint = (int)numMinHp.Value;
             mSwitchSimulator.NextSwitchSlotIndex = mSelectedTongbaoSlotIndex;
             mSwitchSimulator.Simulate(mode);
-            mOutputResult = mDataCollector.OutputResult;
+            mOutputResult = mPrintDataCollector.OutputResult;
             mOutputResultChanged = true;
             UpdateAllTongbaoView();
             UpdateView();
@@ -545,7 +551,7 @@ namespace TongbaoSwitchCalc
 
         private void ClearRecord()
         {
-            mDataCollector.ClearData();
+            mPrintDataCollector.ClearData();
             mOutputResult = string.Empty;
             mRecordForm.Content = string.Empty;
             mOutputResultChanged = false;

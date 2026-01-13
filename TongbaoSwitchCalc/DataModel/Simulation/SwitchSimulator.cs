@@ -24,10 +24,10 @@ namespace TongbaoSwitchCalc.DataModel.Simulation
 
         private const int SWITCH_STEP_LIMIT = 10000; // 交换上限，防止死循环
 
-        public SwitchSimulator(PlayerData playerData, IDataCollector<SimulateContext> dataCollector = null)
+        public SwitchSimulator(PlayerData playerData, IDataCollector<SimulateContext> collector = null)
         {
             PlayerData = playerData ?? throw new ArgumentNullException(nameof(playerData));
-            DataCollector = dataCollector;
+            DataCollector = collector;
 
             mRevertPlayerData = new PlayerData(playerData.Random);
         }

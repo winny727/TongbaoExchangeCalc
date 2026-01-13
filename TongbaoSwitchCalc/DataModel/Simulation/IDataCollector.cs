@@ -10,6 +10,7 @@ namespace TongbaoSwitchCalc.DataModel.Simulation
         void OnSimulateStepBegin(in TContext context);
         void OnSimulateStepEnd(in TContext context, SimulateStepResult result);
         void OnSwitchStepBegin(in TContext context);
-        void OnSwitchStepEnd(in TContext context, SwitchStepResult result);
+        void OnSwitchStepEnd(in TContext context, SwitchStepResult result); 
+        void ClearData();
     }
 }

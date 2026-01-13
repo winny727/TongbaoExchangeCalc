@@ -6,10 +6,8 @@ using TongbaoSwitchCalc.DataModel.Simulation;
 
 namespace TongbaoSwitchCalc.Impl.Simulation
 {
-    public class DataCollector : IDataCollector<SimulateContext>
+    public class PrintDataCollector : IDataCollector<SimulateContext>
     {
-        public List<SwitchRecord> SwitchRecords { get; private set; } = new List<SwitchRecord>();
-
         private SimulationType mSimulationType;
         private int mSimulationTotal = 0;
         private readonly Tongbao mTongbaoBefore = new Tongbao();
@@ -164,7 +162,6 @@ namespace TongbaoSwitchCalc.Impl.Simulation
             mSwitchResultSB.Clear();
             mResChangedTempSB.Clear();
             mOutputResult.Clear();
-            SwitchRecords.Clear();
         }
     }
 }
