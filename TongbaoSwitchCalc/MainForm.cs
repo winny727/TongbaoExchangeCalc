@@ -18,7 +18,7 @@ namespace TongbaoSwitchCalc
         private SwitchSimulator mSwitchSimulator;
         private PrintDataCollector mPrintDataCollector;
         private StatisticDataCollector mStatisticDataCollector;
-        private DataCollectorCollection mDataCollectorCollection;
+        private CompositeDataCollector mCompositeDataCollector;
 
         private SquadType mSelectedSquadType = default;
         private SimulationType mSelectedSimulationType = default;
@@ -63,10 +63,10 @@ namespace TongbaoSwitchCalc
             mPlayerData = new PlayerData(mRandom);
             mPrintDataCollector = new PrintDataCollector();
             mStatisticDataCollector = new StatisticDataCollector();
-            mDataCollectorCollection = new DataCollectorCollection();
-            mDataCollectorCollection.AddDataCollector(mPrintDataCollector);
-            mDataCollectorCollection.AddDataCollector(mStatisticDataCollector);
-            mSwitchSimulator = new SwitchSimulator(mPlayerData, mDataCollectorCollection);
+            mCompositeDataCollector = new CompositeDataCollector();
+            mCompositeDataCollector.AddDataCollector(mPrintDataCollector);
+            mCompositeDataCollector.AddDataCollector(mStatisticDataCollector);
+            mSwitchSimulator = new SwitchSimulator(mPlayerData, mCompositeDataCollector);
             InitPlayerData();
         }
 

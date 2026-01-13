@@ -5,7 +5,7 @@ using TongbaoSwitchCalc.DataModel.Simulation;
 
 namespace TongbaoSwitchCalc.Impl.Simulation
 {
-    public class DataCollectorCollection : IDataCollector<SimulateContext>
+    public class CompositeDataCollector : IDataCollector<SimulateContext>
     {
         private readonly List<IDataCollector<SimulateContext>> mDataCollectors = new List<IDataCollector<SimulateContext>>();
 
