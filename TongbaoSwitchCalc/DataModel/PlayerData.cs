@@ -105,13 +105,20 @@ namespace TongbaoSwitchCalc.DataModel
             LockedTongbaoList.AddRange(playerData.LockedTongbaoList);
             InitResValues(playerData.mResValues);
             ClearTongbao();
-            for (int i = 0; i < playerData.TongbaoBox.Length && i < TongbaoBox.Length; i++)
+            if (TongbaoBox.Length != MaxTongbaoCount)
             {
-                Tongbao tongbao = playerData.TongbaoBox[i];
-                if (tongbao != null)
+                TongbaoBox = new Tongbao[MaxTongbaoCount];
+            }
+            for (int i = 0; i < TongbaoBox.Length; i++)
+            {
+                if (i < playerData.TongbaoBox.Length)
                 {
-                    TongbaoBox[i] = Tongbao.CreateTongbao(tongbao.Id);
-                    TongbaoBox[i].ApplyRandomRes(tongbao.RandomResType, tongbao.RandomResCount);
+                    Tongbao tongbao = playerData.TongbaoBox[i];
+                    if (tongbao != null)
+                    {
+                        TongbaoBox[i] = Tongbao.CreateTongbao(tongbao.Id);
+                        TongbaoBox[i].ApplyRandomRes(tongbao.RandomResType, tongbao.RandomResCount);
+                    }
                 }
             }
         }

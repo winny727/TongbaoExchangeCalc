@@ -48,6 +48,11 @@ namespace TongbaoSwitchCalc.DataModel
                 }
             }
 
+            if (mValidTongbaoTempList.Count <= 0)
+            {
+                return -1; // 无可交换通宝
+            }
+
             // 随机
             int index = random.Next(0, mValidTongbaoTempList.Count);
             return mValidTongbaoTempList[index];

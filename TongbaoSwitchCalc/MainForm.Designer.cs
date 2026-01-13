@@ -58,12 +58,12 @@
             this.btnReset = new System.Windows.Forms.Button();
             this.btnRecord = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.checkBoxAutoRevert = new System.Windows.Forms.CheckBox();
             this.label9 = new System.Windows.Forms.Label();
             this.numMinHp = new System.Windows.Forms.NumericUpDown();
             this.comboBoxSimMode = new System.Windows.Forms.ComboBox();
             this.label10 = new System.Windows.Forms.Label();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.checkBoxAutoRevert = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numSimCnt)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -421,6 +421,16 @@
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "模拟设置";
             // 
+            // checkBoxAutoRevert
+            // 
+            this.checkBoxAutoRevert.AutoSize = true;
+            this.checkBoxAutoRevert.Location = new System.Drawing.Point(14, 100);
+            this.checkBoxAutoRevert.Name = "checkBoxAutoRevert";
+            this.checkBoxAutoRevert.Size = new System.Drawing.Size(180, 16);
+            this.checkBoxAutoRevert.TabIndex = 11;
+            this.checkBoxAutoRevert.Text = "开始模拟前自动重置交换数据";
+            this.checkBoxAutoRevert.UseVisualStyleBackColor = true;
+            // 
             // label9
             // 
             this.label9.AutoSize = true;
@@ -479,16 +489,6 @@
             this.groupBox5.TabIndex = 12;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "自定义规则";
-            // 
-            // checkBoxAutoRevert
-            // 
-            this.checkBoxAutoRevert.AutoSize = true;
-            this.checkBoxAutoRevert.Location = new System.Drawing.Point(14, 100);
-            this.checkBoxAutoRevert.Name = "checkBoxAutoRevert";
-            this.checkBoxAutoRevert.Size = new System.Drawing.Size(180, 16);
-            this.checkBoxAutoRevert.TabIndex = 11;
-            this.checkBoxAutoRevert.Text = "开始模拟前自动重置交换数据";
-            this.checkBoxAutoRevert.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 

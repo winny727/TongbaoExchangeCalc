@@ -21,12 +21,14 @@ namespace TongbaoSwitchCalc
         private SquadType mSelectedSquadType = default;
         private SimulationType mSelectedSimulationType = default;
         private int mSelectedTongbaoSlotIndex = -1;
-        private bool mLastSwitchIsSimulation = false;
+        private bool mCanRevertPlayerData = false;
 
         private string mOutputResult;
         private bool mOutputResultChanged = false;
-        private readonly RecordForm mRecordForm = new RecordForm();
+        private RecordForm mRecordForm;
         private readonly StringBuilder mTempStringBuilder = new StringBuilder();
+
+        private readonly Dictionary<ResType, int> mTempResValues = new Dictionary<ResType, int>();
 
         protected override CreateParams CreateParams
         {
@@ -37,6 +39,10 @@ namespace TongbaoSwitchCalc
                 return createParams;
             }
         }
+
+        //TODO 通宝选择窗口
+        //TODO 自定义规则选择
+        //TODO 目标数据统计
 
         public MainForm()
         {
@@ -60,15 +66,15 @@ namespace TongbaoSwitchCalc
 
         private void InitPlayerData()
         {
-            mPlayerData.Init(mSelectedSquadType, new Dictionary<ResType, int>()
-            {
-                { ResType.LifePoint, (int)numHp.Value },
-                { ResType.OriginiumIngots, (int)numIngots.Value },
-                { ResType.Coupon, (int)numCoupon.Value },
-                { ResType.Candles, (int)numCandle.Value },
-                { ResType.Shield, (int)numShield.Value },
-                { ResType.Hope, (int)numHope.Value },
-            });
+            mCanRevertPlayerData = false;
+            mTempResValues.Clear();
+            mTempResValues.Add(ResType.LifePoint, (int)numHp.Value);
+            mTempResValues.Add(ResType.OriginiumIngots, (int)numIngots.Value);
+            mTempResValues.Add(ResType.Coupon, (int)numCoupon.Value);
+            mTempResValues.Add(ResType.Candles, (int)numCandle.Value);
+            mTempResValues.Add(ResType.Shield, (int)numShield.Value);
+            mTempResValues.Add(ResType.Hope, (int)numHope.Value);
+            mPlayerData.Init(mSelectedSquadType, mTempResValues);
         }
 
         private void DataModelTest()
@@ -110,6 +116,7 @@ namespace TongbaoSwitchCalc
 
         private void InitView()
         {
+            mRecordForm = new RecordForm(this);
             Helper.InitResources();
 
             comboBoxSquad.DisplayMember = "Key";
@@ -319,6 +326,7 @@ namespace TongbaoSwitchCalc
 
         private void OnSelectNewRandomTongbao(int id, int slotIndex)
         {
+            mCanRevertPlayerData = false;
             Tongbao tongbao = Tongbao.CreateTongbao(id, mRandom);
             mPlayerData.InsertTongbao(tongbao, slotIndex);
             UpdateTongbaoView(slotIndex);
@@ -328,6 +336,7 @@ namespace TongbaoSwitchCalc
         private void OnSelectNewCustomTongbao(int id, int slotIndex,
             ResType randomResType = ResType.None, int randomResCount = 0)
         {
+            mCanRevertPlayerData = false;
             Tongbao tongbao = Tongbao.CreateTongbao(id);
             tongbao.ApplyRandomRes(randomResType, randomResCount);
             mPlayerData.InsertTongbao(tongbao, slotIndex);
@@ -343,12 +352,12 @@ namespace TongbaoSwitchCalc
 
         private void SwitchOnce(bool force = false)
         {
-            if (mLastSwitchIsSimulation)
+            if (mCanRevertPlayerData)
             {
                 ClearRecord();
             }
 
-            mLastSwitchIsSimulation = false;
+            mCanRevertPlayerData = false;
             int slotIndex = mSelectedTongbaoSlotIndex;
             mDataCollector?.OnSwitchStepBegin(new SimulateContext(0, mPlayerData.SwitchCount, slotIndex, mPlayerData));
             if (!mPlayerData.SwitchTongbao(slotIndex, force))
@@ -393,7 +402,7 @@ namespace TongbaoSwitchCalc
             {
                 ResetPlayerData();
             }
-            mLastSwitchIsSimulation = true;
+            mCanRevertPlayerData = true;
             mSwitchSimulator.TotalSimulationCount = (int)numSimCnt.Value;
             mSwitchSimulator.MinimumLifePoint = (int)numMinHp.Value;
             mSwitchSimulator.NextSwitchSlotIndex = mSelectedTongbaoSlotIndex;
@@ -406,24 +415,26 @@ namespace TongbaoSwitchCalc
 
         private void ResetPlayerData()
         {
-            if (mLastSwitchIsSimulation)
+            if (mCanRevertPlayerData)
             {
                 mSwitchSimulator.RevertPlayerData();
+                mCanRevertPlayerData = false;
             }
             mPlayerData.SwitchCount = 0;
-            mPlayerData.InitResValues(new Dictionary<ResType, int>()
-            {
-                { ResType.LifePoint, (int)numHp.Value },
-                { ResType.OriginiumIngots, (int)numIngots.Value },
-                { ResType.Coupon, (int)numCoupon.Value },
-                { ResType.Candles, (int)numCandle.Value },
-                { ResType.Shield, (int)numShield.Value },
-                { ResType.Hope, (int)numHope.Value },
-            });
+
+            mTempResValues.Clear();
+            mTempResValues.Add(ResType.LifePoint, (int)numHp.Value);
+            mTempResValues.Add(ResType.OriginiumIngots, (int)numIngots.Value);
+            mTempResValues.Add(ResType.Coupon, (int)numCoupon.Value);
+            mTempResValues.Add(ResType.Candles, (int)numCandle.Value);
+            mTempResValues.Add(ResType.Shield, (int)numShield.Value);
+            mTempResValues.Add(ResType.Hope, (int)numHope.Value);
+            mPlayerData.InitResValues(mTempResValues);
         }
 
         private void comboBoxSquad_SelectedIndexChanged(object sender, EventArgs e)
         {
+            mCanRevertPlayerData = false;
             ComboBoxItem<SquadType> item = comboBoxSquad.SelectedItem as ComboBoxItem<SquadType>;
             mSelectedSquadType = item?.Value ?? default;
             mPlayerData.SetSquadType(mSelectedSquadType);
@@ -495,7 +506,7 @@ namespace TongbaoSwitchCalc
         private void btnReset_Click(object sender, EventArgs e)
         {
             ResetPlayerData();
-            if (mLastSwitchIsSimulation)
+            if (mCanRevertPlayerData)
             {
                 UpdateAllTongbaoView();
             }

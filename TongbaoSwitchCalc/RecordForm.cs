@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using TongbaoSwitchCalc;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace ArknightsRoguelikeRec
@@ -38,9 +39,10 @@ namespace ArknightsRoguelikeRec
 
         private Action mOnClearClick;
 
-        public RecordForm()
+        public RecordForm(MainForm mainForm)
         {
             InitializeComponent();
+            this.Icon = mainForm.Icon;
         }
 
         public void SetClearCallback(Action callback)
