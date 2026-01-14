@@ -40,6 +40,22 @@ namespace TongbaoSwitchCalc.DataModel.Simulation
             }
             return string.Empty;
         }
+
+        public static string GetSimulationRuleName(SimulationRuleType type)
+        {
+            switch (type)
+            {
+                case SimulationRuleType.PrioritySlot:
+                    return "优先交换钱盒槽位";
+                case SimulationRuleType.AutoStop:
+                    return "交换出目标/降级通宝后切换槽位";
+                case SimulationRuleType.ExpectationTongbao:
+                    return "交换出期望通宝后停止交换";
+                default:
+                    break;
+            }
+            return string.Empty;
+        }
     }
 
     public struct SimulateContext
@@ -60,27 +76,34 @@ namespace TongbaoSwitchCalc.DataModel.Simulation
 
     public enum SimulationType
     {
-        LifePointLimit, // 高级交换：根据目标生命确定一轮模拟；
-        ExpectationTongbao, // 期望通宝：不限制血量，根据是否交换出期望通宝确定一轮模拟（除非次数超过上限）；
+        LifePointLimit = 0, // 高级交换：根据目标生命确定一轮模拟；
+        ExpectationTongbao = 1, // 期望通宝：不限制血量，根据是否交换出期望通宝确定一轮模拟（除非次数超过上限）；
     }
 
     public enum SimulateStepResult
     {
-        Success,
-        LifePointLimitReached,
-        ExpectationAchieved,
-        TargetTongbaoFilledPrioritySlots,
-        SwitchStepLimitReached,
-        SwitchFailed,
+        Success = 0,
+        LifePointLimitReached = 1,
+        ExpectationAchieved = 2,
+        TargetTongbaoFilledPrioritySlots = 3,
+        SwitchStepLimitReached = 4,
+        SwitchFailed = 5,
     }
 
     public enum SwitchStepResult
     {
-        Success,
-        SelectedEmpty,
-        TongbaoCanNotSwitch,
-        LifePointNotEnough,
-        UnknownError,
+        Success = 0,
+        SelectedEmpty = 1,
+        TongbaoCanNotSwitch = 2,
+        LifePointNotEnough = 3,
+        NoSwitchableTongbao = 4,
+        UnknownError = 5,
     }
 
+    public enum SimulationRuleType
+    {
+        PrioritySlot = 0,
+        AutoStop = 1,
+        ExpectationTongbao = 2,
+    }
 }

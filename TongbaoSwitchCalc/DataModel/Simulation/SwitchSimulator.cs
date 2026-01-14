@@ -66,6 +66,7 @@ namespace TongbaoSwitchCalc.DataModel.Simulation
             mSlotIndexPriorityIndex = 0;
             if (SlotIndexPriority.Count > 0)
             {
+                Helper.Log($"优先槽位(#{mSlotIndexPriorityIndex}): {NextSwitchSlotIndex}");
                 NextSwitchSlotIndex = SlotIndexPriority[0];
             }
             mSimulateStepResult = SimulateStepResult.Success;
@@ -118,10 +119,12 @@ namespace TongbaoSwitchCalc.DataModel.Simulation
             Tongbao tongbao = PlayerData.GetTongbao(NextSwitchSlotIndex);
             if (tongbao != null && TargetTongbaoIds.Contains(tongbao.Id))
             {
+                Helper.Log($"优先槽位(#{mSlotIndexPriorityIndex}): {NextSwitchSlotIndex}获得目标通宝{tongbao.Name}");
                 mSlotIndexPriorityIndex++;
                 if (mSlotIndexPriorityIndex < SlotIndexPriority.Count)
                 {
                     NextSwitchSlotIndex = SlotIndexPriority[mSlotIndexPriorityIndex];
+                    Helper.Log($"优先槽位(#{mSlotIndexPriorityIndex}): {NextSwitchSlotIndex}");
                 }
                 else
                 {
@@ -154,7 +157,7 @@ namespace TongbaoSwitchCalc.DataModel.Simulation
                 }
                 else
                 {
-                    result = SwitchStepResult.UnknownError;
+                    result = SwitchStepResult.NoSwitchableTongbao;
                 }
             }
             DataCollector?.OnSwitchStepEnd(new SimulateContext(SimulationStepIndex, SwitchStepIndex, NextSwitchSlotIndex, PlayerData), result);

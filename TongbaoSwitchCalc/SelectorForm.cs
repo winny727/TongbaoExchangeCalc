@@ -109,6 +109,8 @@ namespace TongbaoSwitchCalc
             mListViewItems = listViewItems.ToArray();
             listView1.SelectedItems.Clear();
 
+            textBox1.Focus();
+
             UpdateListView();
         }
 

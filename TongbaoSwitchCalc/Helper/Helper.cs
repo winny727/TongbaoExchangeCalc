@@ -5,6 +5,7 @@ using System.Text;
 using System.Drawing;
 using System.Windows.Forms;
 using System.IO;
+using TongbaoSwitchCalc.DataModel.Simulation;
 
 namespace TongbaoSwitchCalc
 {
@@ -13,7 +14,14 @@ namespace TongbaoSwitchCalc
         public static readonly Dictionary<string, TongbaoConfig> TongbaoNameDict = new Dictionary<string, TongbaoConfig>();
         public static readonly Dictionary<int, Image> TongbaoImageDict = new Dictionary<int, Image>();
         private static Image mTongbaoSlotImage;
-        private static Dictionary<string, Image> mTongbaoImageCache = new Dictionary<string, Image>();
+        private static readonly Dictionary<string, Image> mTongbaoImageCache = new Dictionary<string, Image>();
+
+        public static readonly Dictionary<SimulationRuleType, SimulationRuleCollection> SimulationRulePresets = new Dictionary<SimulationRuleType, SimulationRuleCollection>()
+        {
+            { SimulationRuleType.PrioritySlot, new SimulationRuleCollection() },
+            { SimulationRuleType.AutoStop, new SimulationRuleCollection() },
+            { SimulationRuleType.ExpectationTongbao, new SimulationRuleCollection() },
+        };
 
         public static TongbaoConfig GetTongbaoConfigByName(string name)
         {
@@ -61,6 +69,7 @@ namespace TongbaoSwitchCalc
             TongbaoConfig.ClearTongbaoConfig();
             InitTongbaoConfig();
             InitTongbaoNameDict();
+            InitSimulationRulePresets();
         }
 
         public static void InitResources()
@@ -119,9 +128,48 @@ namespace TongbaoSwitchCalc
             }
         }
 
+        private static void InitSimulationRulePresets()
+        {
+            void AddAutoStopRuleByTongbaoName(string name)
+            {
+                TongbaoConfig config = GetTongbaoConfigByName(name);
+                if (config != null)
+                {
+                    SimulationRulePresets[SimulationRuleType.AutoStop].Add(new AutoStopRule(config.Id));
+                }
+            }
+
+            void AddExpectationTongbaoRuleByTongbaoName(string name)
+            {
+                TongbaoConfig config = GetTongbaoConfigByName(name);
+                if (config != null)
+                {
+                    SimulationRulePresets[SimulationRuleType.ExpectationTongbao].Add(new ExpectationTongbaoRule(config.Id));
+                }
+            }
+
+            SimulationRulePresets[SimulationRuleType.PrioritySlot].Clear();
+            SimulationRulePresets[SimulationRuleType.AutoStop].Clear();
+            SimulationRulePresets[SimulationRuleType.ExpectationTongbao].Clear();
+
+            SimulationRulePresets[SimulationRuleType.PrioritySlot].Add(new PrioritySlotRule(0));
+
+            string[] autoStopTongbaoNames = new string[] { "驰道长", "武人之争", "百业俱兴", "寒窗志", "志欲遂", "慧避灾" };
+            foreach (var name in autoStopTongbaoNames)
+            {
+                AddAutoStopRuleByTongbaoName(name);
+            }
+
+            string[] expectationTongbaoNames = new string[] { "茧成绢" };
+            foreach (var name in expectationTongbaoNames)
+            {
+                AddExpectationTongbaoRuleByTongbaoName(name);
+            }
+        }
+
         private static void InitTongbaoConfig()
         {
-            string path = Environment.CurrentDirectory + "/Config/TongbaoConfig.txt";
+            string path = Environment.CurrentDirectory + "/Resources/Config/TongbaoConfig.txt";
             TableReader tableReader = LoadConfig(path);
 
             if (tableReader == null)

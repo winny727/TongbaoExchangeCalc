@@ -44,11 +44,9 @@ namespace TongbaoSwitchCalc
             }
         }
 
-        //TODO 通宝选择窗口
         //TODO 自定义规则选择
         //TODO 目标数据统计
         //规则模板四“新获得的目标生命马上用于筹谋交换”?
-        //TODO 商店卡钱逻辑
 
         public MainForm()
         {
@@ -154,8 +152,8 @@ namespace TongbaoSwitchCalc
 
             panelLockedList.Controls.Clear();
             panelLockedList.Controls.Add(mIconGrid);
-            mIconGrid.CellSize = 24;
-            mIconGrid.Spacing = -3;
+            mIconGrid.CellSize = 22;
+            mIconGrid.Spacing = -4;
             mIconGrid.Width = panelLockedList.Width;
             mIconGrid.Height = panelLockedList.Height;
             mIconGrid.Click -= iconGridControl_Click;
@@ -170,6 +168,7 @@ namespace TongbaoSwitchCalc
             Helper.SetupResNumberic(mPlayerData, numHope, ResType.Hope);
 
             InitTongbaoView();
+            InitRuleTreeView();
 
             mRecordForm.SetClearCallback(ClearRecord);
         }
@@ -185,6 +184,25 @@ namespace TongbaoSwitchCalc
             // InitSlot
             InitTongbaoSlot();
             listViewTongbao.SelectedItems.Clear();
+        }
+
+        private void InitRuleTreeView()
+        {
+            treeViewRule.Nodes.Clear();
+            foreach (var item in Helper.SimulationRulePresets)
+            {
+                SimulationRuleType type = item.Key;
+                SimulationRuleCollection presets = item.Value;
+                string name = SimulationDefine.GetSimulationRuleName(type);
+                TreeNode treeNode = treeViewRule.Nodes.Add(name);
+                treeNode.Tag = presets;
+                foreach (var preset in presets)
+                {
+                    TreeNode child = treeNode.Nodes.Add(preset.GetRuleString());
+                    child.Tag = preset;
+                }
+            }
+            treeViewRule.ExpandAll();
         }
 
         private void InitTongbaoSlot()
@@ -582,11 +600,8 @@ namespace TongbaoSwitchCalc
         private void btnReset_Click(object sender, EventArgs e)
         {
             ResetPlayerData();
-            if (mCanRevertPlayerData)
-            {
-                UpdateAllTongbaoView();
-            }
             ClearRecord();
+            UpdateAllTongbaoView();
             UpdateView();
         }
 
@@ -629,6 +644,26 @@ namespace TongbaoSwitchCalc
                 mPlayerData.LockedTongbaoList.AddRange(selectorForm.SelectedIds);
                 UpdateLockedListView();
             }
+        }
+
+        private void btnAdd_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnRemove_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnUp_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnDown_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

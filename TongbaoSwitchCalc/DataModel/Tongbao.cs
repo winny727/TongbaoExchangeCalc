@@ -172,12 +172,4 @@ namespace TongbaoSwitchCalc.DataModel
             }
         }
     }
-
-    public enum TongbaoType
-    {
-        Unknown = 0,
-        Balance = 1, //衡钱
-        Flower = 2, //花钱
-        Risk = 3, //厉钱
-    }
 }

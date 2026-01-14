@@ -67,6 +67,11 @@
             this.label10 = new System.Windows.Forms.Label();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.label11 = new System.Windows.Forms.Label();
+            this.treeViewRule = new System.Windows.Forms.TreeView();
+            this.btnAdd = new System.Windows.Forms.Button();
+            this.btnRemove = new System.Windows.Forms.Button();
+            this.btnDown = new System.Windows.Forms.Button();
+            this.btnUp = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numSimCnt)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -79,6 +84,7 @@
             this.groupBox4.SuspendLayout();
             this.groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numMinHp)).BeginInit();
+            this.groupBox5.SuspendLayout();
             this.SuspendLayout();
             // 
             // comboBoxSquad
@@ -369,7 +375,7 @@
             this.groupBox4.Size = new System.Drawing.Size(270, 122);
             this.groupBox4.TabIndex = 7;
             this.groupBox4.TabStop = false;
-            this.groupBox4.Text = "实时交换数据";
+            this.groupBox4.Text = "实时数据监测";
             // 
             // btnSync
             // 
@@ -506,12 +512,17 @@
             // 
             // groupBox5
             // 
+            this.groupBox5.Controls.Add(this.btnDown);
+            this.groupBox5.Controls.Add(this.btnUp);
+            this.groupBox5.Controls.Add(this.btnRemove);
+            this.groupBox5.Controls.Add(this.btnAdd);
+            this.groupBox5.Controls.Add(this.treeViewRule);
             this.groupBox5.Location = new System.Drawing.Point(518, 140);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Size = new System.Drawing.Size(270, 172);
             this.groupBox5.TabIndex = 12;
             this.groupBox5.TabStop = false;
-            this.groupBox5.Text = "自定义规则";
+            this.groupBox5.Text = "自定义模拟策略";
             // 
             // label11
             // 
@@ -523,6 +534,58 @@
             this.label11.TabIndex = 15;
             this.label11.Text = "双击添加/更改通宝";
             this.label11.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // treeViewRule
+            // 
+            this.treeViewRule.CheckBoxes = true;
+            this.treeViewRule.Location = new System.Drawing.Point(6, 49);
+            this.treeViewRule.Name = "treeViewRule";
+            this.treeViewRule.Size = new System.Drawing.Size(258, 117);
+            this.treeViewRule.TabIndex = 0;
+            // 
+            // btnAdd
+            // 
+            this.btnAdd.Font = new System.Drawing.Font("宋体", 12F);
+            this.btnAdd.Location = new System.Drawing.Point(8, 20);
+            this.btnAdd.Name = "btnAdd";
+            this.btnAdd.Size = new System.Drawing.Size(23, 23);
+            this.btnAdd.TabIndex = 1;
+            this.btnAdd.Text = "+";
+            this.btnAdd.UseVisualStyleBackColor = true;
+            this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
+            // 
+            // btnRemove
+            // 
+            this.btnRemove.Font = new System.Drawing.Font("宋体", 12F);
+            this.btnRemove.Location = new System.Drawing.Point(37, 20);
+            this.btnRemove.Name = "btnRemove";
+            this.btnRemove.Size = new System.Drawing.Size(23, 23);
+            this.btnRemove.TabIndex = 2;
+            this.btnRemove.Text = "-";
+            this.btnRemove.UseVisualStyleBackColor = true;
+            this.btnRemove.Click += new System.EventHandler(this.btnRemove_Click);
+            // 
+            // btnDown
+            // 
+            this.btnDown.Font = new System.Drawing.Font("宋体", 9F);
+            this.btnDown.Location = new System.Drawing.Point(241, 20);
+            this.btnDown.Name = "btnDown";
+            this.btnDown.Size = new System.Drawing.Size(23, 23);
+            this.btnDown.TabIndex = 4;
+            this.btnDown.Text = "↓";
+            this.btnDown.UseVisualStyleBackColor = true;
+            this.btnDown.Click += new System.EventHandler(this.btnDown_Click);
+            // 
+            // btnUp
+            // 
+            this.btnUp.Font = new System.Drawing.Font("宋体", 9F);
+            this.btnUp.Location = new System.Drawing.Point(212, 20);
+            this.btnUp.Name = "btnUp";
+            this.btnUp.Size = new System.Drawing.Size(23, 23);
+            this.btnUp.TabIndex = 3;
+            this.btnUp.Text = "↑";
+            this.btnUp.UseVisualStyleBackColor = true;
+            this.btnUp.Click += new System.EventHandler(this.btnUp_Click);
             // 
             // MainForm
             // 
@@ -563,6 +626,7 @@
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numMinHp)).EndInit();
+            this.groupBox5.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -607,5 +671,10 @@
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.Panel panelLockedList;
+        private System.Windows.Forms.TreeView treeViewRule;
+        private System.Windows.Forms.Button btnRemove;
+        private System.Windows.Forms.Button btnAdd;
+        private System.Windows.Forms.Button btnDown;
+        private System.Windows.Forms.Button btnUp;
     }
 }

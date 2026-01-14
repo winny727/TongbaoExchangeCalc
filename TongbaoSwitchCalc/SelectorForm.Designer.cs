@@ -43,7 +43,7 @@
             this.btnClose.Location = new System.Drawing.Point(255, 315);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(75, 23);
-            this.btnClose.TabIndex = 2;
+            this.btnClose.TabIndex = 5;
             this.btnClose.Text = "取消";
             this.btnClose.UseVisualStyleBackColor = true;
             // 
@@ -53,7 +53,7 @@
             this.btnOK.Location = new System.Drawing.Point(174, 315);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
-            this.btnOK.TabIndex = 3;
+            this.btnOK.TabIndex = 4;
             this.btnOK.Text = "确定";
             this.btnOK.UseVisualStyleBackColor = true;
             // 
@@ -67,7 +67,7 @@
             this.listView1.MultiSelect = false;
             this.listView1.Name = "listView1";
             this.listView1.Size = new System.Drawing.Size(318, 270);
-            this.listView1.TabIndex = 4;
+            this.listView1.TabIndex = 6;
             this.listView1.TileSize = new System.Drawing.Size(128, 16);
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.SmallIcon;
@@ -79,7 +79,7 @@
             this.textBox1.Location = new System.Drawing.Point(12, 288);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(156, 21);
-            this.textBox1.TabIndex = 5;
+            this.textBox1.TabIndex = 0;
             this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // comboBox1
@@ -89,7 +89,7 @@
             this.comboBox1.Location = new System.Drawing.Point(174, 288);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(156, 20);
-            this.comboBox1.TabIndex = 6;
+            this.comboBox1.TabIndex = 1;
             this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
             // btnRandom
@@ -97,7 +97,7 @@
             this.btnRandom.Location = new System.Drawing.Point(93, 315);
             this.btnRandom.Name = "btnRandom";
             this.btnRandom.Size = new System.Drawing.Size(75, 23);
-            this.btnRandom.TabIndex = 7;
+            this.btnRandom.TabIndex = 3;
             this.btnRandom.Text = "随机选择";
             this.btnRandom.UseVisualStyleBackColor = true;
             this.btnRandom.Click += new System.EventHandler(this.btnRandom_Click);
@@ -107,7 +107,7 @@
             this.btnClear.Location = new System.Drawing.Point(12, 315);
             this.btnClear.Name = "btnClear";
             this.btnClear.Size = new System.Drawing.Size(75, 23);
-            this.btnClear.TabIndex = 8;
+            this.btnClear.TabIndex = 2;
             this.btnClear.Text = "清空选择";
             this.btnClear.UseVisualStyleBackColor = true;
             this.btnClear.Click += new System.EventHandler(this.btnClear_Click);

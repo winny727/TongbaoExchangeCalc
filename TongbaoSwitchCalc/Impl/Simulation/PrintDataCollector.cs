@@ -140,6 +140,11 @@ namespace TongbaoSwitchCalc.Impl.Simulation
                     case SwitchStepResult.LifePointNotEnough:
                         mSwitchResultSB.Append("交换失败，交换所需生命值不足");
                         break;
+                    case SwitchStepResult.NoSwitchableTongbao:
+                        mSwitchResultSB.Append("交换失败，通宝[")
+                                       .Append(mTongbaoBefore.Name)
+                                       .Append("]无可交换通宝");
+                        break;
                     case SwitchStepResult.UnknownError:
                         mSwitchResultSB.Append("交换失败，未知错误");
                         break;
