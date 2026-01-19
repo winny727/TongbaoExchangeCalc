@@ -769,6 +769,12 @@ namespace TongbaoSwitchCalc
             FillRandomTongbao();
         }
 
+        private void btnClear_Click(object sender, EventArgs e)
+        {
+            mPlayerData.ClearTongbao();
+            UpdateAllTongbaoView();
+        }
+
         private void iconGridControl_Click(object sender, EventArgs e)
         {
             SelectorForm selectorForm = new SelectorForm(SelectMode.MultiSelect);

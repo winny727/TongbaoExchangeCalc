@@ -76,6 +76,7 @@
             this.label11 = new System.Windows.Forms.Label();
             this.checkBoxEnableRecord = new System.Windows.Forms.CheckBox();
             this.btnRandom = new System.Windows.Forms.Button();
+            this.btnClear = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numSimCnt)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -606,11 +607,11 @@
             // 
             this.label11.BackColor = System.Drawing.SystemColors.Window;
             this.label11.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label11.Location = new System.Drawing.Point(302, 414);
+            this.label11.Location = new System.Drawing.Point(352, 337);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(200, 20);
+            this.label11.Size = new System.Drawing.Size(120, 40);
             this.label11.TabIndex = 15;
-            this.label11.Text = "单击选中通宝，双击添加/更改通宝";
+            this.label11.Text = "单击选中通宝\r\n双击添加/更改通宝";
             this.label11.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // checkBoxEnableRecord
@@ -627,7 +628,7 @@
             // 
             // btnRandom
             // 
-            this.btnRandom.Location = new System.Drawing.Point(382, 388);
+            this.btnRandom.Location = new System.Drawing.Point(352, 380);
             this.btnRandom.Name = "btnRandom";
             this.btnRandom.Size = new System.Drawing.Size(120, 23);
             this.btnRandom.TabIndex = 17;
@@ -635,12 +636,23 @@
             this.btnRandom.UseVisualStyleBackColor = true;
             this.btnRandom.Click += new System.EventHandler(this.btnRandom_Click);
             // 
+            // btnClear
+            // 
+            this.btnClear.Location = new System.Drawing.Point(352, 409);
+            this.btnClear.Name = "btnClear";
+            this.btnClear.Size = new System.Drawing.Size(120, 23);
+            this.btnClear.TabIndex = 18;
+            this.btnClear.Text = "全部清除";
+            this.btnClear.UseVisualStyleBackColor = true;
+            this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
+            // 
             // MainForm
             // 
             this.AcceptButton = this.btnSwitch;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 456);
+            this.Controls.Add(this.btnClear);
             this.Controls.Add(this.btnRandom);
             this.Controls.Add(this.checkBoxEnableRecord);
             this.Controls.Add(this.checkBoxAutoRevert);
@@ -733,5 +745,6 @@
         private System.Windows.Forms.ComboBox comboBoxMultiSel;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Button btnRandom;
+        private System.Windows.Forms.Button btnClear;
     }
 }
