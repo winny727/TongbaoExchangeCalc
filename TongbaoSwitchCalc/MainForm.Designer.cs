@@ -77,6 +77,7 @@
             this.checkBoxEnableRecord = new System.Windows.Forms.CheckBox();
             this.btnRandom = new System.Windows.Forms.Button();
             this.btnClear = new System.Windows.Forms.Button();
+            this.checkBoxOptimize = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numSimCnt)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -396,14 +397,14 @@
             // 
             this.lblCurrent.Location = new System.Drawing.Point(518, 334);
             this.lblCurrent.Name = "lblCurrent";
-            this.lblCurrent.Size = new System.Drawing.Size(144, 59);
+            this.lblCurrent.Size = new System.Drawing.Size(164, 40);
             this.lblCurrent.TabIndex = 8;
             // 
             // btnSwitch
             // 
-            this.btnSwitch.Location = new System.Drawing.Point(668, 334);
+            this.btnSwitch.Location = new System.Drawing.Point(688, 334);
             this.btnSwitch.Name = "btnSwitch";
-            this.btnSwitch.Size = new System.Drawing.Size(120, 23);
+            this.btnSwitch.Size = new System.Drawing.Size(100, 23);
             this.btnSwitch.TabIndex = 11;
             this.btnSwitch.Text = "交换";
             this.btnSwitch.UseVisualStyleBackColor = true;
@@ -411,9 +412,9 @@
             // 
             // btnSimulation
             // 
-            this.btnSimulation.Location = new System.Drawing.Point(668, 363);
+            this.btnSimulation.Location = new System.Drawing.Point(688, 363);
             this.btnSimulation.Name = "btnSimulation";
-            this.btnSimulation.Size = new System.Drawing.Size(120, 23);
+            this.btnSimulation.Size = new System.Drawing.Size(100, 23);
             this.btnSimulation.TabIndex = 12;
             this.btnSimulation.Text = "开始模拟";
             this.btnSimulation.UseVisualStyleBackColor = true;
@@ -421,9 +422,9 @@
             // 
             // btnReset
             // 
-            this.btnReset.Location = new System.Drawing.Point(668, 392);
+            this.btnReset.Location = new System.Drawing.Point(688, 392);
             this.btnReset.Name = "btnReset";
-            this.btnReset.Size = new System.Drawing.Size(120, 23);
+            this.btnReset.Size = new System.Drawing.Size(100, 23);
             this.btnReset.TabIndex = 13;
             this.btnReset.Text = "重置";
             this.btnReset.UseVisualStyleBackColor = true;
@@ -431,9 +432,9 @@
             // 
             // btnRecord
             // 
-            this.btnRecord.Location = new System.Drawing.Point(668, 421);
+            this.btnRecord.Location = new System.Drawing.Point(688, 421);
             this.btnRecord.Name = "btnRecord";
-            this.btnRecord.Size = new System.Drawing.Size(120, 23);
+            this.btnRecord.Size = new System.Drawing.Size(100, 23);
             this.btnRecord.TabIndex = 14;
             this.btnRecord.Text = "查看交换记录";
             this.btnRecord.UseVisualStyleBackColor = true;
@@ -528,7 +529,7 @@
             this.checkBoxAutoRevert.AutoSize = true;
             this.checkBoxAutoRevert.Checked = true;
             this.checkBoxAutoRevert.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxAutoRevert.Location = new System.Drawing.Point(518, 396);
+            this.checkBoxAutoRevert.Location = new System.Drawing.Point(518, 399);
             this.checkBoxAutoRevert.Name = "checkBoxAutoRevert";
             this.checkBoxAutoRevert.Size = new System.Drawing.Size(132, 16);
             this.checkBoxAutoRevert.TabIndex = 11;
@@ -619,7 +620,7 @@
             this.checkBoxEnableRecord.AutoSize = true;
             this.checkBoxEnableRecord.Checked = true;
             this.checkBoxEnableRecord.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxEnableRecord.Location = new System.Drawing.Point(518, 416);
+            this.checkBoxEnableRecord.Location = new System.Drawing.Point(518, 419);
             this.checkBoxEnableRecord.Name = "checkBoxEnableRecord";
             this.checkBoxEnableRecord.Size = new System.Drawing.Size(132, 28);
             this.checkBoxEnableRecord.TabIndex = 16;
@@ -646,12 +647,24 @@
             this.btnClear.UseVisualStyleBackColor = true;
             this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
             // 
+            // checkBoxOptimize
+            // 
+            this.checkBoxOptimize.AutoSize = true;
+            this.checkBoxOptimize.Location = new System.Drawing.Point(518, 377);
+            this.checkBoxOptimize.Name = "checkBoxOptimize";
+            this.checkBoxOptimize.Size = new System.Drawing.Size(144, 16);
+            this.checkBoxOptimize.TabIndex = 19;
+            this.checkBoxOptimize.Text = "开启多线程优化(测试)";
+            this.checkBoxOptimize.UseVisualStyleBackColor = true;
+            this.checkBoxOptimize.CheckedChanged += new System.EventHandler(this.checkBoxOptimize_CheckedChanged);
+            // 
             // MainForm
             // 
             this.AcceptButton = this.btnSwitch;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 456);
+            this.Controls.Add(this.checkBoxOptimize);
             this.Controls.Add(this.btnClear);
             this.Controls.Add(this.btnRandom);
             this.Controls.Add(this.checkBoxEnableRecord);
@@ -746,5 +759,6 @@
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Button btnRandom;
         private System.Windows.Forms.Button btnClear;
+        private System.Windows.Forms.CheckBox checkBoxOptimize;
     }
 }

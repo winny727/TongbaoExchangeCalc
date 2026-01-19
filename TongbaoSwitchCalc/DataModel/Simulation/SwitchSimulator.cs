@@ -28,7 +28,7 @@ namespace TongbaoSwitchCalc.DataModel.Simulation
         private int mSlotIndexPriorityIndex = 0;
         private readonly PlayerData mRevertPlayerData;
 
-        private const int SWITCH_STEP_LIMIT = 10000; // 交换上限，防止死循环
+        public const int SWITCH_STEP_LIMIT = 10000; // 交换上限，防止死循环
 
         public int OptimizeThreshold { get; set; } = 100000; // 触发多线程的阈值（预计剩余交换次数）
         public int MaxParallelism { get; set; } = Math.Max(1, Environment.ProcessorCount / 4); // 线程太多竞态很严重
@@ -43,13 +43,9 @@ namespace TongbaoSwitchCalc.DataModel.Simulation
             mRevertPlayerData = new PlayerData(playerData.TongbaoSelector, playerData.Random);
         }
 
-        public SwitchSimulator(PlayerData playerData, IThreadSafeDataCollector<SimulateContext> collector = null, ILogger logger = null)
+        public void SetDataCollector(IDataCollector<SimulateContext> collector)
         {
-            PlayerData = playerData ?? throw new ArgumentNullException(nameof(playerData));
             DataCollector = collector;
-            Logger = logger;
-
-            mRevertPlayerData = new PlayerData(playerData.TongbaoSelector, playerData.Random);
         }
 
         public void RevertPlayerData()

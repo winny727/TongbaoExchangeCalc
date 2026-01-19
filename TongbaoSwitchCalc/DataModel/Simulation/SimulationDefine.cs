@@ -19,6 +19,7 @@ namespace TongbaoSwitchCalc.DataModel.Simulation
             return string.Empty;
         }
 
+        private static readonly string mSwitchStepLimitStr = $"超过模拟交换次数上限({SwitchSimulator.SWITCH_STEP_LIMIT})";
         public static string GetSimulateStepEndReason(SimulateStepResult type)
         {
             switch (type)
@@ -32,7 +33,7 @@ namespace TongbaoSwitchCalc.DataModel.Simulation
                 case SimulateStepResult.TargetTongbaoFilledPrioritySlots:
                     return "目标/降级通宝已填满优先槽位";
                 case SimulateStepResult.SwitchStepLimitReached:
-                    return "已达交换次数限制";
+                    return mSwitchStepLimitStr;
                 case SimulateStepResult.SwitchFailed:
                     return "交换失败";
                 default:

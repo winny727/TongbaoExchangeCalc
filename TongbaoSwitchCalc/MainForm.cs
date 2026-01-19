@@ -204,6 +204,7 @@ namespace TongbaoSwitchCalc
 
             InitTongbaoView();
             InitRuleTreeView();
+            UpdateMultiThreadOptimize();
 
             mRecordForm.SetClearCallback(ClearRecord);
         }
@@ -409,13 +410,11 @@ namespace TongbaoSwitchCalc
 
             if (tongbao == null)
             {
-                sb.AppendLine("当前选中通宝:")
-                  .AppendLine("无");
+                sb.AppendLine("选中通宝:");
             }
             else
             {
-                sb.AppendLine("当前选中通宝:")
-                  .Append('[')
+                sb.Append("选中通宝:[")
                   .Append(slotIndex + 1)
                   .Append(']');
                 Helper.AppendTongbaoFullName(sb, tongbao.Id);
@@ -448,6 +447,18 @@ namespace TongbaoSwitchCalc
                 mTempTongbaoImages.Add(image);
             }
             mIconGrid.SetIcons(mTempTongbaoImages);
+        }
+
+        private void UpdateMultiThreadOptimize()
+        {
+            if (checkBoxOptimize.Checked)
+            {
+                mSwitchSimulator.SetDataCollector(new WarpperThreadSafeDataCollector(mCompositeDataCollector));
+            }
+            else
+            {
+                mSwitchSimulator.SetDataCollector(mCompositeDataCollector);
+            }
         }
 
         private void OnSelectNewRandomTongbao(int id, int slotIndex)
@@ -581,7 +592,7 @@ namespace TongbaoSwitchCalc
 
             mSwitchSimulator.Simulate(mode);
             //TODO 异步+进度条
-            //一键随机通宝按钮
+            //开启多线程按钮(SetDataCollector)
 
             mOutputResult = mPrintDataCollector.OutputResult;
             mOutputResultChanged = true;
@@ -785,6 +796,11 @@ namespace TongbaoSwitchCalc
                 mPlayerData.LockedTongbaoList.AddRange(selectorForm.SelectedIds);
                 UpdateLockedListView();
             }
+        }
+
+        private void checkBoxOptimize_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateMultiThreadOptimize();
         }
 
         #region Rule TreeView Controller
