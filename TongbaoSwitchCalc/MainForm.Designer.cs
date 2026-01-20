@@ -562,7 +562,6 @@
             this.btnDown.TabIndex = 4;
             this.btnDown.Text = "↓";
             this.btnDown.UseVisualStyleBackColor = true;
-            this.btnDown.Click += new System.EventHandler(this.btnDown_Click);
             // 
             // btnUp
             // 
@@ -573,7 +572,6 @@
             this.btnUp.TabIndex = 3;
             this.btnUp.Text = "↑";
             this.btnUp.UseVisualStyleBackColor = true;
-            this.btnUp.Click += new System.EventHandler(this.btnUp_Click);
             // 
             // btnRemove
             // 
@@ -584,7 +582,6 @@
             this.btnRemove.TabIndex = 2;
             this.btnRemove.Text = "-";
             this.btnRemove.UseVisualStyleBackColor = true;
-            this.btnRemove.Click += new System.EventHandler(this.btnRemove_Click);
             // 
             // btnAdd
             // 
@@ -595,17 +592,14 @@
             this.btnAdd.TabIndex = 1;
             this.btnAdd.Text = "+";
             this.btnAdd.UseVisualStyleBackColor = true;
-            this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
             // 
             // treeViewRule
             // 
             this.treeViewRule.CheckBoxes = true;
             this.treeViewRule.Location = new System.Drawing.Point(6, 49);
-            this.treeViewRule.Name = "treeViewRule";
+            this.treeViewRule.Name = "mRuleTreeView";
             this.treeViewRule.Size = new System.Drawing.Size(258, 117);
             this.treeViewRule.TabIndex = 0;
-            this.treeViewRule.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.treeViewRule_AfterCheck);
-            this.treeViewRule.DoubleClick += new System.EventHandler(this.treeViewRule_DoubleClick);
             // 
             // checkBoxEnableRecord
             // 
