@@ -4,12 +4,12 @@ using TongbaoSwitchCalc.DataModel.Simulation;
 
 namespace TongbaoSwitchCalc.Impl.Simulation
 {
-    public class WarpperThreadSafeDataCollector : IThreadSafeDataCollector<SimulateContext>
+    public class WrapperThreadSafeDataCollector : IThreadSafeDataCollector<SimulateContext>
     {
         private readonly IDataCollector<SimulateContext> mInner;
         private readonly object mLock = new object();
 
-        public WarpperThreadSafeDataCollector(IDataCollector<SimulateContext> inner)
+        public WrapperThreadSafeDataCollector(IDataCollector<SimulateContext> inner)
         {
             mInner = inner ?? throw new ArgumentNullException(nameof(inner));
         }

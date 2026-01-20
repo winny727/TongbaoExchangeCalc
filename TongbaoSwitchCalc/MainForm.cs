@@ -71,7 +71,7 @@ namespace TongbaoSwitchCalc
             //mSwitchSimulator = new SwitchSimulator(mPlayerData, mCompositeDataCollector); //4.2s，45.9s，3.1s，33.4s
             //mSwitchSimulator = new SwitchSimulator(mPlayerData, new LockThreadSafeDataCollector() { RecordEverySwitch = false }); //100w次就已经21.2s了，锁麻了；不记录每次交换：3.2s，32.1s
             //mSwitchSimulator = new SwitchSimulator(mPlayerData, new ConcurrentThreadSafeDataCollector() { RecordEverySwitch = false }); //7.9s，ConcurrentDict GC很多；不记录每次交换：3.1s，33.3s
-            mSwitchSimulator = new SwitchSimulator(mPlayerData, new WarpperThreadSafeDataCollector(mCompositeDataCollector)); //5.5s，55.9s，2.5s，22.8s；若开记录GC很多
+            mSwitchSimulator = new SwitchSimulator(mPlayerData, new WrapperThreadSafeDataCollector(mCompositeDataCollector)); //5.5s，55.9s，2.5s，22.8s；若开记录GC很多
 
             //线程数测试（16核CPU，1000w次无记录WarpperThreadSafeDataCollector）：单线程（主线程）32.5s，单线程（非主线程）35.1s，双线程21.9s，四线程18.2s，八线程19.3s，15线程26.3s，16线程24.3s
             //结论：线程数：处理器数/4
@@ -233,8 +233,8 @@ namespace TongbaoSwitchCalc
                 TreeNode treeNode = treeViewRule.Nodes.Add(name);
                 treeNode.Checked = true;
                 treeNode.Tag = collection;
-                UpdateRuleTreeView();
             }
+            UpdateRuleTreeView();
             treeViewRule.ExpandAll();
         }
 
@@ -468,7 +468,7 @@ namespace TongbaoSwitchCalc
         {
             if (checkBoxOptimize.Checked)
             {
-                mSwitchSimulator.SetDataCollector(new WarpperThreadSafeDataCollector(mCompositeDataCollector));
+                mSwitchSimulator.SetDataCollector(new WrapperThreadSafeDataCollector(mCompositeDataCollector));
             }
             else
             {
@@ -558,8 +558,16 @@ namespace TongbaoSwitchCalc
                 return;
             }
 
+            var sb = mTempStringBuilder;
+            sb.Clear();
+
+            sb.Append('(')
+              .Append(mPlayerData.SwitchCount)
+              .Append(") ")
+              .AppendLine(mPrintDataCollector.LastSwitchResult);
+
             mPrintDataCollector?.OnSwitchStepEnd(new SimulateContext(0, mPlayerData.SwitchCount, slotIndex, mPlayerData), SwitchStepResult.Success);
-            mOutputResult += $"({mPlayerData.SwitchCount}) {mPrintDataCollector.LastSwitchResult}{Environment.NewLine}";
+            mOutputResult += sb.ToString();
             mOutputResultChanged = true;
             UpdateTongbaoView(slotIndex);
             UpdateView();
