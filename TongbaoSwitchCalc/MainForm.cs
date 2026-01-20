@@ -17,13 +17,10 @@ namespace TongbaoSwitchCalc
         private PlayerData mPlayerData;
         private RandomGenerator mRandom;
         private TongbaoSelector mTongbaoSelector;
-
-#region Simulation
         private SwitchSimulator mSwitchSimulator;
         private PrintDataCollector mPrintDataCollector;
         private StatisticDataCollector mStatisticDataCollector;
         private CompositeDataCollector mCompositeDataCollector;
-#endregion
 
         private int mSelectedTongbaoSlotIndex = -1;
         private bool mCanRevertPlayerData = false;
