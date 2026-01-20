@@ -65,7 +65,7 @@ namespace TongbaoSwitchCalc.DataModel.Simulation
             mOriginNextSwitchSlotIndex = NextSwitchSlotIndex;
         }
 
-        public async Task SimulateAsync(IProgress<int> progress = null, Action onComplete = null)
+        public async Task SimulateAsync(IProgress<int> progress = null)
         {
             mCancellationTokenSource = new CancellationTokenSource();
             mAsyncProgress = progress;
@@ -80,8 +80,6 @@ namespace TongbaoSwitchCalc.DataModel.Simulation
                 mCancellationTokenSource = null;
                 mAsyncProgress = null;
             }
-
-            onComplete?.Invoke();
         }
 
         public void CancelSimulate()

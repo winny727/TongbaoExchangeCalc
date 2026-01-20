@@ -562,10 +562,19 @@ namespace TongbaoSwitchCalc
             toolStripProgressBar1.Minimum = 0;
             toolStripProgressBar1.Maximum = mSwitchSimulator.TotalSimulationCount;
             toolStripProgressBar1.Value = 0;
+            int lastPermille = -1; // 0.1% = 1‰
             Progress<int> progress = new Progress<int>((value) =>
             {
+                int permille = value * 1000 / total; // 千分比
+                if (permille == lastPermille)
+                {
+                    return;
+                }
+
+                lastPermille = permille;
+
+                float percent = permille / 10f;
                 toolStripProgressBar1.Value = value;
-                float percent = value * 100f / total;
                 toolStripStatusLabel1.Text = $"正在进行[{simulationName}]模拟: {value}/{total} ({percent:F1}%)";
             });
             await mSwitchSimulator.SimulateAsync(progress);
