@@ -276,6 +276,7 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
             */
 
             //TODO 多线程优化
+            //ObjectPool
 
             if (token.IsCancellationRequested)
             {

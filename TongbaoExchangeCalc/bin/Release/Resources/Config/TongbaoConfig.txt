@@ -21,7 +21,7 @@ Id	Name	Description	ImgPath	Type	ExchangeInPool	ExchangeOutPools	IsUpgrade	Extra
 1020	塞上月		rogue_5_copper_R_02$0.png	Balance	2	2				
 1021	军屯垦		rogue_5_copper_R_04$0.png	Balance	2	2				
 1022	诡意代币		rogue_5_copper_R_06$0.png	Balance	2	0		OriginiumIngots	10	
-1023	债难偿		rogue_5_copper_R_13$0.png	Balance	2	2		LifePoint	2	
+1023	债难偿		rogue_5_copper_R_13$0.png	Balance	2	2		LifePoint	6	
 1024	触锁代币		rogue_5_copper_R_14$0.png	Balance	2	2|3				
 1025	移山繁		rogue_5_copper_U_2$0.png	Balance	2	4				
 1026	天下先		rogue_5_copper_U_4$0.png	Balance	2	5				

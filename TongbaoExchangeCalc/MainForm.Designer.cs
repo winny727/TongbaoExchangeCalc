@@ -80,6 +80,7 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
+            this.btnRandomEmpty = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numSimCnt)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -614,9 +615,9 @@
             // 
             // btnRandom
             // 
-            this.btnRandom.Location = new System.Drawing.Point(395, 380);
+            this.btnRandom.Location = new System.Drawing.Point(375, 351);
             this.btnRandom.Name = "btnRandom";
-            this.btnRandom.Size = new System.Drawing.Size(100, 23);
+            this.btnRandom.Size = new System.Drawing.Size(120, 23);
             this.btnRandom.TabIndex = 17;
             this.btnRandom.Text = "全部随机";
             this.btnRandom.UseVisualStyleBackColor = true;
@@ -624,9 +625,9 @@
             // 
             // btnClear
             // 
-            this.btnClear.Location = new System.Drawing.Point(395, 409);
+            this.btnClear.Location = new System.Drawing.Point(375, 409);
             this.btnClear.Name = "btnClear";
-            this.btnClear.Size = new System.Drawing.Size(100, 23);
+            this.btnClear.Size = new System.Drawing.Size(120, 23);
             this.btnClear.TabIndex = 18;
             this.btnClear.Text = "全部清除";
             this.btnClear.UseVisualStyleBackColor = true;
@@ -665,12 +666,23 @@
             this.toolStripProgressBar1.Name = "toolStripProgressBar1";
             this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 17);
             // 
+            // btnRandomEmpty
+            // 
+            this.btnRandomEmpty.Location = new System.Drawing.Point(375, 380);
+            this.btnRandomEmpty.Name = "btnRandomEmpty";
+            this.btnRandomEmpty.Size = new System.Drawing.Size(120, 23);
+            this.btnRandomEmpty.TabIndex = 21;
+            this.btnRandomEmpty.Text = "随机填充空槽位";
+            this.btnRandomEmpty.UseVisualStyleBackColor = true;
+            this.btnRandomEmpty.Click += new System.EventHandler(this.btnRandomEmpty_Click);
+            // 
             // MainForm
             // 
             this.AcceptButton = this.btnExchange;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 469);
+            this.Controls.Add(this.btnRandomEmpty);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.checkBoxOptimize);
             this.Controls.Add(this.btnClear);
@@ -771,5 +783,6 @@
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
+        private System.Windows.Forms.Button btnRandomEmpty;
     }
 }

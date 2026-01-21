@@ -134,10 +134,11 @@ namespace TongbaoExchangeCalc
                 }
             }
 
-            for (int i = 0; i < mPlayerData.TongbaoBox.Length; i++)
+            for (int i = 0; i < mPlayerData.MaxTongbaoCount; i++)
             {
-                string tongbaoName = mPlayerData.TongbaoBox[i] != null ?
-                    Helper.GetTongbaoFullName(mPlayerData.TongbaoBox[i].Id) : "Empty";
+                Tongbao tongbao = mPlayerData.GetTongbao(i);
+                string tongbaoName = tongbao != null ?
+                    Helper.GetTongbaoFullName(tongbao.Id) : "Empty";
                 Helper.Log($"[{i}]={tongbaoName}");
             }
 
@@ -616,14 +617,6 @@ namespace TongbaoExchangeCalc
             GC.Collect();
         }
 
-        private void FillRandomTongbao()
-        {
-            for (int i = 0; i < mPlayerData.TongbaoBox.Length; i++)
-            {
-                SetRandomTongbao(i);
-            }
-        }
-
         private void SetRandomTongbao(int slotIndex)
         {
             // 测试，随机添加不重复通宝
@@ -779,7 +772,21 @@ namespace TongbaoExchangeCalc
 
         private void btnRandom_Click(object sender, EventArgs e)
         {
-            FillRandomTongbao();
+            for (int i = 0; i < mPlayerData.MaxTongbaoCount; i++)
+            {
+                SetRandomTongbao(i);
+            }
+        }
+
+        private void btnRandomEmpty_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < mPlayerData.MaxTongbaoCount; i++)
+            {
+                if (mPlayerData.GetTongbao(i) == null)
+                {
+                    SetRandomTongbao(i);
+                }
+            }
         }
 
         private void btnClear_Click(object sender, EventArgs e)
