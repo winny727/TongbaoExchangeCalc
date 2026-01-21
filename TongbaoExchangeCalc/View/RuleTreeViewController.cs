@@ -96,6 +96,11 @@ namespace TongbaoExchangeCalc.View
                 return;
             }
 
+            simulator.ExchangeableSlots.Clear();
+            simulator.UnexchangeableTongbaoIds.Clear();
+            simulator.ExpectedTongbaoIds.Clear();
+            simulator.PriorityTongbaoIds.Clear();
+
             foreach (TreeNode treeNode in mRuleTreeView.Nodes)
             {
                 if (treeNode.Tag is UniqueRuleCollection collection && treeNode.Checked)

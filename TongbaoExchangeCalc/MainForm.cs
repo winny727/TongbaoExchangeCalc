@@ -546,12 +546,9 @@ namespace TongbaoExchangeCalc
             mExchangeSimulator.SimulationType = type;
             mExchangeSimulator.TotalSimulationCount = (int)numSimCnt.Value;
             mExchangeSimulator.MinimumLifePoint = (int)numMinHp.Value;
-            mExchangeSimulator.NextExchangeSlotIndex = mSelectedTongbaoSlotIndex;
+            mExchangeSimulator.ExchangeSlotIndex = mSelectedTongbaoSlotIndex;
 
             // ApplyRule
-            mExchangeSimulator.ExchangeableSlots.Clear();
-            mExchangeSimulator.TargetTongbaoIds.Clear();
-            mExchangeSimulator.ExpectedTongbaoId = -1;
             RuleTreeViewController.ApplySimulationRule(mExchangeSimulator);
 
             //mExchangeSimulator.Simulate();

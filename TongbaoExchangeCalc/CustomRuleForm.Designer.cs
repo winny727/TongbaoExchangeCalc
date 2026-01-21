@@ -36,6 +36,7 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.btnSel = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -43,7 +44,7 @@
             // btnClose
             // 
             this.btnClose.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnClose.Location = new System.Drawing.Point(197, 76);
+            this.btnClose.Location = new System.Drawing.Point(197, 126);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(75, 23);
             this.btnClose.TabIndex = 5;
@@ -53,7 +54,7 @@
             // btnOK
             // 
             this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnOK.Location = new System.Drawing.Point(116, 75);
+            this.btnOK.Location = new System.Drawing.Point(116, 126);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
             this.btnOK.TabIndex = 4;
@@ -63,15 +64,15 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 20);
+            this.label1.Location = new System.Drawing.Point(12, 9);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(179, 12);
+            this.label1.Size = new System.Drawing.Size(173, 12);
             this.label1.TabIndex = 7;
-            this.label1.Text = "交换出目标/降级通宝后切换槽位";
+            this.label1.Text = "交换出不可交换通宝后切换槽位";
             // 
             // numericUpDown1
             // 
-            this.numericUpDown1.Location = new System.Drawing.Point(95, 42);
+            this.numericUpDown1.Location = new System.Drawing.Point(12, 52);
             this.numericUpDown1.Maximum = new decimal(new int[] {
             10,
             0,
@@ -90,7 +91,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 45);
+            this.label2.Location = new System.Drawing.Point(12, 32);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(77, 12);
             this.label2.TabIndex = 10;
@@ -98,7 +99,7 @@
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Location = new System.Drawing.Point(95, 39);
+            this.pictureBox1.Location = new System.Drawing.Point(34, 50);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(24, 24);
             this.pictureBox1.TabIndex = 11;
@@ -106,9 +107,9 @@
             // 
             // btnSel
             // 
-            this.btnSel.Location = new System.Drawing.Point(176, 39);
+            this.btnSel.Location = new System.Drawing.Point(152, 50);
             this.btnSel.Name = "btnSel";
-            this.btnSel.Size = new System.Drawing.Size(75, 23);
+            this.btnSel.Size = new System.Drawing.Size(50, 23);
             this.btnSel.TabIndex = 8;
             this.btnSel.Text = "选择";
             this.btnSel.UseVisualStyleBackColor = true;
@@ -117,11 +118,19 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(117, 45);
+            this.label3.Location = new System.Drawing.Point(93, 55);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(53, 12);
             this.label3.TabIndex = 12;
             this.label3.Text = "目标通宝";
+            // 
+            // label4
+            // 
+            this.label4.Location = new System.Drawing.Point(10, 82);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(262, 41);
+            this.label4.TabIndex = 13;
+            this.label4.Text = "描述";
             // 
             // CustomRuleForm
             // 
@@ -129,7 +138,8 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnClose;
-            this.ClientSize = new System.Drawing.Size(284, 111);
+            this.ClientSize = new System.Drawing.Size(284, 161);
+            this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.label2);
@@ -163,5 +173,6 @@
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Button btnSel;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label4;
     }
 }

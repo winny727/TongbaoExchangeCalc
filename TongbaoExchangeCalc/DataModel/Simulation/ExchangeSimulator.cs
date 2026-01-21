@@ -11,16 +11,19 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
         public IDataCollector<SimulateContext> DataCollector { get; private set; }
 
         public SimulationType SimulationType { get; set; } = SimulationType.LifePointLimit;
-        public List<int> ExchangeableSlots { get; private set; } = new List<int>(); // 可交换槽位
-        public HashSet<int> TargetTongbaoIds { get; private set; } = new HashSet<int>(); // 目标/降级通宝ID集合
-        public int ExpectedTongbaoId { get; set; } = -1; // 期望通宝ID
         public int MinimumLifePoint { get; set; } = 1; // 最小生命值限制
         public int TotalSimulationCount { get; set; } = 1000;
+
+        // 自定义交换策略
+        public List<int> ExchangeableSlots { get; private set; } = new List<int>(); // 可交换槽位
+        public HashSet<int> UnexchangeableTongbaoIds { get; private set; } = new HashSet<int>(); // 不可交换通宝ID集合
+        public HashSet<int> PriorityTongbaoIds { get; private set; } = new HashSet<int>(); // 优先通宝ID集合
+        public HashSet<int> ExpectedTongbaoIds { get; private set; } = new HashSet<int>(); // 期望通宝ID集合
 
         private int mSimulationStepIndex = 0;
         public int SimulationStepIndex => mSimulationStepIndex;
         public int ExchangeStepIndex { get; private set; } = 0; // 包括交换失败
-        public int NextExchangeSlotIndex { get; set; } = -1;
+        public int ExchangeSlotIndex { get; set; } = -1;
 
         private IProgress<int> mAsyncProgress;
         private CancellationTokenSource mCancellationTokenSource;
@@ -28,8 +31,9 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
 
         private SimulateStepResult mSimulateStepResult = SimulateStepResult.Success;
         private bool mIsSimulating = false;
-        private int mExchangeableSlotsListIndex = 0;
-        private int mOriginNextExchangeSlotIndex;
+        private int mExchangeableSlotsPosIndex = 0;
+        private bool mPriorityPhaseFinished = false;
+        private int mInitialExchangeSlotIndex;
         private readonly PlayerData mRevertPlayerData;
 
         public const int EXCHANGE_STEP_LIMIT = 10000; // 单轮循环的交换上限，防止死循环
@@ -57,13 +61,13 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
         public void RevertPlayerData()
         {
             PlayerData.CopyFrom(mRevertPlayerData);
-            NextExchangeSlotIndex = mOriginNextExchangeSlotIndex;
+            ExchangeSlotIndex = mInitialExchangeSlotIndex;
         }
 
         public void CachePlayerData()
         {
             mRevertPlayerData.CopyFrom(PlayerData);
-            mOriginNextExchangeSlotIndex = NextExchangeSlotIndex;
+            mInitialExchangeSlotIndex = ExchangeSlotIndex;
         }
 
         public async Task SimulateAsync(IProgress<int> progress = null)
@@ -97,7 +101,8 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
         {
             mSimulationStepIndex = 0;
             ExchangeStepIndex = 0;
-            mExchangeableSlotsListIndex = 0;
+            mExchangeableSlotsPosIndex = 0;
+            mPriorityPhaseFinished = false;
             mSimulateStepResult = SimulateStepResult.Success;
             mUseParallel = false;
             CachePlayerData();
@@ -139,7 +144,7 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
                     }
                     catch (OperationCanceledException)
                     {
-
+                        //Log("OperationCanceledException");
                     }
                 }
 
@@ -192,10 +197,11 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
                     var localSimulator = new ExchangeSimulator(localPlayerData, (IThreadSafeDataCollector<SimulateContext>)DataCollector)
                     {
                         SimulationType = SimulationType,
-                        NextExchangeSlotIndex = mOriginNextExchangeSlotIndex,
+                        ExchangeSlotIndex = mInitialExchangeSlotIndex,
                         ExchangeableSlots = new List<int>(ExchangeableSlots),
-                        TargetTongbaoIds = new HashSet<int>(TargetTongbaoIds),
-                        ExpectedTongbaoId = ExpectedTongbaoId,
+                        UnexchangeableTongbaoIds = new HashSet<int>(UnexchangeableTongbaoIds),
+                        ExpectedTongbaoIds = new HashSet<int>(ExpectedTongbaoIds),
+                        PriorityTongbaoIds = new HashSet<int>(PriorityTongbaoIds),
                         MinimumLifePoint = MinimumLifePoint,
                         TotalSimulationCount = 1,
                     };
@@ -224,14 +230,15 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
         {
             RevertPlayerData();
             ExchangeStepIndex = 0;
-            mExchangeableSlotsListIndex = 0;
+            mExchangeableSlotsPosIndex = 0;
+            mPriorityPhaseFinished = false;
             if (ExchangeableSlots.Count > 0)
             {
-                //Log($"初始可交换槽位(#{mExchangeableSlotsListIndex}): {NextExchangeSlotIndex}");
-                NextExchangeSlotIndex = ExchangeableSlots[0];
+                //Log($"初始可交换槽位(#{mExchangeableSlotsPosIndex}): {ExchangeSlotIndex}");
+                ExchangeSlotIndex = ExchangeableSlots[0];
             }
             mSimulateStepResult = SimulateStepResult.Success;
-            DataCollector?.OnSimulateStepBegin(new SimulateContext(SimulationStepIndex, ExchangeStepIndex, NextExchangeSlotIndex, PlayerData));
+            DataCollector?.OnSimulateStepBegin(new SimulateContext(SimulationStepIndex, ExchangeStepIndex, ExchangeSlotIndex, PlayerData));
             while (ExchangeStepIndex < EXCHANGE_STEP_LIMIT)
             {
                 if (mSimulateStepResult != SimulateStepResult.Success)
@@ -251,7 +258,7 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
             {
                 ExchangeStepIndex -= 2; //修正为最后一次交换成功的轮次的Index
             }
-            DataCollector?.OnSimulateStepEnd(new SimulateContext(SimulationStepIndex, ExchangeStepIndex, NextExchangeSlotIndex, PlayerData), mSimulateStepResult);
+            DataCollector?.OnSimulateStepEnd(new SimulateContext(SimulationStepIndex, ExchangeStepIndex, ExchangeSlotIndex, PlayerData), mSimulateStepResult);
         }
 
         private void ExchangeStep(CancellationToken token)
@@ -261,11 +268,13 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
             高级交换：根据目标生命停止模拟；
             期望通宝-不限次数：不限制血量，根据是否交换出期望通宝停止模拟（除非次数超过上限）
             期望通宝-限制血量：限制血量，根据是否交换出期望通宝停止模拟（除非次数超过上限）
-            通用规则：按顺序交换指定槽位内的通宝，直到交换到目标/降级通宝，切换到下一个槽位；若指定槽位被目标/降级通宝填满，则也停止模拟；
+            通用规则：
+            交换可以交换槽位的优先交换通宝，直到没有优先交换通宝时，开始下一项
+            按照可以交换槽位的顺序交换通宝，将要交换的通宝是不交换的通宝时，切换到下一槽位
+            已经持有所有期望通宝或在最后一个槽位需要切换到下一个槽位时，停止交换
+            优先交换通宝和不交换通宝冲突时，按不交换算
             */
 
-            //TODO 槽位已有目标通宝还是会换的bug
-            //TODO 第一轮循环，把优先全换掉；第二轮循环，把非不可交换全换掉
             //TODO 多线程优化
 
             if (token.IsCancellationRequested)
@@ -274,6 +283,7 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
                 return;
             }
 
+            // 血量限制检测
             if (SimulationType == SimulationType.LifePointLimit || SimulationType == SimulationType.ExpectationTongbao_Limited)
             {
                 int lifePointAfterExchange = PlayerData.GetResValue(ResType.LifePoint) - PlayerData.NextExchangeCostLifePoint;
@@ -284,39 +294,108 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
                 }
             }
 
-            //if (SimulationType == SimulationType.ExpectationTongbao || SimulationType == SimulationType.ExpectationTongbao_Limited)
-            //{
-                if (ExpectedTongbaoId > 0 && PlayerData.IsTongbaoExist(ExpectedTongbaoId))
+            // 获得全部期望通宝检测
+            if (ExpectedTongbaoIds.Count > 0)
+            {
+                bool expectationAchieved = true;
+                foreach (var tongbaoId in ExpectedTongbaoIds)
+                {
+                    if (!PlayerData.IsTongbaoExist(tongbaoId))
+                    {
+                        expectationAchieved = false;
+                        break;
+                    }
+                }
+                if (expectationAchieved)
                 {
                     BreakSimulationStep(SimulateStepResult.ExpectationAchieved);
                     return;
                 }
-            //}
+            }
 
-            Tongbao tongbao;
-            while (true)
+            Tongbao tongbao = PlayerData.GetTongbao(ExchangeSlotIndex);
+            if (ExchangeableSlots.Count > 0)
             {
-                tongbao = PlayerData.GetTongbao(NextExchangeSlotIndex);
-                if (tongbao == null || !TargetTongbaoIds.Contains(tongbao.Id))
+                while (true)
                 {
-                    //Log($"可交换槽位(#{mExchangeableSlotsListIndex}): {NextExchangeSlotIndex}获得目标通宝{tongbao.Name}");
-                    break;
-                }
+                    if (mExchangeableSlotsPosIndex >= ExchangeableSlots.Count)
+                    {
+                        bool hasPriorityTongbao = false;
 
-                mExchangeableSlotsListIndex++;
-                if (mExchangeableSlotsListIndex >= ExchangeableSlots.Count)
-                {
-                    //Log($"可交换槽位切换(#{mExchangeableSlotsListIndex}): {NextExchangeSlotIndex}");
-                    BreakSimulationStep(SimulateStepResult.TargetFilledExchangeableSlots);
-                    return;
-                }
+                        // 如果循环结束还有优先通宝，切回到优先通宝阶段
+                        for (int i = 0; i < ExchangeableSlots.Count; i++)
+                        {
+                            if (PriorityTongbaoIds.Contains(ExchangeableSlots[i]))
+                            {
+                                mExchangeableSlotsPosIndex = i;
+                                mPriorityPhaseFinished = false;
+                                hasPriorityTongbao = true;
+                                break;
+                            }
+                        }
 
-                NextExchangeSlotIndex = ExchangeableSlots[mExchangeableSlotsListIndex];
+                        if (!hasPriorityTongbao)
+                        {
+                            if (!mPriorityPhaseFinished)
+                            {
+                                mExchangeableSlotsPosIndex = 0;
+                                mPriorityPhaseFinished = true;
+                            }
+                            else
+                            {
+                                BreakSimulationStep(SimulateStepResult.TargetFilledExchangeableSlots);
+                                return;
+                            }
+                        }
+                    }
+
+                    ExchangeSlotIndex = ExchangeableSlots[mExchangeableSlotsPosIndex];
+                    tongbao = PlayerData.GetTongbao(ExchangeSlotIndex);
+
+                    if (tongbao == null)
+                    {
+                        // 当前槽位为空，切到下个槽位
+                        mExchangeableSlotsPosIndex++;
+                        continue;
+                    }
+                    else if (!tongbao.CanExchange())
+                    {
+                        // 当前通宝不可交换，切到下个槽位
+                        mExchangeableSlotsPosIndex++;
+                        continue;
+                    }
+                    else if (ExpectedTongbaoIds.Contains(tongbao.Id))
+                    {
+                        // 当前通宝是期望通宝，切到下个槽位
+                        mExchangeableSlotsPosIndex++;
+                        continue;
+                    }
+                    else if (!mPriorityPhaseFinished)
+                    {
+                        // 优先通宝阶段，若当前槽位不是优先通宝或是不可交换通宝，切到下个槽位
+                        if (!PriorityTongbaoIds.Contains(tongbao.Id) || UnexchangeableTongbaoIds.Contains(tongbao.Id))
+                        {
+                            mExchangeableSlotsPosIndex++;
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        // 普通交换阶段，若当前槽位是不可交换通宝，切到下个槽位
+                        if (UnexchangeableTongbaoIds.Contains(tongbao.Id))
+                        {
+                            mExchangeableSlotsPosIndex++;
+                            continue;
+                        }
+                    }
+
+                    break; // 找到合法槽位
+                }
             }
 
             bool force = SimulationType == SimulationType.ExpectationTongbao;
-            DataCollector?.OnExchangeStepBegin(new SimulateContext(SimulationStepIndex, ExchangeStepIndex, NextExchangeSlotIndex, PlayerData));
-            bool isSuccess = PlayerData.ExchangeTongbao(NextExchangeSlotIndex, force);
+            DataCollector?.OnExchangeStepBegin(new SimulateContext(SimulationStepIndex, ExchangeStepIndex, ExchangeSlotIndex, PlayerData));
+            bool isSuccess = PlayerData.ExchangeTongbao(ExchangeSlotIndex, force);
             ExchangeStepResult result;
             if (isSuccess)
             {
@@ -341,7 +420,7 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
                     result = ExchangeStepResult.ExchangeableTongbaoNotExist;
                 }
             }
-            DataCollector?.OnExchangeStepEnd(new SimulateContext(SimulationStepIndex, ExchangeStepIndex, NextExchangeSlotIndex, PlayerData), result);
+            DataCollector?.OnExchangeStepEnd(new SimulateContext(SimulationStepIndex, ExchangeStepIndex, ExchangeSlotIndex, PlayerData), result);
             if (result != ExchangeStepResult.Success)
             {
                 BreakSimulationStep(SimulateStepResult.ExchangeFailed);

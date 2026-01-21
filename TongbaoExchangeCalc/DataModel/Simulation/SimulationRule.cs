@@ -37,6 +37,70 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
         public TongbaoIdRule(int tongbaoId) : base(tongbaoId) { }
     }
 
+    public class UnexchangeableTongbaoRule : TongbaoIdRule
+    {
+        public override SimulationRuleType Type { get; } = SimulationRuleType.UnexchangeableTongbao;
+
+        public UnexchangeableTongbaoRule(int targetId) : base(targetId) { }
+
+        public override void ApplyRule(ExchangeSimulator simulator)
+        {
+            simulator.UnexchangeableTongbaoIds.Add(TongbaoId);
+        }
+
+        public override void UnapplyRule(ExchangeSimulator simulator)
+        {
+            simulator.UnexchangeableTongbaoIds.Remove(TongbaoId);
+        }
+
+        public override bool Equals(SimulationRule other)
+        {
+            return other is UnexchangeableTongbaoRule otherRule && otherRule.TongbaoId == TongbaoId;
+        }
+
+        public override string GetRuleString()
+        {
+            TongbaoConfig config = TongbaoConfig.GetTongbaoConfigById(TongbaoId);
+            if (config == null)
+            {
+                return "无效规则，通宝配置错误";
+            }
+            return $"交换出{config.Name}就停止";
+        }
+    }
+
+    public class ExpectationTongbaoRule : TongbaoIdRule
+    {
+        public override SimulationRuleType Type { get; } = SimulationRuleType.ExpectationTongbao;
+
+        public ExpectationTongbaoRule(int id) : base(id) { }
+
+        public override void ApplyRule(ExchangeSimulator simulator)
+        {
+            simulator.ExpectedTongbaoIds.Add(TongbaoId);
+        }
+
+        public override void UnapplyRule(ExchangeSimulator simulator)
+        {
+            simulator.ExpectedTongbaoIds.Remove(TongbaoId);
+        }
+
+        public override bool Equals(SimulationRule other)
+        {
+            return other is ExpectationTongbaoRule otherRule && otherRule.TongbaoId == TongbaoId;
+        }
+
+        public override string GetRuleString()
+        {
+            TongbaoConfig config = TongbaoConfig.GetTongbaoConfigById(TongbaoId);
+            if (config == null)
+            {
+                return "无效规则，通宝配置错误";
+            }
+            return $"期望获得{config.Name}";
+        }
+    }
+
     public class ExchangeableSlotRule : SlotIndexRule
     {
         public override SimulationRuleType Type { get; } = SimulationRuleType.ExchangeableSlot;
@@ -67,25 +131,25 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
         }
     }
 
-    public class UnexchangeableTongbaoRule : TongbaoIdRule
+    public class PriorityExchangeTongbaoRule : TongbaoIdRule
     {
-        public override SimulationRuleType Type { get; } = SimulationRuleType.UnexchangeableTongbao;
+        public override SimulationRuleType Type { get; } = SimulationRuleType.PriorityExchangeTongbao;
 
-        public UnexchangeableTongbaoRule(int targetId) : base(targetId) { }
+        public PriorityExchangeTongbaoRule(int id) : base(id) { }
 
         public override void ApplyRule(ExchangeSimulator simulator)
         {
-            simulator.TargetTongbaoIds.Add(TongbaoId);
+            simulator.PriorityTongbaoIds.Add(TongbaoId);
         }
 
         public override void UnapplyRule(ExchangeSimulator simulator)
         {
-            simulator.TargetTongbaoIds.Remove(TongbaoId);
+            simulator.PriorityTongbaoIds.Remove(TongbaoId);
         }
 
         public override bool Equals(SimulationRule other)
         {
-            return other is UnexchangeableTongbaoRule otherRule && otherRule.TongbaoId == TongbaoId;
+            return other is PriorityExchangeTongbaoRule otherRule && otherRule.TongbaoId == TongbaoId;
         }
 
         public override string GetRuleString()
@@ -95,42 +159,7 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
             {
                 return "无效规则，通宝配置错误";
             }
-            return $"交换出{config.Name}就停止";
-        }
-    }
-
-    public class ExpectationTongbaoRule : TongbaoIdRule
-    {
-        public override SimulationRuleType Type { get; } = SimulationRuleType.ExpectationTongbao;
-
-        public ExpectationTongbaoRule(int id) : base(id) { }
-
-        public override void ApplyRule(ExchangeSimulator simulator)
-        {
-            simulator.ExpectedTongbaoId = TongbaoId;
-        }
-
-        public override void UnapplyRule(ExchangeSimulator simulator)
-        {
-            if (simulator.ExpectedTongbaoId == TongbaoId)
-            {
-                simulator.ExpectedTongbaoId = -1;
-            }
-        }
-
-        public override bool Equals(SimulationRule other)
-        {
-            return true; // 限制期望通宝只能存在一个
-        }
-
-        public override string GetRuleString()
-        {
-            TongbaoConfig config = TongbaoConfig.GetTongbaoConfigById(TongbaoId);
-            if (config == null)
-            {
-                return "无效规则，通宝配置错误";
-            }
-            return $"期望获得{config.Name}";
+            return $"优先交换{config.Name}";
         }
     }
 }
