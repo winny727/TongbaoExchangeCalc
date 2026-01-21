@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TongbaoSwitchCalc.DataModel
+namespace TongbaoExchangeCalc.DataModel
 {
     public interface ITongbaoSelector
     {

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using TongbaoSwitchCalc.DataModel;
+using TongbaoExchangeCalc.DataModel;
 
-namespace TongbaoSwitchCalc.Impl
+namespace TongbaoExchangeCalc.Impl
 {
     public class RandomGenerator : IRandomGenerator
     {

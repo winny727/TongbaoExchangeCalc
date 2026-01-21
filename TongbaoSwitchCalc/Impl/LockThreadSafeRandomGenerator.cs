@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TongbaoSwitchCalc.Impl
+namespace TongbaoExchangeCalc.Impl
 {
     public class LockThreadSafeRandomGenerator : RandomGenerator
     {

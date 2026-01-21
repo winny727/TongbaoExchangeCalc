@@ -2,17 +2,17 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using TongbaoSwitchCalc.DataModel;
-using TongbaoSwitchCalc.View;
+using TongbaoExchangeCalc.DataModel;
+using TongbaoExchangeCalc.View;
 
-namespace TongbaoSwitchCalc
+namespace TongbaoExchangeCalc
 {
     public enum SelectMode
     {
         None,
         SingleSelect,
         SingleSelectWithComboBox, // 单选+品相
-        SwitchTongbaoSelector,
+        ExchangeTongbaoSelector,
         MultiSelect,
     }
 
@@ -22,7 +22,7 @@ namespace TongbaoSwitchCalc
         public bool IsSingleSelect =>
             SelectMode == SelectMode.SingleSelect ||
             SelectMode == SelectMode.SingleSelectWithComboBox || 
-            SelectMode == SelectMode.SwitchTongbaoSelector;
+            SelectMode == SelectMode.ExchangeTongbaoSelector;
         public bool IsMultiSelect => SelectMode == SelectMode.MultiSelect;
 
         public int SelectedId { get; private set; }
@@ -30,7 +30,7 @@ namespace TongbaoSwitchCalc
         public RandomResDefine SelectedRandomRes { get; private set; }
         public bool IsSelected => SelectedIds.Count > 0;
 
-        private List<int> mSwitchTongbaoIdList = new List<int>();
+        private readonly List<int> mExchangeTongbaoIdList = new List<int>();
         private ListViewItem[] mListViewItems;
         private bool mRawSet = false;
 
@@ -64,12 +64,12 @@ namespace TongbaoSwitchCalc
             UpdateChecked();
         }
 
-        public void SetSwitchTongbaoIdList(IReadOnlyList<int> tongbaoIds)
+        public void SetExchangeTongbaoIdList(IReadOnlyList<int> tongbaoIds)
         {
-            mSwitchTongbaoIdList.Clear();
+            mExchangeTongbaoIdList.Clear();
             if (tongbaoIds != null)
             {
-                mSwitchTongbaoIdList.AddRange(tongbaoIds);
+                mExchangeTongbaoIdList.AddRange(tongbaoIds);
             }
             UpdateListView();
         }
@@ -139,9 +139,9 @@ namespace TongbaoSwitchCalc
             foreach (ListViewItem item in mListViewItems)
             {
                 int tongbaoId = GetListViewItemId(item);
-                if (SelectMode == SelectMode.SwitchTongbaoSelector)
+                if (SelectMode == SelectMode.ExchangeTongbaoSelector)
                 {
-                    if (!mSwitchTongbaoIdList.Contains(tongbaoId))
+                    if (!mExchangeTongbaoIdList.Contains(tongbaoId))
                     {
                         continue;
                     }

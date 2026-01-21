@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 
-namespace TongbaoSwitchCalc
+namespace TongbaoExchangeCalc
 {
     public partial class RecordForm : Form
     {

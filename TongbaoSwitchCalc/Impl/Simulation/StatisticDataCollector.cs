@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using TongbaoSwitchCalc.DataModel;
-using TongbaoSwitchCalc.DataModel.Simulation;
+using TongbaoExchangeCalc.DataModel;
+using TongbaoExchangeCalc.DataModel.Simulation;
 
-namespace TongbaoSwitchCalc.Impl.Simulation
+namespace TongbaoExchangeCalc.Impl.Simulation
 {
     public class StatisticDataCollector : IDataCollector<SimulateContext>
     {
         private int mTotalSimulateStep;
         private int mExecSimulateStep;
         private float mTotalSimulateTime;
-        private int mTotalSwitchStep;
+        private int mTotalExchangeStep;
         private bool mIsSimulateParallel;
         private readonly Dictionary<SimulateStepResult, int> mTotalSimulateStepResult = new Dictionary<SimulateStepResult, int>();
         private readonly Dictionary<int, Dictionary<ResType, int>> mTempResBefore = new Dictionary<int, Dictionary<ResType, int>>(); // key: simulationStepIndex
@@ -51,7 +51,7 @@ namespace TongbaoSwitchCalc.Impl.Simulation
             mTotalSimulateTime = simCostTimeMS;
         }
 
-        public void OnSimulateParallel(int estimatedLeftSwitchStep, int curSimStep)
+        public void OnSimulateParallel(int estimatedLeftExchangeStep, int curSimStep)
         {
             mIsSimulateParallel = true;
         }
@@ -73,7 +73,7 @@ namespace TongbaoSwitchCalc.Impl.Simulation
             mTempResBefore.Remove(context.SimulationStepIndex);
         }
 
-        public void OnSwitchStepBegin(in SimulateContext context)
+        public void OnExchangeStepBegin(in SimulateContext context)
         {
             var resDict = mTempResBefore[context.SimulationStepIndex];
             resDict.Clear();
@@ -83,11 +83,11 @@ namespace TongbaoSwitchCalc.Impl.Simulation
             }
         }
 
-        public void OnSwitchStepEnd(in SimulateContext context, SwitchStepResult result)
+        public void OnExchangeStepEnd(in SimulateContext context, ExchangeStepResult result)
         {
-            if (result == SwitchStepResult.Success)
+            if (result == ExchangeStepResult.Success)
             {
-                mTotalSwitchStep++;
+                mTotalExchangeStep++;
                 foreach (var item in context.PlayerData.ResValues)
                 {
                     ResType type = item.Key;
@@ -121,7 +121,7 @@ namespace TongbaoSwitchCalc.Impl.Simulation
                               .Append(mTotalSimulateTime)
                               .Append("ms")
                               .Append(", 总交换次数: ")
-                              .Append(mTotalSwitchStep)
+                              .Append(mTotalExchangeStep)
                               .AppendLine()
                               .AppendLine();
 
@@ -159,7 +159,7 @@ namespace TongbaoSwitchCalc.Impl.Simulation
             mTotalSimulateStep = 0;
             mTotalSimulateTime = 0;
             mExecSimulateStep = 0;
-            mTotalSwitchStep = 0;
+            mTotalExchangeStep = 0;
             mIsSimulateParallel = false;
             mTotalSimulateStepResult.Clear();
             mTotalResChanged.Clear();

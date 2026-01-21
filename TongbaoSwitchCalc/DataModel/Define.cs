@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TongbaoSwitchCalc.DataModel
+namespace TongbaoExchangeCalc.DataModel
 {
     public static class Define
     {
@@ -144,12 +144,12 @@ namespace TongbaoSwitchCalc.DataModel
         }
 
         // 从0开始
-        public int GetCostLifePoint(int switchCount)
+        public int GetCostLifePoint(int exchangeCount)
         {
-            if (switchCount < 0 || CostLifePoints == null || CostLifePoints.Length == 0)
+            if (exchangeCount < 0 || CostLifePoints == null || CostLifePoints.Length == 0)
                 return 0;
 
-            int index = Math.Min(switchCount, CostLifePoints.Length - 1);
+            int index = Math.Min(exchangeCount, CostLifePoints.Length - 1);
             return CostLifePoints[index];
         }
     }

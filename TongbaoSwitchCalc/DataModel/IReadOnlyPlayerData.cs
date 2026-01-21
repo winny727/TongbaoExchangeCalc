@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TongbaoSwitchCalc.DataModel
+namespace TongbaoExchangeCalc.DataModel
 {
     public interface IReadOnlyPlayerData
     {
         SquadType SquadType { get; }
-        int SwitchCount { get; }
+        int ExchangeCount { get; }
         int MaxTongbaoCount { get; }
-        int NextSwitchCostLifePoint { get; }
+        int NextExchangeCostLifePoint { get; }
         IReadOnlyDictionary<ResType, int> ResValues { get; }
 
         Tongbao GetTongbao(int slotIndex);

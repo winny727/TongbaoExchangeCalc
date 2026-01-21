@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36121.58
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TongbaoSwitchCalc", "TongbaoSwitchCalc\TongbaoSwitchCalc.csproj", "{056174C0-E18B-458C-A460-3EEFDA988AB1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TongbaoExchangeCalc", "TongbaoSwitchCalc\TongbaoExchangeCalc.csproj", "{056174C0-E18B-458C-A460-3EEFDA988AB1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

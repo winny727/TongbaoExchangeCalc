@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TongbaoSwitchCalc.DataModel.Simulation
+namespace TongbaoExchangeCalc.DataModel.Simulation
 {
     public static class SimulationDefine
     {
@@ -21,7 +21,7 @@ namespace TongbaoSwitchCalc.DataModel.Simulation
             return string.Empty;
         }
 
-        private static readonly string mSwitchStepLimitStr = $"超过模拟交换次数上限({SwitchSimulator.SWITCH_STEP_LIMIT})";
+        private static readonly string mExchangeStepLimitStr = $"超过模拟交换次数上限({ExchangeSimulator.EXCHANGE_STEP_LIMIT})";
         public static string GetSimulateStepEndReason(SimulateStepResult type)
         {
             switch (type)
@@ -32,11 +32,11 @@ namespace TongbaoSwitchCalc.DataModel.Simulation
                     return "已达目标生命值限制";
                 case SimulateStepResult.ExpectationAchieved:
                     return "已获得期望通宝";
-                case SimulateStepResult.TargetTongbaoFilledPrioritySlots:
+                case SimulateStepResult.TargetFilledExchangeableSlots:
                     return "目标/降级通宝已填满优先槽位";
-                case SimulateStepResult.SwitchStepLimitReached:
-                    return mSwitchStepLimitStr;
-                case SimulateStepResult.SwitchFailed:
+                case SimulateStepResult.ExchangeStepLimitReached:
+                    return mExchangeStepLimitStr;
+                case SimulateStepResult.ExchangeFailed:
                     return "交换失败";
                 case SimulateStepResult.CancellationRequested:
                     return "用户取消";
@@ -50,9 +50,9 @@ namespace TongbaoSwitchCalc.DataModel.Simulation
         {
             switch (type)
             {
-                case SimulationRuleType.PrioritySlot:
-                    return "优先交换钱盒槽位";
-                case SimulationRuleType.AutoStop:
+                case SimulationRuleType.ExchangeableSlot:
+                    return "可交换钱盒槽位";
+                case SimulationRuleType.UnexchangeableTongbao:
                     return "交换出目标/降级通宝后切换槽位";
                 case SimulationRuleType.ExpectationTongbao:
                     return "交换出期望通宝后停止交换";
@@ -66,16 +66,16 @@ namespace TongbaoSwitchCalc.DataModel.Simulation
         {
             switch (type)
             {
-                case SimulationRuleType.PrioritySlot:
-                    if (args != null && args.Length > 0 && args[0] is int prioritySlot)
+                case SimulationRuleType.ExchangeableSlot:
+                    if (args != null && args.Length > 0 && args[0] is int exchangeableSlot)
                     {
-                        return new PrioritySlotRule(prioritySlot);
+                        return new ExchangeableSlotRule(exchangeableSlot);
                     }
                     break;
-                case SimulationRuleType.AutoStop:
+                case SimulationRuleType.UnexchangeableTongbao:
                     if (args != null && args.Length > 0 && args[0] is int targetTongbaoId)
                     {
-                        return new AutoStopRule(targetTongbaoId);
+                        return new UnexchangeableTongbaoRule(targetTongbaoId);
                     }
                     break;
                 case SimulationRuleType.ExpectationTongbao:
@@ -103,14 +103,14 @@ namespace TongbaoSwitchCalc.DataModel.Simulation
     public struct SimulateContext
     {
         public int SimulationStepIndex { get; private set; }
-        public int SwitchStepIndex { get; private set; }
+        public int ExchangeStepIndex { get; private set; }
         public int SlotIndex { get; private set; }
         public IReadOnlyPlayerData PlayerData { get; private set; }
 
-        public SimulateContext(int simulationStepIndex, int switchStepIndex, int slotIndex, IReadOnlyPlayerData playerData)
+        public SimulateContext(int simulationStepIndex, int exchangeStepIndex, int slotIndex, IReadOnlyPlayerData playerData)
         {
             SimulationStepIndex = simulationStepIndex;
-            SwitchStepIndex = switchStepIndex;
+            ExchangeStepIndex = exchangeStepIndex;
             SlotIndex = slotIndex;
             PlayerData = playerData;
         }
@@ -128,26 +128,27 @@ namespace TongbaoSwitchCalc.DataModel.Simulation
         Success = 0,
         LifePointLimitReached = 1,
         ExpectationAchieved = 2,
-        TargetTongbaoFilledPrioritySlots = 3,
-        SwitchStepLimitReached = 4,
-        SwitchFailed = 5,
+        TargetFilledExchangeableSlots = 3,
+        ExchangeStepLimitReached = 4,
+        ExchangeFailed = 5,
         CancellationRequested = 6,
     }
 
-    public enum SwitchStepResult
+    public enum ExchangeStepResult
     {
         Success = 0,
         SelectedEmpty = 1,
-        TongbaoCanNotSwitch = 2,
+        TongbaoUnexchangeable = 2, // 当前选中的通宝不可交换
         LifePointNotEnough = 3,
-        NoSwitchableTongbao = 4,
+        ExchangeableTongbaoNotExist = 4, // 没有可以被交换出来的通宝
         UnknownError = 5,
     }
 
     public enum SimulationRuleType
     {
-        PrioritySlot = 0,
-        AutoStop = 1,
-        ExpectationTongbao = 2,
+        UnexchangeableTongbao = 0, // 不可交换通宝，交换到不可交换通宝就切换槽位
+        ExpectationTongbao = 1, // 期望通宝，交换到所有期望通宝就停止交换
+        ExchangeableSlot = 2, // 可交换槽位
+        //PriorityExchangeTongbao = 3, // 优先交换通宝
     }
 }

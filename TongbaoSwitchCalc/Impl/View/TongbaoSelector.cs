@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using TongbaoSwitchCalc.DataModel;
+using TongbaoExchangeCalc.DataModel;
 
-namespace TongbaoSwitchCalc.Impl.View
+namespace TongbaoExchangeCalc.Impl.View
 {
     public enum TongbaoSelectMode
     {
@@ -57,8 +57,8 @@ namespace TongbaoSwitchCalc.Impl.View
             }
             else if (TongbaoSelectMode == TongbaoSelectMode.Dialog)
             {
-                SelectorForm selectorForm = new SelectorForm(SelectMode.SwitchTongbaoSelector);
-                selectorForm.SetSwitchTongbaoIdList(tongbaoIds);
+                SelectorForm selectorForm = new SelectorForm(SelectMode.ExchangeTongbaoSelector);
+                selectorForm.SetExchangeTongbaoIdList(tongbaoIds);
                 if (selectorForm.ShowDialog() == DialogResult.OK)
                 {
                     return selectorForm.SelectedId;

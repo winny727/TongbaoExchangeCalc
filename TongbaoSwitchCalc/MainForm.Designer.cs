@@ -1,4 +1,4 @@
-﻿namespace TongbaoSwitchCalc
+﻿namespace TongbaoExchangeCalc
 {
     partial class MainForm
     {
@@ -55,7 +55,7 @@
             this.lblRes = new System.Windows.Forms.Label();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.lblCurrent = new System.Windows.Forms.Label();
-            this.btnSwitch = new System.Windows.Forms.Button();
+            this.btnExchange = new System.Windows.Forms.Button();
             this.btnSimulation = new System.Windows.Forms.Button();
             this.btnReset = new System.Windows.Forms.Button();
             this.btnRecord = new System.Windows.Forms.Button();
@@ -403,15 +403,15 @@
             this.lblCurrent.Size = new System.Drawing.Size(164, 40);
             this.lblCurrent.TabIndex = 8;
             // 
-            // btnSwitch
+            // btnExchange
             // 
-            this.btnSwitch.Location = new System.Drawing.Point(688, 334);
-            this.btnSwitch.Name = "btnSwitch";
-            this.btnSwitch.Size = new System.Drawing.Size(100, 23);
-            this.btnSwitch.TabIndex = 11;
-            this.btnSwitch.Text = "交换";
-            this.btnSwitch.UseVisualStyleBackColor = true;
-            this.btnSwitch.Click += new System.EventHandler(this.btnSwitch_Click);
+            this.btnExchange.Location = new System.Drawing.Point(688, 334);
+            this.btnExchange.Name = "btnExchange";
+            this.btnExchange.Size = new System.Drawing.Size(100, 23);
+            this.btnExchange.TabIndex = 11;
+            this.btnExchange.Text = "交换";
+            this.btnExchange.UseVisualStyleBackColor = true;
+            this.btnExchange.Click += new System.EventHandler(this.btnExchange_Click);
             // 
             // btnSimulation
             // 
@@ -667,7 +667,7 @@
             // 
             // MainForm
             // 
-            this.AcceptButton = this.btnSwitch;
+            this.AcceptButton = this.btnExchange;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 469);
@@ -680,7 +680,7 @@
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.btnRecord);
             this.Controls.Add(this.lblCurrent);
-            this.Controls.Add(this.btnSwitch);
+            this.Controls.Add(this.btnExchange);
             this.Controls.Add(this.btnReset);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.btnSimulation);
@@ -743,7 +743,7 @@
         private System.Windows.Forms.Label lblRes;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.Label lblCurrent;
-        private System.Windows.Forms.Button btnSwitch;
+        private System.Windows.Forms.Button btnExchange;
         private System.Windows.Forms.Button btnSimulation;
         private System.Windows.Forms.Button btnReset;
         private System.Windows.Forms.Button btnRecord;

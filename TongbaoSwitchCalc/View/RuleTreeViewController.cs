@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using TongbaoSwitchCalc.DataModel;
-using TongbaoSwitchCalc.DataModel.Simulation;
+using TongbaoExchangeCalc.DataModel;
+using TongbaoExchangeCalc.DataModel.Simulation;
 
 
-namespace TongbaoSwitchCalc.View
+namespace TongbaoExchangeCalc.View
 {
     public class RuleTreeViewController
     {
@@ -89,7 +89,7 @@ namespace TongbaoSwitchCalc.View
             }
         }
 
-        public void ApplySimulationRule(SwitchSimulator simulator)
+        public void ApplySimulationRule(ExchangeSimulator simulator)
         {
             if (simulator == null)
             {
@@ -137,7 +137,7 @@ namespace TongbaoSwitchCalc.View
                 CustomRuleForm customRuleForm = new CustomRuleForm(collection.Type);
 
                 // 设Numeric范围+自动填一个没填过的SlotIndex
-                if (rule.Type == SimulationRuleType.PrioritySlot)
+                if (rule.Type == SimulationRuleType.ExchangeableSlot)
                 {
                     customRuleForm.SetNumericRange(1, mPlayerData.MaxTongbaoCount);
                     AutoSetNextValidSlotIndex(customRuleForm, collection);
@@ -162,7 +162,7 @@ namespace TongbaoSwitchCalc.View
                 CustomRuleForm customRuleForm = new CustomRuleForm(collection.Type);
 
                 // 设Numeric范围+自动填一个没填过的SlotIndex
-                if (collection.Type == SimulationRuleType.PrioritySlot)
+                if (collection.Type == SimulationRuleType.ExchangeableSlot)
                 {
                     customRuleForm.SetNumericRange(1, mPlayerData.MaxTongbaoCount);
                     AutoSetNextValidSlotIndex(customRuleForm, collection);
@@ -290,7 +290,7 @@ namespace TongbaoSwitchCalc.View
                     break;
                 }
             }
-            object[] args = SimulationDefine.GetSimulationRuleArgs(new PrioritySlotRule(defaultIndex));
+            object[] args = SimulationDefine.GetSimulationRuleArgs(new ExchangeableSlotRule(defaultIndex));
             customRuleForm.SetSelectedParams(args);
         }
     }

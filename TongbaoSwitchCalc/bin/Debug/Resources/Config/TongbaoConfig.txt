@@ -1,4 +1,4 @@
-Id	Name	Description	ImgPath	Type	SwitchInPool	SwitchOutPools	IsUpgrade	ExtraResType	ExtraResCount	备注
+Id	Name	Description	ImgPath	Type	ExchangeInPool	ExchangeOutPools	IsUpgrade	ExtraResType	ExtraResCount	备注
 1001	大炎通宝		rogue_5_copper_B_01$0.png	Balance	1	0				
 1002	奇土生金		rogue_5_copper_B_06$0.png	Balance	1	1				
 1003	水生木护		rogue_5_copper_B_07$0.png	Balance	1	1				

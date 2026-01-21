@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 
-namespace TongbaoSwitchCalc.Impl
+namespace TongbaoExchangeCalc.Impl
 {
     public class ThreadSafeRandomGenerator : RandomGenerator
     {

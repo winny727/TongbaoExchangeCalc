@@ -1,29 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.Remoting.Contexts;
 using System.Text;
-using TongbaoSwitchCalc.DataModel;
-using TongbaoSwitchCalc.DataModel.Simulation;
+using TongbaoExchangeCalc.DataModel;
+using TongbaoExchangeCalc.DataModel.Simulation;
 
-namespace TongbaoSwitchCalc.Impl.Simulation
+namespace TongbaoExchangeCalc.Impl.Simulation
 {
     public class PrintDataCollector : IDataCollector<SimulateContext>
     {
-        public bool RecordEverySwitch { get; set; } = true;
-        public bool OmitExcessiveSwitches { get; set; } = true; // 省略过多的交换信息
+        public bool RecordEachExchange { get; set; } = true;
+        public bool OmitExcessiveExchanges { get; set; } = true; // 省略过多的交换信息
 
         private SimulationType mSimulationType;
         private int mTotalSimulateStep;
         private readonly Dictionary<int, string> mTempBeforeTongbaoName = new Dictionary<int, string>();
         private readonly Dictionary<int, Dictionary<ResType, int>> mTempResBefore = new Dictionary<int, Dictionary<ResType, int>>(); // key: simulationStepIndex
 
-        private const int OMIITED_SWITCH_INDEX = 2000; // 交换次数过多则省略
+        private const int OMIITED_EXCHANGE_INDEX = 2000; // 交换次数过多则省略
 
         private readonly Stack<Dictionary<ResType, int>> mResDictPool = new Stack<Dictionary<ResType, int>>();
 
-        private readonly StringBuilder mSwitchResultSB = new StringBuilder();
+        // 避免大量模拟时字符串拼接导致频繁GC，用StringBuilder
+        private readonly StringBuilder mExchangeResultSB = new StringBuilder();
         private readonly StringBuilder mResChangedTempSB = new StringBuilder();
-        public string LastSwitchResult => mSwitchResultSB.ToString();
+        public string LastExchangeResult => mExchangeResultSB.ToString();
 
         private readonly StringBuilder mOutputResult = new StringBuilder();
         public string OutputResult => mOutputResult.ToString();
@@ -46,7 +46,7 @@ namespace TongbaoSwitchCalc.Impl.Simulation
             }
         }
 
-        //因为外部可以单步调用OnSwitchStepBegin/OnSwitchStepEnd，这里提供个接口初始化
+        //因为外部可以单步调用OnExchangeStepBegin/OnExchangeStepEnd，这里提供个接口初始化
         public void InitSimulateStep(int simulationStepIndex)
         {
             if (!mTempResBefore.ContainsKey(simulationStepIndex))
@@ -79,19 +79,19 @@ namespace TongbaoSwitchCalc.Impl.Simulation
                          .AppendLine("ms");
         }
 
-        public void OnSimulateParallel(int estimatedLeftSwitchStep, int curSimStep)
+        public void OnSimulateParallel(int estimatedLeftExchangeStep, int curSimStep)
         {
             mOutputResult.Append("预计剩余交换次数过多(")
-                         .Append(estimatedLeftSwitchStep)
+                         .Append(estimatedLeftExchangeStep)
                          .AppendLine(")，触发多线程优化");
         }
 
         public void OnSimulateStepBegin(in SimulateContext context)
         {
             mTempResBefore.Add(context.SimulationStepIndex, AllocateResDict());
-            if (!RecordEverySwitch)
+            if (!RecordEachExchange)
             {
-                RecordSwitch(context);
+                RecordCurrentExchange(context);
             }
 
             mOutputResult.Append("========第")
@@ -103,19 +103,25 @@ namespace TongbaoSwitchCalc.Impl.Simulation
 
         public void OnSimulateStepEnd(in SimulateContext context, SimulateStepResult result)
         {
-            mSwitchResultSB.Clear();
+            mExchangeResultSB.Clear();
             mResChangedTempSB.Clear();
 
-            if (!RecordEverySwitch)
+            if (!RecordEachExchange)
             {
                 GenerateResChangedString(context);
                 mOutputResult.Append('(')
                              .Append(context.SimulationStepIndex + 1)
-                             .Append("|1-")
-                             .Append(context.SwitchStepIndex + 1)
+                             .Append("|");
+
+                if (context.ExchangeStepIndex > 1)
+                {
+                    mOutputResult.Append("1-");
+                }
+
+                mOutputResult.Append(context.ExchangeStepIndex + 1)
                              .Append(") ")
                              .Append("总共经过了")
-                             .Append(context.SwitchStepIndex + 1)
+                             .Append(context.ExchangeStepIndex + 1)
                              .AppendLine("次交换");
 
                 if (mResChangedTempSB.Length > 0)
@@ -126,18 +132,27 @@ namespace TongbaoSwitchCalc.Impl.Simulation
                              .AppendLine();
                 }
             }
-            else if (OmitExcessiveSwitches && context.SwitchStepIndex > OMIITED_SWITCH_INDEX)
+            else if (OmitExcessiveExchanges && context.ExchangeStepIndex > OMIITED_EXCHANGE_INDEX)
             {
                 GenerateResChangedString(context);
                 mOutputResult.Append('(')
                              .Append(context.SimulationStepIndex + 1)
-                             .Append('|')
-                             .Append(OMIITED_SWITCH_INDEX + 1)
+                             .Append('|');
+
+                if (OMIITED_EXCHANGE_INDEX != context.ExchangeStepIndex)
+                {
+                    mOutputResult.Append(OMIITED_EXCHANGE_INDEX + 1)
                              .Append('-')
-                             .Append(context.SwitchStepIndex + 1)
-                             .Append(") ")
-                             .Append("交换次数过多，省略了共")
-                             .Append(context.SwitchStepIndex - OMIITED_SWITCH_INDEX + 1)
+                             .Append(context.ExchangeStepIndex + 1);
+                }
+                else
+                {
+                    mOutputResult.Append(context.ExchangeStepIndex + 1);
+                }
+
+                mOutputResult.Append(") ")
+                             .Append("交换次数过多，省略了")
+                             .Append(context.ExchangeStepIndex - OMIITED_EXCHANGE_INDEX + 1)
                              .Append("次交换信息");
 
                 if (mResChangedTempSB.Length > 0)
@@ -164,44 +179,44 @@ namespace TongbaoSwitchCalc.Impl.Simulation
             mTempBeforeTongbaoName.Remove(context.SimulationStepIndex);
         }
 
-        public void OnSwitchStepBegin(in SimulateContext context)
+        public void OnExchangeStepBegin(in SimulateContext context)
         {
-            if (!RecordEverySwitch)
+            if (!RecordEachExchange)
             {
                 return;
             }
 
-            if (OmitExcessiveSwitches && context.SwitchStepIndex >= OMIITED_SWITCH_INDEX + 1) // 多记录一次，用于最终计算差值
+            if (OmitExcessiveExchanges && context.ExchangeStepIndex >= OMIITED_EXCHANGE_INDEX + 1) // 多记录一次，用于最终计算差值
             {
                 return;
             }
 
-            RecordSwitch(context);
+            RecordCurrentExchange(context);
         }
 
-        public void OnSwitchStepEnd(in SimulateContext context, SwitchStepResult result)
+        public void OnExchangeStepEnd(in SimulateContext context, ExchangeStepResult result)
         {
-            if (!RecordEverySwitch)
+            if (!RecordEachExchange)
             {
                 return;
             }
 
-            if (OmitExcessiveSwitches && context.SwitchStepIndex >= OMIITED_SWITCH_INDEX)
+            if (OmitExcessiveExchanges && context.ExchangeStepIndex >= OMIITED_EXCHANGE_INDEX)
             {
                 return;
             }
 
-            mSwitchResultSB.Clear();
+            mExchangeResultSB.Clear();
             mResChangedTempSB.Clear();
 
             mTempBeforeTongbaoName.TryGetValue(context.SimulationStepIndex, out var beforeTongbaoName);
 
-            if (result == SwitchStepResult.Success)
+            if (result == ExchangeStepResult.Success)
             {
                 Tongbao afterTongbao = context.PlayerData.GetTongbao(context.SlotIndex);
                 GenerateResChangedString(context);
 
-                mSwitchResultSB.Append("将位置[")
+                mExchangeResultSB.Append("将位置[")
                                .Append(context.SlotIndex + 1)
                                .Append("]上的[")
                                .Append(beforeTongbaoName)
@@ -215,26 +230,26 @@ namespace TongbaoSwitchCalc.Impl.Simulation
             {
                 switch (result)
                 {
-                    case SwitchStepResult.SelectedEmpty:
-                        mSwitchResultSB.Append("交换失败，选中的位置[")
+                    case ExchangeStepResult.SelectedEmpty:
+                        mExchangeResultSB.Append("交换失败，选中的位置[")
                                        .Append(context.SlotIndex + 1)
                                        .Append("]上的通宝为空");
                         break;
-                    case SwitchStepResult.TongbaoCanNotSwitch:
-                        mSwitchResultSB.Append("交换失败，通宝[")
+                    case ExchangeStepResult.TongbaoUnexchangeable:
+                        mExchangeResultSB.Append("交换失败，通宝[")
                                        .Append(beforeTongbaoName)
                                        .Append("]不可交换");
                         break;
-                    case SwitchStepResult.LifePointNotEnough:
-                        mSwitchResultSB.Append("交换失败，交换所需生命值不足");
+                    case ExchangeStepResult.LifePointNotEnough:
+                        mExchangeResultSB.Append("交换失败，交换所需生命值不足");
                         break;
-                    case SwitchStepResult.NoSwitchableTongbao:
-                        mSwitchResultSB.Append("交换失败，通宝[")
+                    case ExchangeStepResult.ExchangeableTongbaoNotExist:
+                        mExchangeResultSB.Append("交换失败，通宝[")
                                        .Append(beforeTongbaoName)
                                        .Append("]无可交换通宝");
                         break;
-                    case SwitchStepResult.UnknownError:
-                        mSwitchResultSB.Append("交换失败，未知错误");
+                    case ExchangeStepResult.UnknownError:
+                        mExchangeResultSB.Append("交换失败，未知错误");
                         break;
                     default:
                         break;
@@ -244,13 +259,13 @@ namespace TongbaoSwitchCalc.Impl.Simulation
             mOutputResult.Append('(')
                          .Append(context.SimulationStepIndex + 1)
                          .Append('|')
-                         .Append(context.SwitchStepIndex + 1)
+                         .Append(context.ExchangeStepIndex + 1)
                          .Append(") ")
-                         .Append(LastSwitchResult)
+                         .Append(LastExchangeResult)
                          .AppendLine();
         }
 
-        private void RecordSwitch(in SimulateContext context)
+        private void RecordCurrentExchange(in SimulateContext context)
         {
             Tongbao beforeTongbao = context.PlayerData.GetTongbao(context.SlotIndex);
             mTempBeforeTongbaoName[context.SimulationStepIndex] = beforeTongbao?.Name;
@@ -297,7 +312,7 @@ namespace TongbaoSwitchCalc.Impl.Simulation
         public void ClearData()
         {
             mTempBeforeTongbaoName.Clear();
-            mSwitchResultSB.Clear();
+            mExchangeResultSB.Clear();
             mResChangedTempSB.Clear();
             mOutputResult.Clear();
 

@@ -1,13 +1,13 @@
-﻿using TongbaoSwitchCalc.DataModel;
+﻿using TongbaoExchangeCalc.DataModel;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Drawing;
 using System.Windows.Forms;
 using System.IO;
-using TongbaoSwitchCalc.DataModel.Simulation;
+using TongbaoExchangeCalc.DataModel.Simulation;
 
-namespace TongbaoSwitchCalc
+namespace TongbaoExchangeCalc
 {
     public static class Helper
     {
@@ -18,8 +18,8 @@ namespace TongbaoSwitchCalc
 
         public static readonly Dictionary<SimulationRuleType, List<SimulationRule>> SimulationRulePresets = new Dictionary<SimulationRuleType, List<SimulationRule>>()
         {
-            { SimulationRuleType.PrioritySlot, new List<SimulationRule>() },
-            { SimulationRuleType.AutoStop, new List<SimulationRule>() },
+            { SimulationRuleType.ExchangeableSlot, new List<SimulationRule>() },
+            { SimulationRuleType.UnexchangeableTongbao, new List<SimulationRule>() },
             { SimulationRuleType.ExpectationTongbao, new List<SimulationRule>() },
         };
 
@@ -130,12 +130,12 @@ namespace TongbaoSwitchCalc
 
         private static void InitSimulationRulePresets()
         {
-            void AddAutoStopRuleByTongbaoName(string name)
+            void AddUnexchangeableTongbaoRuleByTongbaoName(string name)
             {
                 TongbaoConfig config = GetTongbaoConfigByName(name);
                 if (config != null)
                 {
-                    SimulationRulePresets[SimulationRuleType.AutoStop].Add(new AutoStopRule(config.Id));
+                    SimulationRulePresets[SimulationRuleType.UnexchangeableTongbao].Add(new UnexchangeableTongbaoRule(config.Id));
                 }
             }
 
@@ -148,16 +148,16 @@ namespace TongbaoSwitchCalc
                 }
             }
 
-            SimulationRulePresets[SimulationRuleType.PrioritySlot].Clear();
-            SimulationRulePresets[SimulationRuleType.AutoStop].Clear();
+            SimulationRulePresets[SimulationRuleType.ExchangeableSlot].Clear();
+            SimulationRulePresets[SimulationRuleType.UnexchangeableTongbao].Clear();
             SimulationRulePresets[SimulationRuleType.ExpectationTongbao].Clear();
 
-            SimulationRulePresets[SimulationRuleType.PrioritySlot].Add(new PrioritySlotRule(0));
+            SimulationRulePresets[SimulationRuleType.ExchangeableSlot].Add(new ExchangeableSlotRule(0));
 
-            string[] autoStopTongbaoNames = new string[] { "驰道长", "武人之争", "百业俱兴", "寒窗志", "志欲遂", "慧避灾" };
-            foreach (var name in autoStopTongbaoNames)
+            string[] unexchangeableTongbaoNames = new string[] { "驰道长", "武人之争", "百业俱兴", "寒窗志", "志欲遂", "慧避灾" };
+            foreach (var name in unexchangeableTongbaoNames)
             {
-                AddAutoStopRuleByTongbaoName(name);
+                AddUnexchangeableTongbaoRuleByTongbaoName(name);
             }
 
             string[] expectationTongbaoNames = new string[] { "茧成绢" };
@@ -184,8 +184,8 @@ namespace TongbaoSwitchCalc
                 string description = line.GetValue("Description");
                 string imgPath = line.GetValue("ImgPath");
                 TongbaoType type = line.GetValue<TongbaoType>("Type");
-                int switchInPool = line.GetValue<int>("SwitchInPool");
-                List<int> switchOutPools = ParseList<int>(line.GetValue("SwitchOutPools"));
+                int exchangeInPool = line.GetValue<int>("ExchangeInPool");
+                List<int> exchangeOutPools = ParseList<int>(line.GetValue("ExchangeOutPools"));
                 bool isUpgrade = line.GetValue<int>("IsUpgrade") != 0;
                 ResType extraResType = line.GetValue<ResType>("ExtraResType");
                 int extraResCount = line.GetValue<int>("ExtraResCount");
@@ -197,8 +197,8 @@ namespace TongbaoSwitchCalc
                     Description = description,
                     ImgPath = imgPath,
                     Type = type,
-                    SwitchInPool = switchInPool,
-                    SwitchOutPools = switchOutPools,
+                    ExchangeInPool = exchangeInPool,
+                    ExchangeOutPools = exchangeOutPools,
                     IsUpgrade = isUpgrade,
                     ExtraResType = extraResType,
                     ExtraResCount = extraResCount,
@@ -330,10 +330,10 @@ namespace TongbaoSwitchCalc
                 TongbaoConfig config = item.Value;
                 if (!config.IsUpgrade) continue;
 
-                var switchOutTongbaoIds = SwitchPool.GetSwitchOutTongbaoIds(config.SwitchInPool);
-                if (switchOutTongbaoIds != null && switchOutTongbaoIds.Count > 1)
+                var exchangeOutTongbaoIds = ExchangePool.GetExchangeOutTongbaoIds(config.ExchangeInPool);
+                if (exchangeOutTongbaoIds != null && exchangeOutTongbaoIds.Count > 1)
                 {
-                    foreach (var tongbaoId in switchOutTongbaoIds)
+                    foreach (var tongbaoId in exchangeOutTongbaoIds)
                     {
                         if (!result.Contains(tongbaoId))
                         {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TongbaoSwitchCalc.DataModel
+namespace TongbaoExchangeCalc.DataModel
 {
     public class PlayerData : IReadOnlyPlayerData
     {
@@ -14,14 +14,14 @@ namespace TongbaoSwitchCalc.DataModel
         public IReadOnlyDictionary<ResType, int> ResValues => mResValues; // 资源数值只读接口
         public Tongbao[] TongbaoBox { get; private set; } // 钱盒
         public SquadType SquadType { get; private set; } // 分队类型
-        public int SwitchCount { get; set; } // 已交换次数
+        public int ExchangeCount { get; set; } // 已交换次数
         public SpecialConditionFlag SpecialConditionFlag { get; set; } // 特殊条件，如福祸相依（交换后的通宝如果是厉钱，则获得票券+1）
         public List<int> LockedTongbaoList { get; private set; } = new List<int>(); // 商店锁定的通宝ID列表
         public int MaxTongbaoCount => mSquadDefine.MaxTongbaoCount;
-        public int NextSwitchCostLifePoint => mSquadDefine.GetCostLifePoint(SwitchCount);
-        public bool HasEnoughSwitchLife => GetResValue(ResType.LifePoint) > NextSwitchCostLifePoint;
+        public int NextExchangeCostLifePoint => mSquadDefine.GetCostLifePoint(ExchangeCount);
+        public bool HasEnoughExchangeLife => GetResValue(ResType.LifePoint) > NextExchangeCostLifePoint;
 
-        private readonly List<int> mTempSwitchResults = new List<int>();
+        private readonly List<int> mTempExchangeResults = new List<int>();
 
         public PlayerData(ITongbaoSelector selector, IRandomGenerator random)
         {
@@ -37,7 +37,7 @@ namespace TongbaoSwitchCalc.DataModel
                 throw new ArgumentException($"Unknown SquadType：{squadType}", nameof(squadType));
             }
 
-            SwitchCount = 0;
+            ExchangeCount = 0;
             SquadType = squadType;
             mSquadDefine = Define.SquadDefines[squadType]; //只读Dictionary线程安全
             SpecialConditionFlag = SpecialConditionFlag.None;
@@ -103,7 +103,7 @@ namespace TongbaoSwitchCalc.DataModel
             }
             SquadType = playerData.SquadType;
             mSquadDefine = Define.SquadDefines[SquadType];
-            SwitchCount = playerData.SwitchCount;
+            ExchangeCount = playerData.ExchangeCount;
             SpecialConditionFlag = playerData.SpecialConditionFlag;
             LockedTongbaoList.Clear();
             LockedTongbaoList.AddRange(playerData.LockedTongbaoList);
@@ -360,8 +360,7 @@ namespace TongbaoSwitchCalc.DataModel
             return (SpecialConditionFlag & specialCondition) != 0;
         }
 
-        // 避免大量模拟时字符串拼接导致频繁GC，用StringBuilder
-        public bool SwitchTongbao(int slotIndex, bool force = false)
+        public bool ExchangeTongbao(int slotIndex, bool force = false)
         {
             Tongbao tongbao = GetTongbao(slotIndex);
             if (tongbao == null)
@@ -369,17 +368,17 @@ namespace TongbaoSwitchCalc.DataModel
                 return false;
             }
 
-            if (!tongbao.CanSwitch())
+            if (!tongbao.CanExchange())
             {
                 return false;
             }
 
-            int costLifePoint = NextSwitchCostLifePoint;
+            int costLifePoint = NextExchangeCostLifePoint;
             int lifePoint = GetResValue(ResType.LifePoint);
             if (lifePoint > costLifePoint || force)
             {
-                SwitchPool.SwitchTongbao(Random, this, tongbao, mTempSwitchResults);
-                int newTongbaoId = TongbaoSelector.SelectTongbao(mTempSwitchResults);
+                ExchangePool.ExchangeTongbao(Random, this, tongbao, mTempExchangeResults);
+                int newTongbaoId = TongbaoSelector.SelectTongbao(mTempExchangeResults);
                 Tongbao newTongbao;
                 if (tongbao.IsUpgrade)
                 {
@@ -395,7 +394,7 @@ namespace TongbaoSwitchCalc.DataModel
                 {
                     InsertTongbao(newTongbao, slotIndex);
 
-                    SwitchCount++;
+                    ExchangeCount++;
                     AddResValue(ResType.LifePoint, -costLifePoint);
 
                     return true;

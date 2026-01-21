@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using TongbaoSwitchCalc.DataModel;
-using TongbaoSwitchCalc.DataModel.Simulation;
+using TongbaoExchangeCalc.DataModel;
+using TongbaoExchangeCalc.DataModel.Simulation;
 
-namespace TongbaoSwitchCalc
+namespace TongbaoExchangeCalc
 {
     public partial class CustomRuleForm : Form
     {
@@ -30,12 +30,12 @@ namespace TongbaoSwitchCalc
 
             switch (Type)
             {
-                case SimulationRuleType.PrioritySlot:
+                case SimulationRuleType.ExchangeableSlot:
                     label2.Text = "钱盒槽位编号";
                     numericUpDown1.Visible = true;
                     SelectedParams = new object[] { (int)(numericUpDown1.Value - 1) }; // 默认值
                     break;
-                case SimulationRuleType.AutoStop:
+                case SimulationRuleType.UnexchangeableTongbao:
                     label2.Text = "目标/降级通宝";
                     label3.Text = "未选择";
                     pictureBox1.Image = null;
@@ -61,10 +61,10 @@ namespace TongbaoSwitchCalc
             SelectedParams = args;
             switch (Type)
             {
-                case SimulationRuleType.PrioritySlot:
+                case SimulationRuleType.ExchangeableSlot:
                     numericUpDown1.Value = GetArg<int>(0) + 1;
                     break;
-                case SimulationRuleType.AutoStop:
+                case SimulationRuleType.UnexchangeableTongbao:
                     UpdateTongbaoInfo(GetArg<int>(0));
                     break;
                 case SimulationRuleType.ExpectationTongbao:

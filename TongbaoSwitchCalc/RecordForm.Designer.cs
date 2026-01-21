@@ -1,4 +1,4 @@
-﻿namespace TongbaoSwitchCalc
+﻿namespace TongbaoExchangeCalc
 {
     partial class RecordForm
     {

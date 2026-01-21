@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
-namespace TongbaoSwitchCalc.DataModel
+namespace TongbaoExchangeCalc.DataModel
 {
     [Serializable]
     public class TongbaoConfig
@@ -12,8 +12,8 @@ namespace TongbaoSwitchCalc.DataModel
         public string Description;
         public string ImgPath;
         public TongbaoType Type;
-        public int SwitchInPool; //交换前池子ID
-        public List<int> SwitchOutPools; //交换后池子ID列表
+        public int ExchangeInPool; //交换前池子ID
+        public List<int> ExchangeOutPools; //交换后池子ID列表
         public bool IsUpgrade; //是否升级通宝
         public ResType ExtraResType; //通宝自带效果
         public int ExtraResCount;
@@ -28,7 +28,7 @@ namespace TongbaoSwitchCalc.DataModel
             }
 
             mTongbaoConfigDict[config.Id] = config;
-            SwitchPool.SetupTongbaoSwitchPool(config);
+            ExchangePool.SetupTongbaoExchangePool(config);
         }
 
         public static TongbaoConfig GetTongbaoConfigById(int id)
@@ -43,7 +43,7 @@ namespace TongbaoSwitchCalc.DataModel
         public static void ClearTongbaoConfig()
         {
             mTongbaoConfigDict.Clear();
-            SwitchPool.Clear();
+            ExchangePool.Clear();
         }
 
         public static IReadOnlyDictionary<int, TongbaoConfig> GetAllTongbaoConfigs()
@@ -59,8 +59,8 @@ namespace TongbaoSwitchCalc.DataModel
         public string Description { get; private set; }
         public string ImgPath { get; private set; }
         public TongbaoType Type { get; private set; }
-        public int SwitchInPool { get; private set; } //交换前池子ID
-        public List<int> SwitchOutPools { get; private set; } //交换后池子ID列表
+        public int ExchangeInPool { get; private set; } //交换前池子ID
+        public List<int> ExchangeOutPools { get; private set; } //交换后池子ID列表
         public bool IsUpgrade { get; private set; } //是否升级通宝
         public ResType ExtraResType { get; private set; } //通宝自带效果
         public int ExtraResCount { get; private set; }
@@ -116,8 +116,8 @@ namespace TongbaoSwitchCalc.DataModel
                 Description = default;
                 ImgPath = default;
                 Type = default;
-                SwitchInPool = default;
-                SwitchOutPools = default;
+                ExchangeInPool = default;
+                ExchangeOutPools = default;
                 ExtraResType = default;
                 ExtraResCount = default;
                 RandomResType = default;
@@ -130,17 +130,17 @@ namespace TongbaoSwitchCalc.DataModel
             Description = tongbao.Description;
             ImgPath = tongbao.ImgPath;
             Type = tongbao.Type;
-            SwitchInPool = tongbao.SwitchInPool;
-            SwitchOutPools = tongbao.SwitchOutPools;
+            ExchangeInPool = tongbao.ExchangeInPool;
+            ExchangeOutPools = tongbao.ExchangeOutPools;
             ExtraResType = tongbao.ExtraResType;
             ExtraResCount = tongbao.ExtraResCount;
             RandomResType = tongbao.RandomResType;
             RandomResCount = tongbao.RandomResCount;
         }
 
-        public bool CanSwitch()
+        public bool CanExchange()
         {
-            return SwitchInPool > 0;
+            return ExchangeInPool > 0;
         }
 
         // 不传IRandomGenerator则不生成随机品相效果
@@ -159,8 +159,8 @@ namespace TongbaoSwitchCalc.DataModel
             tongbao.Description = config.Description;
             tongbao.ImgPath = config.ImgPath;
             tongbao.Type = config.Type;
-            tongbao.SwitchInPool = config.SwitchInPool;
-            tongbao.SwitchOutPools = config.SwitchOutPools;
+            tongbao.ExchangeInPool = config.ExchangeInPool;
+            tongbao.ExchangeOutPools = config.ExchangeOutPools;
             tongbao.IsUpgrade = config.IsUpgrade;
             tongbao.ExtraResType = config.ExtraResType;
             tongbao.ExtraResCount = config.ExtraResCount;

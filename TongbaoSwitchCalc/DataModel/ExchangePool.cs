@@ -1,45 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TongbaoSwitchCalc.DataModel
+namespace TongbaoExchangeCalc.DataModel
 {
-    internal static class SwitchPool
+    internal static class ExchangePool
     {
-        private static readonly Dictionary<int, List<int>> mSwitchOutPools = new Dictionary<int, List<int>>(); // <poolId, <out tongbaoId>>
+        private static readonly Dictionary<int, List<int>> mExchangeOutPools = new Dictionary<int, List<int>>(); // <poolId, <out tongbaoId>>
 
-        internal static void SetupTongbaoSwitchPool(TongbaoConfig config)
+        internal static void SetupTongbaoExchangePool(TongbaoConfig config)
         {
-            if (config == null || config.SwitchOutPools == null)
+            if (config == null || config.ExchangeOutPools == null)
             {
                 return;
             }
 
-            foreach (var poolId in config.SwitchOutPools)
+            foreach (var poolId in config.ExchangeOutPools)
             {
                 if (poolId <= 0) continue; // 大于0的才有效
-                if (!mSwitchOutPools.ContainsKey(poolId))
+                if (!mExchangeOutPools.ContainsKey(poolId))
                 {
-                    mSwitchOutPools[poolId] = new List<int>();
+                    mExchangeOutPools[poolId] = new List<int>();
                 }
-                mSwitchOutPools[poolId].Add(config.Id);
+                mExchangeOutPools[poolId].Add(config.Id);
             }
         }
 
         internal static void Clear()
         {
-            mSwitchOutPools.Clear();
+            mExchangeOutPools.Clear();
         }
 
-        internal static IReadOnlyList<int> GetSwitchOutTongbaoIds(int id)
+        internal static IReadOnlyList<int> GetExchangeOutTongbaoIds(int id)
         {
-            if (mSwitchOutPools.TryGetValue(id, out var tongbaoIds))
+            if (mExchangeOutPools.TryGetValue(id, out var tongbaoIds))
             {
                 return tongbaoIds;
             }
             return null;
         }
 
-        internal static void SwitchTongbao(IRandomGenerator random, PlayerData playerData, Tongbao tongbao, List<int> outResults)
+        internal static void ExchangeTongbao(IRandomGenerator random, PlayerData playerData, Tongbao tongbao, List<int> outResults)
         {
             if (outResults == null)
             {
@@ -52,13 +52,13 @@ namespace TongbaoSwitchCalc.DataModel
                 return;
             }
 
-            int poolId = tongbao.SwitchInPool;
-            if (poolId <= 0 || !mSwitchOutPools.ContainsKey(poolId))
+            int poolId = tongbao.ExchangeInPool;
+            if (poolId <= 0 || !mExchangeOutPools.ContainsKey(poolId))
             {
                 return; // 不可交换
             }
 
-            foreach (var tongbaoId in mSwitchOutPools[poolId])
+            foreach (var tongbaoId in mExchangeOutPools[poolId])
             {
                 TongbaoConfig config = TongbaoConfig.GetTongbaoConfigById(tongbaoId);
                 if (config == null)
@@ -76,7 +76,7 @@ namespace TongbaoSwitchCalc.DataModel
                 if (config.IsUpgrade)
                 {
                     bool isExistUpgrade = false;
-                    foreach (var upgradeTongbaoId in mSwitchOutPools[config.SwitchInPool])
+                    foreach (var upgradeTongbaoId in mExchangeOutPools[config.ExchangeInPool])
                     {
                         if (playerData.IsTongbaoExist(upgradeTongbaoId))
                         {

@@ -1,8 +1,8 @@
 ﻿using System;
-using TongbaoSwitchCalc.DataModel;
-using TongbaoSwitchCalc.DataModel.Simulation;
+using TongbaoExchangeCalc.DataModel;
+using TongbaoExchangeCalc.DataModel.Simulation;
 
-namespace TongbaoSwitchCalc.Impl.Simulation
+namespace TongbaoExchangeCalc.Impl.Simulation
 {
     public class WrapperThreadSafeDataCollector : IThreadSafeDataCollector<SimulateContext>
     {
@@ -30,11 +30,11 @@ namespace TongbaoSwitchCalc.Impl.Simulation
             }
         }
 
-        public void OnSimulateParallel(int estimatedLeftSwitchStep, int curSimStep)
+        public void OnSimulateParallel(int estimatedLeftExchangeStep, int curSimStep)
         {
             lock (mLock)
             {
-                mInner.OnSimulateParallel(estimatedLeftSwitchStep, curSimStep);
+                mInner.OnSimulateParallel(estimatedLeftExchangeStep, curSimStep);
             }
         }
 
@@ -54,19 +54,19 @@ namespace TongbaoSwitchCalc.Impl.Simulation
             }
         }
 
-        public void OnSwitchStepBegin(in SimulateContext context)
+        public void OnExchangeStepBegin(in SimulateContext context)
         {
             lock (mLock)
             {
-                mInner.OnSwitchStepBegin(context);
+                mInner.OnExchangeStepBegin(context);
             }
         }
 
-        public void OnSwitchStepEnd(in SimulateContext context, SwitchStepResult result)
+        public void OnExchangeStepEnd(in SimulateContext context, ExchangeStepResult result)
         {
             lock (mLock)
             {
-                mInner.OnSwitchStepEnd(context, result);
+                mInner.OnExchangeStepEnd(context, result);
             }
         }
 

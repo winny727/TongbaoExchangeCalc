@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using TongbaoSwitchCalc.DataModel;
-using TongbaoSwitchCalc.DataModel.Simulation;
+using TongbaoExchangeCalc.DataModel;
+using TongbaoExchangeCalc.DataModel.Simulation;
 
-namespace TongbaoSwitchCalc.Impl.Simulation
+namespace TongbaoExchangeCalc.Impl.Simulation
 {
     public class LockThreadSafeDataCollector : DataCollector, IThreadSafeDataCollector<SimulateContext>
     {
         private readonly object mTongbaoRecordsLock = new object();
         private readonly object mResValueRecordsLock = new object();
-        private readonly object mSwitchStepResultsLock = new object();
+        private readonly object mExchangeStepResultsLock = new object();
         private readonly object mSimulateStepResultsLock = new object();
 
         public override void OnSimulateStepEnd(in SimulateContext context, SimulateStepResult result)
@@ -20,9 +20,9 @@ namespace TongbaoSwitchCalc.Impl.Simulation
             }
         }
 
-        public override void OnSwitchStepBegin(in SimulateContext context)
+        public override void OnExchangeStepBegin(in SimulateContext context)
         {
-            if (!RecordEverySwitch)
+            if (!RecordEachExchange)
             {
                 return;
             }
@@ -30,7 +30,7 @@ namespace TongbaoSwitchCalc.Impl.Simulation
             var indexes = new StepIndexes
             {
                 SimulateStepIndex = context.SimulationStepIndex,
-                SwitchStepIndex = context.SwitchStepIndex,
+                ExchangeStepIndex = context.ExchangeStepIndex,
             };
 
             Tongbao tongbao = context.PlayerData.GetTongbao(context.SlotIndex);
@@ -65,9 +65,9 @@ namespace TongbaoSwitchCalc.Impl.Simulation
             }
         }
 
-        public override void OnSwitchStepEnd(in SimulateContext context, SwitchStepResult result)
+        public override void OnExchangeStepEnd(in SimulateContext context, ExchangeStepResult result)
         {
-            if (!RecordEverySwitch)
+            if (!RecordEachExchange)
             {
                 return;
             }
@@ -75,12 +75,12 @@ namespace TongbaoSwitchCalc.Impl.Simulation
             var indexes = new StepIndexes
             {
                 SimulateStepIndex = context.SimulationStepIndex,
-                SwitchStepIndex = context.SwitchStepIndex,
+                ExchangeStepIndex = context.ExchangeStepIndex,
             };
 
-            lock (mSwitchStepResultsLock)
+            lock (mExchangeStepResultsLock)
             {
-                mSwitchStepResults[indexes] = result;
+                mExchangeStepResults[indexes] = result;
             }
 
             Tongbao tongbao = context.PlayerData.GetTongbao(context.SlotIndex);
@@ -132,7 +132,7 @@ namespace TongbaoSwitchCalc.Impl.Simulation
             TotalSimulateStep = 0;
             ExecSimulateStep = 0;
             TotalSimulateTime = 0;
-            EstimatedSwitchStep = 0;
+            EstimatedExchangeStep = 0;
             lock (mTongbaoRecordsLock)
             {
                 mTongbaoRecords.Clear();
@@ -145,9 +145,9 @@ namespace TongbaoSwitchCalc.Impl.Simulation
             {
                 mSimulateStepResults.Clear();
             }
-            lock (mSwitchStepResultsLock)
+            lock (mExchangeStepResultsLock)
             {
-                mSwitchStepResults.Clear();
+                mExchangeStepResults.Clear();
             }
         }
     }

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using TongbaoSwitchCalc.DataModel;
-using TongbaoSwitchCalc.DataModel.Simulation;
+using TongbaoExchangeCalc.DataModel;
+using TongbaoExchangeCalc.DataModel.Simulation;
 
-namespace TongbaoSwitchCalc.Impl.Simulation
+namespace TongbaoExchangeCalc.Impl.Simulation
 {
     public class CompositeDataCollector : IDataCollector<SimulateContext>
     {
@@ -58,11 +58,11 @@ namespace TongbaoSwitchCalc.Impl.Simulation
             }
         }
 
-        public void OnSimulateParallel(int estimatedLeftSwitchStep, int remainSimStep)
+        public void OnSimulateParallel(int estimatedLeftExchangeStep, int remainSimStep)
         {
             foreach (var collector in mDataCollectors)
             {
-                collector.OnSimulateParallel(estimatedLeftSwitchStep, remainSimStep);
+                collector.OnSimulateParallel(estimatedLeftExchangeStep, remainSimStep);
             }
         }
 
@@ -82,19 +82,19 @@ namespace TongbaoSwitchCalc.Impl.Simulation
             }
         }
 
-        public void OnSwitchStepBegin(in SimulateContext context)
+        public void OnExchangeStepBegin(in SimulateContext context)
         {
             foreach (var collector in mDataCollectors)
             {
-                collector.OnSwitchStepBegin(in context);
+                collector.OnExchangeStepBegin(in context);
             }
         }
 
-        public void OnSwitchStepEnd(in SimulateContext context, SwitchStepResult result)
+        public void OnExchangeStepEnd(in SimulateContext context, ExchangeStepResult result)
         {
             foreach (var collector in mDataCollectors)
             {
-                collector.OnSwitchStepEnd(in context, result);
+                collector.OnExchangeStepEnd(in context, result);
             }
         }
 

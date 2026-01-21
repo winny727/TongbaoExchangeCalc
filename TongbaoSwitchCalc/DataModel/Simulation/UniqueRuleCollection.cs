@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace TongbaoSwitchCalc.DataModel.Simulation
+namespace TongbaoExchangeCalc.DataModel.Simulation
 {
     public class UniqueRuleCollection : IEnumerable<SimulationRule>
     {

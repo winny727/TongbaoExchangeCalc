@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TongbaoSwitchCalc.DataModel.Simulation
+namespace TongbaoExchangeCalc.DataModel.Simulation
 {
     public abstract class SimulationRule
     {
         public bool Enabled { get; set; } = true;
         public abstract SimulationRuleType Type { get; }
-        public abstract void ApplyRule(SwitchSimulator simulator);
-        public abstract void UnapplyRule(SwitchSimulator simulator);
+        public abstract void ApplyRule(ExchangeSimulator simulator);
+        public abstract void UnapplyRule(ExchangeSimulator simulator);
         public abstract bool Equals(SimulationRule other);
         public abstract string GetRuleString();
     }
@@ -37,28 +37,28 @@ namespace TongbaoSwitchCalc.DataModel.Simulation
         public TongbaoIdRule(int tongbaoId) : base(tongbaoId) { }
     }
 
-    public class PrioritySlotRule : SlotIndexRule
+    public class ExchangeableSlotRule : SlotIndexRule
     {
-        public override SimulationRuleType Type { get; } = SimulationRuleType.PrioritySlot;
+        public override SimulationRuleType Type { get; } = SimulationRuleType.ExchangeableSlot;
 
-        public PrioritySlotRule(int slotIndex) : base(slotIndex) { }
+        public ExchangeableSlotRule(int slotIndex) : base(slotIndex) { }
 
-        public override void ApplyRule(SwitchSimulator simulator)
+        public override void ApplyRule(ExchangeSimulator simulator)
         {
-            if (!simulator.SlotIndexPriority.Contains(SlotIndex))
+            if (!simulator.ExchangeableSlots.Contains(SlotIndex))
             {
-                simulator.SlotIndexPriority.Add(SlotIndex);
+                simulator.ExchangeableSlots.Add(SlotIndex);
             }
         }
 
-        public override void UnapplyRule(SwitchSimulator simulator)
+        public override void UnapplyRule(ExchangeSimulator simulator)
         {
-            simulator.SlotIndexPriority.Remove(SlotIndex);
+            simulator.ExchangeableSlots.Remove(SlotIndex);
         }
 
         public override bool Equals(SimulationRule other)
         {
-            return other is PrioritySlotRule otherRule && otherRule.SlotIndex == SlotIndex;
+            return other is ExchangeableSlotRule otherRule && otherRule.SlotIndex == SlotIndex;
         }
 
         public override string GetRuleString()
@@ -67,25 +67,25 @@ namespace TongbaoSwitchCalc.DataModel.Simulation
         }
     }
 
-    public class AutoStopRule : TongbaoIdRule
+    public class UnexchangeableTongbaoRule : TongbaoIdRule
     {
-        public override SimulationRuleType Type { get; } = SimulationRuleType.AutoStop;
+        public override SimulationRuleType Type { get; } = SimulationRuleType.UnexchangeableTongbao;
 
-        public AutoStopRule(int targetId) : base(targetId) { }
+        public UnexchangeableTongbaoRule(int targetId) : base(targetId) { }
 
-        public override void ApplyRule(SwitchSimulator simulator)
+        public override void ApplyRule(ExchangeSimulator simulator)
         {
             simulator.TargetTongbaoIds.Add(TongbaoId);
         }
 
-        public override void UnapplyRule(SwitchSimulator simulator)
+        public override void UnapplyRule(ExchangeSimulator simulator)
         {
             simulator.TargetTongbaoIds.Remove(TongbaoId);
         }
 
         public override bool Equals(SimulationRule other)
         {
-            return other is AutoStopRule otherRule && otherRule.TongbaoId == TongbaoId;
+            return other is UnexchangeableTongbaoRule otherRule && otherRule.TongbaoId == TongbaoId;
         }
 
         public override string GetRuleString()
@@ -105,12 +105,12 @@ namespace TongbaoSwitchCalc.DataModel.Simulation
 
         public ExpectationTongbaoRule(int id) : base(id) { }
 
-        public override void ApplyRule(SwitchSimulator simulator)
+        public override void ApplyRule(ExchangeSimulator simulator)
         {
             simulator.ExpectedTongbaoId = TongbaoId;
         }
 
-        public override void UnapplyRule(SwitchSimulator simulator)
+        public override void UnapplyRule(ExchangeSimulator simulator)
         {
             if (simulator.ExpectedTongbaoId == TongbaoId)
             {

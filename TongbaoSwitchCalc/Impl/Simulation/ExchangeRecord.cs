@@ -1,16 +1,16 @@
 ﻿using System;
-using TongbaoSwitchCalc.DataModel;
+using TongbaoExchangeCalc.DataModel;
 
-namespace TongbaoSwitchCalc.Impl.Simulation
+namespace TongbaoExchangeCalc.Impl.Simulation
 {
     public struct StepIndexes : IEquatable<StepIndexes>
     {
         public int SimulateStepIndex;
-        public int SwitchStepIndex;
+        public int ExchangeStepIndex;
 
         public bool Equals(StepIndexes other)
         {
-            return SimulateStepIndex == other.SimulateStepIndex && SwitchStepIndex == other.SwitchStepIndex;
+            return SimulateStepIndex == other.SimulateStepIndex && ExchangeStepIndex == other.ExchangeStepIndex;
         }
 
         public override readonly int GetHashCode()
@@ -19,7 +19,7 @@ namespace TongbaoSwitchCalc.Impl.Simulation
             {
                 int hash = 17;
                 hash = hash * 31 + SimulateStepIndex;
-                hash = hash * 31 + SwitchStepIndex;
+                hash = hash * 31 + ExchangeStepIndex;
                 return hash;
             }
         }

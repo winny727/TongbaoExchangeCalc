@@ -3,21 +3,21 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using TongbaoSwitchCalc.DataModel;
-using TongbaoSwitchCalc.DataModel.Simulation;
-using TongbaoSwitchCalc.Impl;
-using TongbaoSwitchCalc.Impl.Simulation;
-using TongbaoSwitchCalc.Impl.View;
-using TongbaoSwitchCalc.View;
+using TongbaoExchangeCalc.DataModel;
+using TongbaoExchangeCalc.DataModel.Simulation;
+using TongbaoExchangeCalc.Impl;
+using TongbaoExchangeCalc.Impl.Simulation;
+using TongbaoExchangeCalc.Impl.View;
+using TongbaoExchangeCalc.View;
 
-namespace TongbaoSwitchCalc
+namespace TongbaoExchangeCalc
 {
     public partial class MainForm : Form
     {
         private PlayerData mPlayerData;
         private RandomGenerator mRandom;
         private TongbaoSelector mTongbaoSelector;
-        private SwitchSimulator mSwitchSimulator;
+        private ExchangeSimulator mExchangeSimulator;
         private PrintDataCollector mPrintDataCollector;
         private StatisticDataCollector mStatisticDataCollector;
         private CompositeDataCollector mCompositeDataCollector;
@@ -76,10 +76,10 @@ namespace TongbaoSwitchCalc
             mCompositeDataCollector.AddDataCollector(mStatisticDataCollector);
 
             // 交换耗时测试（16线程）：100w开记录/1000w次开记录/100w次不开记录/1000w次不开记录
-            //mSwitchSimulator = new SwitchSimulator(mPlayerData, mCompositeDataCollector); //4.2s，45.9s，3.1s，33.4s
-            //mSwitchSimulator = new SwitchSimulator(mPlayerData, new LockThreadSafeDataCollector() { RecordEverySwitch = false }); //100w次就已经21.2s了，锁麻了；不记录每次交换：3.2s，32.1s
-            //mSwitchSimulator = new SwitchSimulator(mPlayerData, new ConcurrentThreadSafeDataCollector() { RecordEverySwitch = false }); //7.9s，ConcurrentDict GC很多；不记录每次交换：3.1s，33.3s
-            mSwitchSimulator = new SwitchSimulator(mPlayerData, new WrapperThreadSafeDataCollector(mCompositeDataCollector)); //5.5s，55.9s，2.5s，22.8s；若开记录GC很多
+            //mExchangeSimulator = new ExchangeSimulator(mPlayerData, mCompositeDataCollector); //4.2s，45.9s，3.1s，33.4s
+            //mExchangeSimulator = new ExchangeSimulator(mPlayerData, new LockThreadSafeDataCollector() { RecordEachExchange = false }); //100w次就已经21.2s了，锁麻了；不记录每次交换：3.2s，32.1s
+            //mExchangeSimulator = new ExchangeSimulator(mPlayerData, new ConcurrentThreadSafeDataCollector() { RecordEachExchange = false }); //7.9s，ConcurrentDict GC很多；不记录每次交换：3.1s，33.3s
+            mExchangeSimulator = new ExchangeSimulator(mPlayerData, new WrapperThreadSafeDataCollector(mCompositeDataCollector)); //5.5s，55.9s，2.5s，22.8s；若开记录GC很多
 
             //线程数测试（16核CPU，1000w次无记录WarpperThreadSafeDataCollector）：单线程（主线程）32.5s，单线程（非主线程）35.1s，双线程21.9s，四线程18.2s，八线程19.3s，15线程26.3s，16线程24.3s
             //结论：线程数：处理器数/4
@@ -130,7 +130,7 @@ namespace TongbaoSwitchCalc
                 for (int i = 0; i < 1000; i++)
                 {
                     SelectTongbaoSlot(i % names.Length);
-                    SwitchOnce(true);
+                    ExchangeOnce(true);
                 }
             }
 
@@ -368,11 +368,11 @@ namespace TongbaoSwitchCalc
             }
 
             sb.Append("当前交换次数: ")
-              .Append(mPlayerData.SwitchCount)
+              .Append(mPlayerData.ExchangeCount)
               .AppendLine();
 
             sb.Append("下次交换消耗生命值: ")
-              .Append(mPlayerData.NextSwitchCostLifePoint);
+              .Append(mPlayerData.NextExchangeCostLifePoint);
 
             lblCurrent.Text = sb.ToString();
             sb.Clear();
@@ -408,7 +408,7 @@ namespace TongbaoSwitchCalc
             checkBoxOptimize.Enabled = enabled;
             checkBoxAutoRevert.Enabled = enabled;
             checkBoxEnableRecord.Enabled = enabled;
-            btnSwitch.Enabled = enabled;
+            btnExchange.Enabled = enabled;
             btnReset.Enabled = enabled;
             btnSimulation.Text = asyncSimulating ? "停止模拟" : "开始模拟";
         }
@@ -417,11 +417,11 @@ namespace TongbaoSwitchCalc
         {
             if (checkBoxOptimize.Checked)
             {
-                mSwitchSimulator.SetDataCollector(new WrapperThreadSafeDataCollector(mCompositeDataCollector));
+                mExchangeSimulator.SetDataCollector(new WrapperThreadSafeDataCollector(mCompositeDataCollector));
             }
             else
             {
-                mSwitchSimulator.SetDataCollector(mCompositeDataCollector);
+                mExchangeSimulator.SetDataCollector(mCompositeDataCollector);
             }
         }
 
@@ -465,7 +465,7 @@ namespace TongbaoSwitchCalc
             UpdateView();
         }
 
-        private void SwitchOnce(bool force = false)
+        private void ExchangeOnce(bool force = false)
         {
             if (mCanRevertPlayerData)
             {
@@ -473,36 +473,36 @@ namespace TongbaoSwitchCalc
             }
 
             mCanRevertPlayerData = false;
-            mPrintDataCollector.RecordEverySwitch = true; //单次交换固定打印
+            mPrintDataCollector.RecordEachExchange = true; //单次交换固定打印
             mPrintDataCollector.InitSimulateStep(0);
             mTongbaoSelector.TongbaoSelectMode = TongbaoSelectMode.Dialog; //弹窗询问
             int slotIndex = mSelectedTongbaoSlotIndex;
-            mPrintDataCollector?.OnSwitchStepBegin(new SimulateContext(0, mPlayerData.SwitchCount, slotIndex, mPlayerData));
-            if (!mPlayerData.SwitchTongbao(slotIndex, force))
+            mPrintDataCollector?.OnExchangeStepBegin(new SimulateContext(0, mPlayerData.ExchangeCount, slotIndex, mPlayerData));
+            if (!mPlayerData.ExchangeTongbao(slotIndex, force))
             {
                 Tongbao tongbao = mPlayerData.GetTongbao(slotIndex);
                 if (tongbao == null)
                 {
-                    mPrintDataCollector?.OnSwitchStepEnd(new SimulateContext(0, mPlayerData.SwitchCount, slotIndex, mPlayerData), SwitchStepResult.SelectedEmpty);
+                    mPrintDataCollector?.OnExchangeStepEnd(new SimulateContext(0, mPlayerData.ExchangeCount, slotIndex, mPlayerData), ExchangeStepResult.SelectedEmpty);
                     MessageBox.Show("交换失败，请先选中一个通宝。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
-                if (!tongbao.CanSwitch())
+                if (!tongbao.CanExchange())
                 {
-                    mPrintDataCollector?.OnSwitchStepEnd(new SimulateContext(0, mPlayerData.SwitchCount, slotIndex, mPlayerData), SwitchStepResult.TongbaoCanNotSwitch);
+                    mPrintDataCollector?.OnExchangeStepEnd(new SimulateContext(0, mPlayerData.ExchangeCount, slotIndex, mPlayerData), ExchangeStepResult.TongbaoUnexchangeable);
                     MessageBox.Show($"交换失败，选中通宝[{Helper.GetTongbaoFullName(tongbao.Id)}]无法交换。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
-                if (!force && !mPlayerData.HasEnoughSwitchLife)
+                if (!force && !mPlayerData.HasEnoughExchangeLife)
                 {
-                    mPrintDataCollector?.OnSwitchStepEnd(new SimulateContext(0, mPlayerData.SwitchCount, slotIndex, mPlayerData), SwitchStepResult.LifePointNotEnough);
+                    mPrintDataCollector?.OnExchangeStepEnd(new SimulateContext(0, mPlayerData.ExchangeCount, slotIndex, mPlayerData), ExchangeStepResult.LifePointNotEnough);
                     MessageBox.Show($"交换失败，当前生命值不足", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
-                mPrintDataCollector?.OnSwitchStepEnd(new SimulateContext(0, mPlayerData.SwitchCount, slotIndex, mPlayerData), SwitchStepResult.UnknownError);
+                mPrintDataCollector?.OnExchangeStepEnd(new SimulateContext(0, mPlayerData.ExchangeCount, slotIndex, mPlayerData), ExchangeStepResult.UnknownError);
                 MessageBox.Show("交换失败，请检查当前配置和状态。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -511,25 +511,25 @@ namespace TongbaoSwitchCalc
             sb.Clear();
 
             sb.Append('(')
-              .Append(mPlayerData.SwitchCount)
+              .Append(mPlayerData.ExchangeCount)
               .Append(") ")
-              .AppendLine(mPrintDataCollector.LastSwitchResult);
+              .AppendLine(mPrintDataCollector.LastExchangeResult);
 
-            mPrintDataCollector?.OnSwitchStepEnd(new SimulateContext(0, mPlayerData.SwitchCount, slotIndex, mPlayerData), SwitchStepResult.Success);
+            mPrintDataCollector?.OnExchangeStepEnd(new SimulateContext(0, mPlayerData.ExchangeCount, slotIndex, mPlayerData), ExchangeStepResult.Success);
             mOutputResult += sb.ToString();
             mOutputResultChanged = true;
             UpdateTongbaoView(slotIndex);
             UpdateView();
         }
 
-        private async void SwitchSimulate(SimulationType type)
+        private async void ExchangeSimulate(SimulationType type)
         {
             if (checkBoxAutoRevert.Checked)
             {
                 ResetPlayerData();
             }
             mCanRevertPlayerData = true;
-            mPrintDataCollector.RecordEverySwitch = checkBoxEnableRecord.Checked;
+            mPrintDataCollector.RecordEachExchange = checkBoxEnableRecord.Checked;
             mTongbaoSelector.TongbaoSelectMode = TongbaoSelectMode.Default;
             if (comboBoxMultiSel.SelectedItem is ComboBoxItem<TongbaoSelectMode> cbItem)
             {
@@ -543,24 +543,24 @@ namespace TongbaoSwitchCalc
                     mTongbaoSelector.SpecificTongbaoId = config.Id;
                 }
             }
-            mSwitchSimulator.SimulationType = type;
-            mSwitchSimulator.TotalSimulationCount = (int)numSimCnt.Value;
-            mSwitchSimulator.MinimumLifePoint = (int)numMinHp.Value;
-            mSwitchSimulator.NextSwitchSlotIndex = mSelectedTongbaoSlotIndex;
+            mExchangeSimulator.SimulationType = type;
+            mExchangeSimulator.TotalSimulationCount = (int)numSimCnt.Value;
+            mExchangeSimulator.MinimumLifePoint = (int)numMinHp.Value;
+            mExchangeSimulator.NextExchangeSlotIndex = mSelectedTongbaoSlotIndex;
 
             // ApplyRule
-            mSwitchSimulator.SlotIndexPriority.Clear();
-            mSwitchSimulator.TargetTongbaoIds.Clear();
-            mSwitchSimulator.ExpectedTongbaoId = -1;
-            RuleTreeViewController.ApplySimulationRule(mSwitchSimulator);
+            mExchangeSimulator.ExchangeableSlots.Clear();
+            mExchangeSimulator.TargetTongbaoIds.Clear();
+            mExchangeSimulator.ExpectedTongbaoId = -1;
+            RuleTreeViewController.ApplySimulationRule(mExchangeSimulator);
 
-            //mSwitchSimulator.Simulate();
+            //mExchangeSimulator.Simulate();
 
-            string simulationName = SimulationDefine.GetSimulationName(mSwitchSimulator.SimulationType);
-            int total = mSwitchSimulator.TotalSimulationCount;
+            string simulationName = SimulationDefine.GetSimulationName(mExchangeSimulator.SimulationType);
+            int total = mExchangeSimulator.TotalSimulationCount;
             UpdateAsyncSimulateView(true);
             toolStripProgressBar1.Minimum = 0;
-            toolStripProgressBar1.Maximum = mSwitchSimulator.TotalSimulationCount;
+            toolStripProgressBar1.Maximum = mExchangeSimulator.TotalSimulationCount;
             toolStripProgressBar1.Value = 0;
             int lastPermille = -1; // 0.1% = 1‰
             Progress<int> progress = new Progress<int>((value) =>
@@ -577,7 +577,7 @@ namespace TongbaoSwitchCalc
                 toolStripProgressBar1.Value = value;
                 toolStripStatusLabel1.Text = $"正在进行[{simulationName}]模拟: {value}/{total} ({percent:F1}%)";
             });
-            await mSwitchSimulator.SimulateAsync(progress);
+            await mExchangeSimulator.SimulateAsync(progress);
 
             mOutputResult = mPrintDataCollector.OutputResult;
             mOutputResultChanged = true;
@@ -595,10 +595,10 @@ namespace TongbaoSwitchCalc
         {
             if (mCanRevertPlayerData)
             {
-                mSwitchSimulator.RevertPlayerData();
+                mExchangeSimulator.RevertPlayerData();
                 mCanRevertPlayerData = false;
             }
-            mPlayerData.SwitchCount = 0;
+            mPlayerData.ExchangeCount = 0;
 
             mTempResValues.Clear();
             mTempResValues.Add(ResType.LifePoint, (int)numHp.Value);
@@ -722,16 +722,16 @@ namespace TongbaoSwitchCalc
             }
         }
 
-        private void btnSwitch_Click(object sender, EventArgs e)
+        private void btnExchange_Click(object sender, EventArgs e)
         {
-            SwitchOnce();
+            ExchangeOnce();
         }
 
         private void btnSimulation_Click(object sender, EventArgs e)
         {
-            if (mSwitchSimulator.IsAsyncSimulating)
+            if (mExchangeSimulator.IsAsyncSimulating)
             {
-                mSwitchSimulator.CancelSimulate();
+                mExchangeSimulator.CancelSimulate();
                 return;
             }
 
@@ -740,7 +740,7 @@ namespace TongbaoSwitchCalc
             {
                 simType = item.Value;
             }
-            SwitchSimulate(simType);
+            ExchangeSimulate(simType);
         }
 
         private void btnReset_Click(object sender, EventArgs e)
