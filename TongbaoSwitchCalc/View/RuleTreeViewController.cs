@@ -17,16 +17,17 @@ namespace TongbaoSwitchCalc.View
             mRuleTreeView = treeView ?? throw new ArgumentNullException(nameof(treeView));
             mPlayerData = playerData ?? throw new ArgumentNullException(nameof(playerData));
 
-            mRuleTreeView.AfterCheck += treeViewRule_AfterCheck;
-            mRuleTreeView.DoubleClick += treeViewRule_DoubleClick;
+            mRuleTreeView.AfterCheck += OnRuleAfterCheck;
+            mRuleTreeView.DoubleClick += OnRuleDoubleClick;
+            mRuleTreeView.KeyDown += OnTreeViewKeyDown;
         }
 
         public void BindButtons(Button btnAdd, Button btnRemove, Button btnUp, Button btnDown)
         {
-            btnAdd.Click += btnAdd_Click;
-            btnRemove.Click += btnRemove_Click;
-            btnUp.Click += btnUp_Click;
-            btnDown.Click += btnDown_Click;
+            btnAdd.Click += OnAddClick;
+            btnRemove.Click += OnRemoveClick;
+            btnUp.Click += OnMoveUpClick;
+            btnDown.Click += OnMoveDownClick;
         }
 
         public void InitRuleTreeView()
@@ -125,7 +126,7 @@ namespace TongbaoSwitchCalc.View
             return null;
         }
 
-        private void btnAdd_Click(object sender, EventArgs e)
+        private void OnAddClick(object sender, EventArgs e)
         {
             TreeNode selectedNode = mRuleTreeView.SelectedNode;
             if (selectedNode?.Tag is SimulationRule rule)
@@ -196,7 +197,7 @@ namespace TongbaoSwitchCalc.View
             }
         }
 
-        private void btnRemove_Click(object sender, EventArgs e)
+        private void OnRemoveClick(object sender, EventArgs e)
         {
             TreeNode selectedNode = mRuleTreeView.SelectedNode;
             if (selectedNode?.Tag is SimulationRule rule)
@@ -213,7 +214,7 @@ namespace TongbaoSwitchCalc.View
             }
         }
 
-        private void btnUp_Click(object sender, EventArgs e)
+        private void OnMoveUpClick(object sender, EventArgs e)
         {
             TreeNode selectedNode = mRuleTreeView.SelectedNode;
             if (selectedNode?.Tag is SimulationRule rule)
@@ -229,7 +230,7 @@ namespace TongbaoSwitchCalc.View
             }
         }
 
-        private void btnDown_Click(object sender, EventArgs e)
+        private void OnMoveDownClick(object sender, EventArgs e)
         {
             TreeNode selectedNode = mRuleTreeView.SelectedNode;
             if (selectedNode?.Tag is SimulationRule rule)
@@ -245,7 +246,7 @@ namespace TongbaoSwitchCalc.View
             }
         }
 
-        private void treeViewRule_AfterCheck(object sender, TreeViewEventArgs e)
+        private void OnRuleAfterCheck(object sender, TreeViewEventArgs e)
         {
             if (e.Node?.Tag is SimulationRule rule)
             {
@@ -253,7 +254,7 @@ namespace TongbaoSwitchCalc.View
             }
         }
 
-        private void treeViewRule_DoubleClick(object sender, EventArgs e)
+        private void OnRuleDoubleClick(object sender, EventArgs e)
         {
             TreeNode selectedNode = mRuleTreeView.SelectedNode;
             if (selectedNode?.Tag is SimulationRule rule)
@@ -271,6 +272,14 @@ namespace TongbaoSwitchCalc.View
                     collection.Insert(index, newRule);
                     UpdateRuleTreeView();
                 }
+            }
+        }
+
+        private void OnTreeViewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                OnRemoveClick(sender, e);
             }
         }
     }
