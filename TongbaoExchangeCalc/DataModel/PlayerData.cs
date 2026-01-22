@@ -94,7 +94,7 @@ namespace TongbaoExchangeCalc.DataModel
             }
         }
 
-        public void CopyFrom(PlayerData playerData)
+        public void CopyFrom(PlayerData playerData, bool isIgnoreSetting = false)
         {
             if (playerData == null)
             {
@@ -104,9 +104,13 @@ namespace TongbaoExchangeCalc.DataModel
             SquadType = playerData.SquadType;
             mSquadDefine = Define.SquadDefines[SquadType];
             ExchangeCount = playerData.ExchangeCount;
-            SpecialConditionFlag = playerData.SpecialConditionFlag;
-            LockedTongbaoList.Clear();
-            LockedTongbaoList.AddRange(playerData.LockedTongbaoList);
+            if (!isIgnoreSetting)
+            {
+                // 可选不重置Setting类的数据
+                SpecialConditionFlag = playerData.SpecialConditionFlag;
+                LockedTongbaoList.Clear();
+                LockedTongbaoList.AddRange(playerData.LockedTongbaoList);
+            }
             InitResValues(playerData.mResValues);
             ClearTongbao();
             if (TongbaoBox.Length != MaxTongbaoCount)

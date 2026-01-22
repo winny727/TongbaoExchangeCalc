@@ -60,7 +60,7 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
 
         public void RevertPlayerData()
         {
-            PlayerData.CopyFrom(mRevertPlayerData);
+            PlayerData.CopyFrom(mRevertPlayerData, true);
             ExchangeSlotIndex = mInitialExchangeSlotIndex;
         }
 
@@ -252,11 +252,11 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
             if (ExchangeStepIndex >= EXCHANGE_STEP_LIMIT && mSimulateStepResult == SimulateStepResult.Success)
             {
                 mSimulateStepResult = SimulateStepResult.ExchangeStepLimitReached;
-                ExchangeStepIndex--; //修正为最后一次的Index
+                ExchangeStepIndex--; //修正为最后一次的Index (最后一次是成功交换的)
             }
             else
             {
-                ExchangeStepIndex -= 2; //修正为最后一次交换成功的轮次的Index
+                ExchangeStepIndex -= 2; //修正为最后一次交换成功的轮次的Index (倒数第二次是成功交换的)
             }
             DataCollector?.OnSimulateStepEnd(new SimulateContext(SimulationStepIndex, ExchangeStepIndex, ExchangeSlotIndex, PlayerData), mSimulateStepResult);
         }

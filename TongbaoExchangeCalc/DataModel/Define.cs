@@ -102,6 +102,18 @@ namespace TongbaoExchangeCalc.DataModel
         PrimalFarmingCandles = 5, //鸿蒙开荒烛火
         Hope = 6, //希望
         Shield = 7, //护盾
+
+        /*
+        HP 目标生命
+        HPMAX 生命上限
+        GOLD 源石锭
+        POPULATION 希望
+        SHIELD 护盾
+        DIVINATION_KIT 票券
+        SPECIAL_ZONE_AP 烛火
+        RELIC 收藏品
+        PLAYER_LEVEL_UP 指挥等级
+         */
     }
 
     public enum SquadType
