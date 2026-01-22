@@ -31,7 +31,7 @@ namespace TongbaoSwitchCalc.DataModel.Simulation
         private const int SWITCH_STEP_LIMIT = 10000; // 交换上限，防止死循环
 
         public int OptimizeThreshold { get; set; } = 100000; // 触发多线程的阈值（预计剩余交换次数）
-        public int MaxParallelism { get; set; } = Environment.ProcessorCount;
+        public int MaxParallelism { get; set; } = Math.Max(1, Environment.ProcessorCount / 4); // 线程太多竞态很严重
         private bool mUseParallel = false;
 
         public SwitchSimulator(PlayerData playerData, IDataCollector<SimulateContext> collector = null, ILogger logger = null)

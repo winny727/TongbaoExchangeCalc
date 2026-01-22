@@ -69,12 +69,17 @@ namespace TongbaoSwitchCalc
             mCompositeDataCollector.AddDataCollector(mPrintDataCollector);
             mCompositeDataCollector.AddDataCollector(mStatisticDataCollector);
 
-            // 交换耗时测试：100w开记录/1000w次开记录/100w次不开记录/1000w次不开记录
+            // 交换耗时测试（16线程）：100w开记录/1000w次开记录/100w次不开记录/1000w次不开记录
             //mSwitchSimulator = new SwitchSimulator(mPlayerData, mCompositeDataCollector, mLogger); //4.2s，45.9s，3.1s，33.4s
             //mSwitchSimulator = new SwitchSimulator(mPlayerData, new LockThreadSafeDataCollector() { RecordEverySwitch = false }, mLogger); //100w次就已经21.2s了，锁麻了；不记录每次交换：3.2s，32.1s
             //mSwitchSimulator = new SwitchSimulator(mPlayerData, new ConcurrentThreadSafeDataCollector() { RecordEverySwitch = false }, mLogger); //7.9s，ConcurrentDict GC很多；不记录每次交换：3.1s，33.3s
             mSwitchSimulator = new SwitchSimulator(mPlayerData, new WarpperThreadSafeDataCollector(mCompositeDataCollector), mLogger); //5.5s，55.9s，2.5s，22.8s；若开记录GC很多
-            //结论，开记录的话用单线程，不开才用WarpperThreadSafeDataCollector
+
+            //线程数测试（1000w次无记录WarpperThreadSafeDataCollector）：单线程（主线程）32.5s，单线程（非主线程）35.1s，双线程21.9s，四线程18.2s，八线程19.3s，15线程26.3s，16线程24.3s
+            //结论：线程数：处理器数/4
+
+            //4线程情况下，若不开记录最优为ConcurrentThreadSafeDataCollector 1.6s，开记录最优为WarpperThreadSafeDataCollector 4.0s
+            //结论，4线程WarpperThreadSafeDataCollector
 
             InitPlayerData();
         }
