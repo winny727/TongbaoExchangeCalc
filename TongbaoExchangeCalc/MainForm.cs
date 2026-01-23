@@ -743,14 +743,14 @@ namespace TongbaoExchangeCalc
 
         private void btnRecord_Click(object sender, EventArgs e)
         {
+            mRecordForm.Show();
+            mRecordForm.WindowState = FormWindowState.Normal;
+            mRecordForm.Focus();
             if (mOutputResultChanged)
             {
                 mRecordForm.Content = mOutputResult ?? string.Empty;
                 mOutputResultChanged = false;
             }
-            mRecordForm.Show();
-            mRecordForm.WindowState = FormWindowState.Normal;
-            mRecordForm.Focus();
         }
 
         private void btnRandom_Click(object sender, EventArgs e)

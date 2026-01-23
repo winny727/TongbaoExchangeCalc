@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace TongbaoExchangeCalc
@@ -54,11 +55,9 @@ namespace TongbaoExchangeCalc
 
         public void SetText(string text)
         {
-            textBox1.Text = text ?? string.Empty;
-            //textBox1.Clear();
-            //FastAppendText(textBox1, text);
-            UpdateScroll();
+            _ = SetTextAsync(text);
         }
+
 
         public void AppendText(string text)
         {
@@ -66,53 +65,69 @@ namespace TongbaoExchangeCalc
             UpdateScroll();
         }
 
+        public async Task SetTextAsync(string text, int chunkSize = 5_000_000)
+        {
+            text ??= string.Empty;
+
+            // 先清空（UI 线程）
+            if (InvokeRequired)
+            {
+                await InvokeAsync(() => textBox1.Clear());
+            }
+            else
+            {
+                textBox1.Clear();
+            }
+
+            // 后台线程分块
+            await Task.Run(async () =>
+            {
+                int length = text.Length;
+                int offset = 0;
+
+                while (offset < length)
+                {
+                    int size = Math.Min(chunkSize, length - offset);
+                    string chunk = text.Substring(offset, size);
+                    offset += size;
+
+                    // 回 UI 线程追加
+                    await InvokeAsync(() =>
+                    {
+                        textBox1.AppendText(chunk);
+                    });
+                }
+            });
+        }
+
         public void SetClearCallback(Action callback)
         {
             mOnClearClick = callback;
         }
 
-        private unsafe void FastAppendText(TextBox textBox, string text, int chunkSize = 5000)
+        private Task InvokeAsync(Action action)
         {
-            // 禁用UI更新
-            textBox.Visible = false;
-            textBox.SuspendLayout();
-
-            try
+            if (!InvokeRequired)
             {
-                // 使用指针操作提升性能
-                unsafe
+                action();
+                return Task.CompletedTask;
+            }
+
+            var tcs = new TaskCompletionSource<bool>();
+            BeginInvoke(new Action(() =>
+            {
+                try
                 {
-                    fixed (char* pText = text)
-                    {
-                        int totalLength = text.Length;
-                        int processed = 0;
-
-                        while (processed < totalLength)
-                        {
-                            int currentChunkSize = Math.Min(chunkSize, totalLength - processed);
-
-                            // 直接构建字符串片段
-                            string chunk = new string(pText, processed, currentChunkSize);
-                            textBox.AppendText(chunk);
-
-                            processed += currentChunkSize;
-
-                            // 每处理5个区块更新一次UI
-                            if ((processed / chunkSize) % 5 == 0)
-                            {
-                                Application.DoEvents();
-                            }
-                        }
-                    }
+                    action();
+                    tcs.SetResult(true);
                 }
-            }
-            finally
-            {
-                textBox.ResumeLayout();
-                textBox.Visible = true;
-            }
+                catch (Exception ex)
+                {
+                    tcs.SetException(ex);
+                }
+            }));
+            return tcs.Task;
         }
-
 
         private void RecordForm_FormClosing(object sender, FormClosingEventArgs e)
         {

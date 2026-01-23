@@ -142,7 +142,7 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
             // 每个 worker 负责的模拟数量（向上取整）
             int batchSize = (remain + workerCount - 1) / workerCount;
 
-            var dataCollectors = new ConcurrentQueue<IDataCollector<SimulateContext>>();
+            var dataCollectors = new IDataCollector<SimulateContext>[workerCount];
 
             Parallel.For(
                 0,
@@ -173,10 +173,7 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
                     IRandomGenerator clonedRandom = (IRandomGenerator)PlayerData.Random.Clone();
                     IDataCollector<SimulateContext> clonedDataCollector = DataCollector?.CloneAsEmpty();
                     clonedDataCollector?.SetCollectRange(batchStart, batchEnd - batchStart);
-                    if (clonedDataCollector != null)
-                    {
-                        dataCollectors.Enqueue(clonedDataCollector);
-                    }
+                    dataCollectors[workerIndex] = clonedDataCollector;
 
                     PlayerData localPlayerData = new PlayerData(clonedTongbaoSelector, clonedRandom);
                     localPlayerData.CopyFrom(mRevertPlayerData);
@@ -211,10 +208,13 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
                 }
             );
 
-            foreach (var item in dataCollectors)
+            for (int i = 0; i < dataCollectors.Length; i++)
             {
-                DataCollector.MergeData(item);
-                item.ClearData();
+                if (dataCollectors[i] != null)
+                {
+                    DataCollector.MergeData(dataCollectors[i]);
+                    dataCollectors[i].ClearData();
+                }
             }
         }
 
