@@ -296,55 +296,28 @@ namespace TongbaoExchangeCalc
             var sb = mTempStringBuilder;
             sb.Clear();
 
-            int hp = mPlayerData.GetResValue(ResType.LifePoint);
-            int ingots = mPlayerData.GetResValue(ResType.OriginiumIngots);
-            int coupon = mPlayerData.GetResValue(ResType.Coupon);
-            int candle = mPlayerData.GetResValue(ResType.Candles);
-            int primalFarmingCandle = mPlayerData.GetResValue(ResType.PrimalFarmingCandles);
-            int shield = mPlayerData.GetResValue(ResType.Shield);
-            int hope = mPlayerData.GetResValue(ResType.Hope);
-
-            int deltaHp = hp - (int)numHp.Value;
-            int deltaIngots = ingots - (int)numIngots.Value;
-            int deltaCoupon = coupon - (int)numCoupon.Value;
-            int deltaCandle = candle - (int)numCandle.Value;
-            int deltaShield = shield - (int)numShield.Value;
-            int deltaHope = hope - (int)numHope.Value;
-
-            static void AppendSigned(StringBuilder sb, int value)
+            void AppendResValue(ResType resType, NumericUpDown numeric)
             {
-                if (value > 0)
-                    sb.Append('+');
-                sb.Append(value);
+                int value = mPlayerData.GetResValue(resType);
+                sb.Append(Define.GetResName(resType)).Append(": ").Append(value);
+                if (numeric != null)
+                {
+                    int beforeValue = (int)numeric.Value;
+                    int deltaValue = value - beforeValue;
+                    sb.Append('(');
+                    if (deltaValue > 0) sb.Append('+');
+                    sb.Append(deltaValue).Append(")");
+                }
+                sb.AppendLine();
             }
 
-            sb.Append("生命值: ").Append(hp).Append('(');
-            AppendSigned(sb, deltaHp);
-            sb.AppendLine(")");
-
-            sb.Append("源石锭: ").Append(ingots).Append('(');
-            AppendSigned(sb, deltaIngots);
-            sb.AppendLine(")");
-
-            sb.Append("票券: ").Append(coupon).Append('(');
-            AppendSigned(sb, deltaCoupon);
-            sb.AppendLine(")");
-
-            sb.Append("烛火: ").Append(candle).Append('(');
-            AppendSigned(sb, deltaCandle);
-            sb.AppendLine(")");
-
-            sb.Append("鸿蒙开荒烛火: ")
-              .Append(primalFarmingCandle)
-              .AppendLine();
-
-            sb.Append("护盾: ").Append(shield).Append('(');
-            AppendSigned(sb, deltaShield);
-            sb.AppendLine(")");
-
-            sb.Append("希望: ").Append(hope).Append('(');
-            AppendSigned(sb, deltaHope);
-            sb.AppendLine(")");
+            AppendResValue(ResType.LifePoint, numHp);
+            AppendResValue(ResType.OriginiumIngots, numIngots);
+            AppendResValue(ResType.Coupon, numCoupon);
+            AppendResValue(ResType.Candles, numCandle);
+            AppendResValue(ResType.PrimalFarmingCandles, null);
+            AppendResValue(ResType.Shield, numShield);
+            AppendResValue(ResType.Hope, numHope);
 
             lblRes.Text = sb.ToString();
             sb.Clear();
