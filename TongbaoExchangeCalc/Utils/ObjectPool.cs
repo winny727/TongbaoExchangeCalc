@@ -1,12 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 
-public interface IPoolItem<T>
-{
-    void OnAllocate(ObjectPool<T> ownerPool);
-    void OnRecycle(ObjectPool<T> ownerPool);
-}
-
 /// <summary>
 /// 对象池
 /// </summary>
@@ -85,10 +79,6 @@ public class ObjectPool<T>
         {
             item = mCacheStack.Pop();
         }
-        if (item is IPoolItem<T> poolItem)
-        {
-            poolItem.OnAllocate(this);
-        }
         return item;
     }
 
@@ -99,6 +89,11 @@ public class ObjectPool<T>
     /// <param name="notCheckContains">当能保证不会重复的情况下，可以设为true，节省Contains所需的性能，用于每帧回收的情况</param>
     public void Recycle(T item, bool notCheckContains = false)
     {
+        if (item == null)
+        {
+            return;
+        }
+
         int count = mCacheStack.Count;
         if (count >= CacheMaxCount)
         {
@@ -110,10 +105,6 @@ public class ObjectPool<T>
         {
             if (IsValueType || (notCheckContains || !Contains(item)))
             {
-                if (item is IPoolItem<T> poolItem)
-                {
-                    poolItem.OnRecycle(this);
-                }
                 mCacheStack.Push(item);
             }
             else

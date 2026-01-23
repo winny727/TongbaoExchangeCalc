@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,10 +26,6 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
         public int ExchangeStepIndex { get; private set; } = 0; // 包括交换失败
         public int ExchangeSlotIndex { get; set; } = -1;
 
-        private IProgress<int> mAsyncProgress;
-        private CancellationTokenSource mCancellationTokenSource;
-        public bool IsAsyncSimulating => mCancellationTokenSource != null;
-
         private SimulateStepResult mSimulateStepResult = SimulateStepResult.Success;
         private bool mIsSimulating = false;
         private int mExchangeableSlotsPosIndex = 0;
@@ -38,9 +35,9 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
 
         public const int EXCHANGE_STEP_LIMIT = 10000; // 单轮循环的交换上限，防止死循环
 
-        public bool UseMultiThreadOptimize => DataCollector == null || DataCollector is IThreadSafeDataCollector<SimulateContext>;
+        public bool UseMultiThreadOptimize { get; set; } = true;
         public int OptimizeThreshold { get; set; } = 100000; // 触发多线程的阈值（预计剩余交换次数）
-        public int MaxParallelism { get; set; } = Math.Max(1, Environment.ProcessorCount / 4); // 最大线程数，线程太多竞态很严重
+        public int MaxParallelism { get; set; } = Math.Max(1, Environment.ProcessorCount - 1); // 最大线程数
         private bool mUseParallel;
 
         private void Log(string msg) => Helper.Log(msg);
@@ -70,34 +67,12 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
             mInitialExchangeSlotIndex = ExchangeSlotIndex;
         }
 
-        public async Task SimulateAsync(IProgress<int> progress = null)
-        {
-            mCancellationTokenSource = new CancellationTokenSource();
-            mAsyncProgress = progress;
-
-            try
-            {
-                await Task.Run(() => SimulateInternal(mCancellationTokenSource.Token));
-            }
-            finally
-            {
-                mCancellationTokenSource.Dispose();
-                mCancellationTokenSource = null;
-                mAsyncProgress = null;
-            }
-        }
-
-        public void CancelSimulate()
-        {
-            mCancellationTokenSource?.Cancel();
-        }
-
         public void Simulate()
         {
-            SimulateInternal(CancellationToken.None);
+            Simulate(CancellationToken.None);
         }
 
-        public void SimulateInternal(CancellationToken token)
+        public void Simulate(CancellationToken token, IProgress<int> progress = null)
         {
             mSimulationStepIndex = 0;
             ExchangeStepIndex = 0;
@@ -106,23 +81,22 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
             mSimulateStepResult = SimulateStepResult.Success;
             mUseParallel = false;
             CachePlayerData();
-            bool disableOptimization = !UseMultiThreadOptimize;
             using (CodeTimer ct = CodeTimer.StartNew("Simulate"))
             {
                 mIsSimulating = true;
                 DataCollector?.OnSimulateBegin(SimulationType, TotalSimulationCount, PlayerData);
                 while (SimulationStepIndex < TotalSimulationCount)
                 {
-                    SimulateStep(token);
-                    Interlocked.Increment(ref mSimulationStepIndex);
-                    mAsyncProgress?.Report(SimulationStepIndex);
-
                     if (token.IsCancellationRequested)
                     {
                         break;
                     }
 
-                    if (disableOptimization)
+                    SimulateStep(token);
+                    mSimulationStepIndex++;
+                    progress?.Report(SimulationStepIndex);
+
+                    if (!UseMultiThreadOptimize)
                     {
                         continue;
                     }
@@ -140,7 +114,7 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
                 {
                     try
                     {
-                        SimulateParallel(SimulationStepIndex, token);
+                        SimulateParallel(SimulationStepIndex, token, progress);
                     }
                     catch (OperationCanceledException)
                     {
@@ -153,7 +127,7 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
             }
         }
 
-        private void SimulateParallel(int startIndex, CancellationToken token)
+        private void SimulateParallel(int startIndex, CancellationToken token, IProgress<int> progress = null)
         {
             int remain = TotalSimulationCount - startIndex;
             if (remain <= 0)
@@ -161,10 +135,13 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
                 return;
             }
 
+            RevertPlayerData();
             int workerCount = Math.Min(MaxParallelism, remain);
 
             // 每个 worker 负责的模拟数量（向上取整）
             int batchSize = (remain + workerCount - 1) / workerCount;
+
+            var dataCollectors = new ConcurrentQueue<IDataCollector<SimulateContext>>();
 
             Parallel.For(
                 0,
@@ -191,13 +168,18 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
 
                     //Log($"{batchStart}->{batchEnd}");
 
-                    PlayerData localPlayerData = new PlayerData(PlayerData.TongbaoSelector, PlayerData.Random);
+                    ITongbaoSelector clonedTongbaoSelector = (ITongbaoSelector)PlayerData.TongbaoSelector.Clone();
+                    IRandomGenerator clonedRandom = (IRandomGenerator)PlayerData.Random.Clone();
+                    IDataCollector<SimulateContext> clonedDataCollector = DataCollector.CloneAsEmpty();
+                    dataCollectors.Enqueue(clonedDataCollector);
+
+                    PlayerData localPlayerData = new PlayerData(clonedTongbaoSelector, clonedRandom);
                     localPlayerData.CopyFrom(mRevertPlayerData);
 
-                    var localSimulator = new ExchangeSimulator(localPlayerData, (IThreadSafeDataCollector<SimulateContext>)DataCollector)
+                    var localSimulator = new ExchangeSimulator(localPlayerData, clonedDataCollector)
                     {
                         SimulationType = SimulationType,
-                        ExchangeSlotIndex = mInitialExchangeSlotIndex,
+                        ExchangeSlotIndex = ExchangeSlotIndex,
                         ExchangeableSlots = new List<int>(ExchangeableSlots),
                         UnexchangeableTongbaoIds = new HashSet<int>(UnexchangeableTongbaoIds),
                         ExpectedTongbaoIds = new HashSet<int>(ExpectedTongbaoIds),
@@ -218,11 +200,16 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
                         localSimulator.mSimulationStepIndex = simIndex; //仅用于Context标识，不代表全局进度
                         localSimulator.SimulateStep(token);
                         Interlocked.Increment(ref mSimulationStepIndex); //总的Step+1
-                        mAsyncProgress?.Report(mSimulationStepIndex);
+                        progress?.Report(mSimulationStepIndex);
                     }
                     localSimulator.mIsSimulating = false;
                 }
             );
+
+            foreach (var item in dataCollectors)
+            {
+                DataCollector.MergeData(item);
+            }
         }
 
 

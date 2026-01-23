@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace TongbaoExchangeCalc.DataModel
@@ -67,61 +66,24 @@ namespace TongbaoExchangeCalc.DataModel
         public ResType RandomResType { get; private set; } //品相效果
         public int RandomResCount { get; private set; }
 
-        // ConcurrentDictionary保证线程安全+回收时不重复
-        private static readonly ConcurrentDictionary<Tongbao, bool> mPool = new ConcurrentDictionary<Tongbao, bool>();
-
-        //线程安全
-        public static Tongbao Allocate()
-        {
-            if (TryPop(out var result))
-            {
-                return result;
-            }
-            return new Tongbao();
-        }
-
-        private static bool TryPop(out Tongbao result)
-        {
-            result = default;
-
-            // 没有栈顶元素可弹出
-            if (mPool.IsEmpty)
-                return false;
-
-            // 获取任意元素，类似栈操作
-            foreach (var key in mPool.Keys)
-            {
-                if (mPool.TryRemove(key, out _))
-                {
-                    result = key;
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        //线程安全
-        public void Recycle()
-        {
-            mPool.TryAdd(this, true);
-        }
-
         public bool CanExchange()
         {
             return ExchangeInPool > 0;
         }
 
         // 不传IRandomGenerator则不生成随机品相效果
-        public static Tongbao CreateTongbao(int id, IRandomGenerator random = null)
+        public static void InitTongbao(ref Tongbao tongbao, int id, IRandomGenerator random = null)
         {
+            if (tongbao == null)
+            {
+                return;
+            }
+
             TongbaoConfig config = TongbaoConfig.GetTongbaoConfigById(id);
             if (config == null)
             {
-                return null;
+                return;
             }
-
-            Tongbao tongbao = Allocate();
 
             tongbao.Id = config.Id;
             tongbao.Name = config.Name;
@@ -134,8 +96,6 @@ namespace TongbaoExchangeCalc.DataModel
             tongbao.ExtraResType = config.ExtraResType;
             tongbao.ExtraResCount = config.ExtraResCount;
             tongbao.SetupRandomRes(random);
-
-            return tongbao;
         }
 
         public void ApplyRandomRes(ResType resType, int recCount)

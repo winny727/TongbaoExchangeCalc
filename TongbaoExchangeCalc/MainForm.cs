@@ -17,7 +17,7 @@ namespace TongbaoExchangeCalc
         private PlayerData mPlayerData;
         private RandomGenerator mRandom;
         private TongbaoSelector mTongbaoSelector;
-        private ExchangeSimulator mExchangeSimulator;
+        private SimulationController mSimulationController;
         private PrintDataCollector mPrintDataCollector;
         private StatisticDataCollector mStatisticDataCollector;
         private CompositeDataCollector mCompositeDataCollector;
@@ -59,8 +59,7 @@ namespace TongbaoExchangeCalc
         private void InitDataModel()
         {
             Helper.InitConfig();
-            mRandom = new LockThreadSafeRandomGenerator(); //2.3s
-            //mRandom = new ThreadSafeRandomGenerator(); //2.46s
+            mRandom = new RandomGenerator();
             mTongbaoSelector = new TongbaoSelector(mRandom);
             mPlayerData = new PlayerData(mTongbaoSelector, mRandom);
 
@@ -76,20 +75,7 @@ namespace TongbaoExchangeCalc
             mCompositeDataCollector.AddDataCollector(mPrintDataCollector);
             mCompositeDataCollector.AddDataCollector(mStatisticDataCollector);
 
-            // 交换耗时测试（16线程）：100w开记录/1000w次开记录/100w次不开记录/1000w次不开记录
-            //mExchangeSimulator = new ExchangeSimulator(mPlayerData, mCompositeDataCollector); //4.2s，45.9s，3.1s，33.4s
-            //mExchangeSimulator = new ExchangeSimulator(mPlayerData, new LockThreadSafeDataCollector() { RecordEachExchange = false }); //100w次就已经21.2s了，锁麻了；不记录每次交换：3.2s，32.1s
-            //mExchangeSimulator = new ExchangeSimulator(mPlayerData, new ConcurrentThreadSafeDataCollector() { RecordEachExchange = false }); //7.9s，ConcurrentDict GC很多；不记录每次交换：3.1s，33.3s
-            mExchangeSimulator = new ExchangeSimulator(mPlayerData, new WrapperThreadSafeDataCollector(mCompositeDataCollector)); //5.5s，55.9s，2.5s，22.8s；若开记录GC很多
-
-            //线程数测试（16核CPU，1000w次无记录WarpperThreadSafeDataCollector）：单线程（主线程）32.5s，单线程（非主线程）35.1s，双线程21.9s，四线程18.2s，八线程19.3s，15线程26.3s，16线程24.3s
-            //结论：线程数：处理器数/4
-
-            //4线程情况下，若不开记录最优为ConcurrentThreadSafeDataCollector 1.6s
-            //不开记录WarpperThreadSafeDataCollector 1.8s，开记录最优为WarpperThreadSafeDataCollector 4.0s
-            //结论，4线程WarpperThreadSafeDataCollector
-
-            //备注：LockThreadSafeDataCollector和ConcurrentThreadSafeDataCollector还未实现最终的数据整理打印逻辑
+            mSimulationController = new SimulationController(mPlayerData, mCompositeDataCollector);
         }
 
         private void InitPlayerData()
@@ -121,7 +107,7 @@ namespace TongbaoExchangeCalc
                 TongbaoConfig config = Helper.GetTongbaoConfigByName(name);
                 if (config != null)
                 {
-                    Tongbao tongbao = Tongbao.CreateTongbao(config.Id);
+                    Tongbao tongbao = mPlayerData.CreateTongbao(config.Id);
                     mPlayerData.AddTongbao(tongbao);
                 }
             }
@@ -219,7 +205,6 @@ namespace TongbaoExchangeCalc
             InitTongbaoView();
             RuleTreeViewController.InitRuleTreeView();
             RuleTreeViewController.BindButtons(btnAdd, btnRemove, btnUp, btnDown);
-            UpdateMultiThreadOptimize();
 
             mRecordForm.SetClearCallback(ClearRecord);
         }
@@ -415,22 +400,10 @@ namespace TongbaoExchangeCalc
             btnSimulation.Text = asyncSimulating ? "停止模拟" : "开始模拟";
         }
 
-        private void UpdateMultiThreadOptimize()
-        {
-            if (checkBoxOptimize.Checked)
-            {
-                mExchangeSimulator.SetDataCollector(new WrapperThreadSafeDataCollector(mCompositeDataCollector));
-            }
-            else
-            {
-                mExchangeSimulator.SetDataCollector(mCompositeDataCollector);
-            }
-        }
-
         private void OnSelectNewRandomTongbao(int id, int slotIndex)
         {
             mCanRevertPlayerData = false;
-            Tongbao tongbao = Tongbao.CreateTongbao(id, mRandom);
+            Tongbao tongbao = mPlayerData.CreateTongbao(id, mRandom);
             if (tongbao != null)
             {
                 mPlayerData.InsertTongbao(tongbao, slotIndex);
@@ -447,7 +420,7 @@ namespace TongbaoExchangeCalc
             ResType randomResType = ResType.None, int randomResCount = 0)
         {
             mCanRevertPlayerData = false;
-            Tongbao tongbao = Tongbao.CreateTongbao(id);
+            Tongbao tongbao = mPlayerData.CreateTongbao(id);
             if (tongbao != null)
             {
                 tongbao.ApplyRandomRes(randomResType, randomResCount);
@@ -546,21 +519,24 @@ namespace TongbaoExchangeCalc
                     mTongbaoSelector.SpecificTongbaoId = config.Id;
                 }
             }
-            mExchangeSimulator.SimulationType = type;
-            mExchangeSimulator.TotalSimulationCount = (int)numSimCnt.Value;
-            mExchangeSimulator.MinimumLifePoint = (int)numMinHp.Value;
-            mExchangeSimulator.ExchangeSlotIndex = mSelectedTongbaoSlotIndex;
 
-            // ApplyRule
-            RuleTreeViewController.ApplySimulationRule(mExchangeSimulator);
+            SimulationOptions options = new SimulationOptions
+            {
+                SimulationType = type,
+                TotalSimulationCount = (int)numSimCnt.Value,
+                MinimumLifePoint = (int)numMinHp.Value,
+                ExchangeSlotIndex = mSelectedTongbaoSlotIndex,
+                RuleController = RuleTreeViewController,
+                UseMultiThreadOptimize = checkBoxOptimize.Checked,
+            };
 
-            //mExchangeSimulator.Simulate();
+            //mSimulationController.Simulate(options);
 
-            string simulationName = SimulationDefine.GetSimulationName(mExchangeSimulator.SimulationType);
-            int total = mExchangeSimulator.TotalSimulationCount;
+            string simulationName = SimulationDefine.GetSimulationName(options.SimulationType);
+            int total = options.TotalSimulationCount;
             UpdateAsyncSimulateView(true);
             toolStripProgressBar1.Minimum = 0;
-            toolStripProgressBar1.Maximum = mExchangeSimulator.TotalSimulationCount;
+            toolStripProgressBar1.Maximum = total;
             toolStripProgressBar1.Value = 0;
             int lastPermille = -1; // 0.1% = 1‰
             Progress<int> progress = new Progress<int>((value) =>
@@ -577,7 +553,7 @@ namespace TongbaoExchangeCalc
                 toolStripProgressBar1.Value = value;
                 toolStripStatusLabel1.Text = $"正在进行[{simulationName}]模拟: {value}/{total} ({percent:F1}%)";
             });
-            await mExchangeSimulator.SimulateAsync(progress);
+            await mSimulationController.SimulateAsync(options, progress);
 
             mOutputResult = mPrintDataCollector.OutputResult;
             mOutputResultChanged = true;
@@ -596,7 +572,7 @@ namespace TongbaoExchangeCalc
         {
             if (mCanRevertPlayerData)
             {
-                mExchangeSimulator.RevertPlayerData();
+                mSimulationController.RevertPlayerData();
                 mCanRevertPlayerData = false;
             }
             mPlayerData.ExchangeCount = 0;
@@ -722,9 +698,9 @@ namespace TongbaoExchangeCalc
 
         private void btnSimulation_Click(object sender, EventArgs e)
         {
-            if (mExchangeSimulator.IsAsyncSimulating)
+            if (mSimulationController.IsAsyncSimulating)
             {
-                mExchangeSimulator.CancelSimulate();
+                mSimulationController.CancelSimulate();
                 return;
             }
 
@@ -809,11 +785,6 @@ namespace TongbaoExchangeCalc
                 mPlayerData.LockedTongbaoList.AddRange(selectorForm.SelectedIds);
                 UpdateLockedListView();
             }
-        }
-
-        private void checkBoxOptimize_CheckedChanged(object sender, EventArgs e)
-        {
-            UpdateMultiThreadOptimize();
         }
 
         private void comboBoxSimMode_SelectedIndexChanged(object sender, EventArgs e)

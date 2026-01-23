@@ -154,6 +154,40 @@ namespace TongbaoExchangeCalc.Impl.Simulation
             return mTempStringBuilder.ToString();
         }
 
+        public virtual IDataCollector<SimulateContext> CloneAsEmpty()
+        {
+            var collector = new StatisticDataCollector
+            {
+                mTotalSimulateStep = mTotalSimulateStep,
+                mIsSimulateParallel = mIsSimulateParallel,
+            };
+            return collector;
+        }
+
+        public virtual void MergeData(IDataCollector<SimulateContext> other)
+        {
+            if (other is StatisticDataCollector collector)
+            {
+                mTotalExchangeStep += collector.mTotalExchangeStep;
+                foreach (var item in collector.mTotalSimulateStepResult)
+                {
+                    if (!mTotalSimulateStepResult.ContainsKey(item.Key))
+                    {
+                        mTotalSimulateStepResult.Add(item.Key, 0);
+                    }
+                    mTotalSimulateStepResult[item.Key] += item.Value;
+                }
+                foreach (var item in collector.mTotalResChanged)
+                {
+                    if (!mTotalResChanged.ContainsKey(item.Key))
+                    {
+                        mTotalResChanged.Add(item.Key, 0);
+                    }
+                    mTotalResChanged[item.Key] += item.Value;
+                }
+            }
+        }
+
         public void ClearData()
         {
             mTotalSimulateStep = 0;

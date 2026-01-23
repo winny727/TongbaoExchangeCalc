@@ -7,7 +7,7 @@ using TongbaoExchangeCalc.DataModel.Simulation;
 
 namespace TongbaoExchangeCalc.View
 {
-    public class RuleTreeViewController
+    public class RuleTreeViewController : ISimulationRuleController
     {
         private readonly TreeView mRuleTreeView;
         private readonly PlayerData mPlayerData;

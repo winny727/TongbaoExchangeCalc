@@ -67,5 +67,14 @@ namespace TongbaoExchangeCalc.Impl.View
 
             return tongbaoIds[0];
         }
+
+        public object Clone()
+        {
+            return new TongbaoSelector((IRandomGenerator)Random.Clone())
+            {
+                TongbaoSelectMode = TongbaoSelectMode,
+                SpecificTongbaoId = SpecificTongbaoId,
+            };
+        }
     }
 }

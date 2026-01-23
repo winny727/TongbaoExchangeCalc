@@ -5,9 +5,10 @@ using TongbaoExchangeCalc.DataModel.Simulation;
 
 namespace TongbaoExchangeCalc.Impl.Simulation
 {
-    public class DataCollector : IDataCollector<SimulateContext>
+    public class ExchangeDataCollector : IDataCollector<SimulateContext>
     {
         public bool RecordEachExchange { get; set; } = true;
+        public SimulationType SimulationType { get; protected set; }
         public int TotalSimulateStep { get; protected set; }
         public int ExecSimulateStep { get; protected set; }
         public float TotalSimulateTime { get; protected set; }
@@ -29,6 +30,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
         public virtual void OnSimulateBegin(SimulationType type, int totalSimStep, in IReadOnlyPlayerData playerData)
         {
             ClearData();
+            SimulationType = type;
             TotalSimulateStep = totalSimStep;
         }
 
@@ -142,6 +144,40 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                     BeforeValue = beforeValue,
                     AfterValue = item.Value,
                 };
+            }
+        }
+
+        public virtual IDataCollector<SimulateContext> CloneAsEmpty()
+        {
+            var collector = new ExchangeDataCollector
+            {
+                RecordEachExchange = RecordEachExchange,
+                SimulationType = SimulationType,
+                TotalSimulateStep = TotalSimulateStep,
+            };
+            return collector;
+        }
+
+        public virtual void MergeData(IDataCollector<SimulateContext> other)
+        {
+            if (other is ExchangeDataCollector collector)
+            {
+                foreach (var item in collector.mTongbaoRecords)
+                {
+                    mTongbaoRecords.Add(item.Key, item.Value);
+                }
+                foreach (var item in collector.mResValueRecords)
+                {
+                    mResValueRecords.Add(item.Key, item.Value);
+                }
+                foreach (var item in collector.mExchangeStepResults)
+                {
+                    mExchangeStepResults.Add(item.Key, item.Value);
+                }
+                foreach (var item in collector.mSimulateStepResults)
+                {
+                    mSimulateStepResults.Add(item.Key, item.Value);
+                }
             }
         }
 

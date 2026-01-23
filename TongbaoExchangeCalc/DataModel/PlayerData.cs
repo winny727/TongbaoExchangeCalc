@@ -22,6 +22,7 @@ namespace TongbaoExchangeCalc.DataModel
         public bool HasEnoughExchangeLife => GetResValue(ResType.LifePoint) > NextExchangeCostLifePoint;
 
         private readonly List<int> mTempExchangeResults = new List<int>();
+        private readonly ObjectPool<Tongbao> mTongbaoPool = new ObjectPool<Tongbao>(10, 16);
 
         public PlayerData(ITongbaoSelector selector, IRandomGenerator random)
         {
@@ -87,7 +88,7 @@ namespace TongbaoExchangeCalc.DataModel
                     }
                     for (int i = newTongbaoBox.Length; i < TongbaoBox.Length; i++)
                     {
-                        TongbaoBox[i]?.Recycle();
+                        DestroyTongbao(TongbaoBox[i]);
                     }
                 }
                 TongbaoBox = newTongbaoBox;
@@ -124,10 +125,33 @@ namespace TongbaoExchangeCalc.DataModel
                     Tongbao tongbao = playerData.TongbaoBox[i];
                     if (tongbao != null)
                     {
-                        TongbaoBox[i] = Tongbao.CreateTongbao(tongbao.Id);
+                        TongbaoBox[i] = CreateTongbao(tongbao.Id);
                         TongbaoBox[i].ApplyRandomRes(tongbao.RandomResType, tongbao.RandomResCount);
                     }
                 }
+            }
+        }
+
+        // 不传IRandomGenerator则不生成随机品相效果
+        public Tongbao CreateTongbao(int id, IRandomGenerator random = null)
+        {
+            TongbaoConfig config = TongbaoConfig.GetTongbaoConfigById(id);
+            if (config == null)
+            {
+                return null;
+            }
+
+            Tongbao tongbao = mTongbaoPool.Allocate();
+            Tongbao.InitTongbao(ref tongbao, id, random);
+
+            return tongbao;
+        }
+
+        public void DestroyTongbao(Tongbao tongbao)
+        {
+            if (tongbao != null)
+            {
+                mTongbaoPool.Recycle(tongbao);
             }
         }
 
@@ -196,7 +220,7 @@ namespace TongbaoExchangeCalc.DataModel
 
             if (slotIndex >= 0 && slotIndex < TongbaoBox.Length)
             {
-                TongbaoBox[slotIndex]?.Recycle();
+                DestroyTongbao(TongbaoBox[slotIndex]);
                 TongbaoBox[slotIndex] = tongbao;
                 // 添加通宝自带效果
                 if (tongbao.ExtraResType != ResType.None && tongbao.ExtraResCount > 0)
@@ -228,7 +252,7 @@ namespace TongbaoExchangeCalc.DataModel
 
             if (slotIndex >= 0 && slotIndex < TongbaoBox.Length)
             {
-                TongbaoBox[slotIndex]?.Recycle();
+                DestroyTongbao(TongbaoBox[slotIndex]);
                 TongbaoBox[slotIndex] = null;
             }
         }
@@ -249,7 +273,7 @@ namespace TongbaoExchangeCalc.DataModel
             {
                 if (TongbaoBox[i] != null && TongbaoBox[i].Id == tongbao.Id)
                 {
-                    TongbaoBox[i]?.Recycle();
+                    DestroyTongbao(TongbaoBox[i]);
                     TongbaoBox[i] = null;
                     return;
                 }
@@ -265,7 +289,7 @@ namespace TongbaoExchangeCalc.DataModel
 
             for (int i = 0; i < TongbaoBox.Length; i++)
             {
-                TongbaoBox[i]?.Recycle();
+                DestroyTongbao(TongbaoBox[i]);
                 TongbaoBox[i] = null;
             }
         }
@@ -375,12 +399,12 @@ namespace TongbaoExchangeCalc.DataModel
                 if (tongbao.IsUpgrade)
                 {
                     // 升级通宝保留品相重复触发一次
-                    newTongbao = Tongbao.CreateTongbao(newTongbaoId);
+                    newTongbao = CreateTongbao(newTongbaoId);
                     newTongbao.ApplyRandomRes(tongbao.RandomResType, tongbao.RandomResCount);
                 }
                 else
                 {
-                    newTongbao = Tongbao.CreateTongbao(newTongbaoId, Random);
+                    newTongbao = CreateTongbao(newTongbaoId, Random);
                 }
                 if (newTongbao != null)
                 {

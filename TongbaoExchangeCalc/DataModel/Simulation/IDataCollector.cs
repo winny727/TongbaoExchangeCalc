@@ -14,15 +14,8 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
         void OnSimulateStepEnd(in TContext context, SimulateStepResult result);
         void OnExchangeStepBegin(in TContext context);
         void OnExchangeStepEnd(in TContext context, ExchangeStepResult result); 
+        IDataCollector<TContext> CloneAsEmpty();
+        void MergeData(IDataCollector<TContext> other);
         void ClearData();
-
-        //TODO
-        //IDataCollector<TContext> CloneAsEmpty();
-        //void MergeData(IDataCollector<TContext> other);
-    }
-
-    public interface IThreadSafeDataCollector<TContext> : IDataCollector<TContext> where TContext : struct
-    {
-
     }
 }

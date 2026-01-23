@@ -642,7 +642,6 @@
             this.checkBoxOptimize.TabIndex = 19;
             this.checkBoxOptimize.Text = "开启多线程优化(测试)";
             this.checkBoxOptimize.UseVisualStyleBackColor = true;
-            this.checkBoxOptimize.CheckedChanged += new System.EventHandler(this.checkBoxOptimize_CheckedChanged);
             // 
             // statusStrip1
             // 

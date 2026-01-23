@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace TongbaoExchangeCalc.DataModel
 {
-    public interface IRandomGenerator
+    public interface IRandomGenerator : ICloneable
     {
         int Next(int minValue, int maxValue); // [minValue, maxValue)
         double NextDouble();

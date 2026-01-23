@@ -227,6 +227,8 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                 return;
             }
 
+            //mOutputResult.Append(System.Threading.Thread.CurrentThread.ManagedThreadId);
+
             mOutputResult.Append('(')
                          .Append(context.SimulationStepIndex + 1)
                          .Append('|')
@@ -347,6 +349,26 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                 }
             }
             return sb;
+        }
+
+        public virtual IDataCollector<SimulateContext> CloneAsEmpty()
+        {
+            var collector = new PrintDataCollector
+            {
+                RecordEachExchange = RecordEachExchange,
+                OmitExcessiveExchanges = OmitExcessiveExchanges,
+                mSimulationType = mSimulationType,
+                mTotalSimulateStep = mTotalSimulateStep,
+            };
+            return collector;
+        }
+
+        public virtual void MergeData(IDataCollector<SimulateContext> other)
+        {
+            if (other is PrintDataCollector collector)
+            {
+                mOutputResult.Append(collector.OutputResult);
+            }
         }
 
         public void ClearData()

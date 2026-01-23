@@ -17,5 +17,10 @@ namespace TongbaoExchangeCalc.Impl
         {
             return mRandom.NextDouble();
         }
+
+        public virtual object Clone()
+        {
+            return new RandomGenerator();
+        }
     }
 }
