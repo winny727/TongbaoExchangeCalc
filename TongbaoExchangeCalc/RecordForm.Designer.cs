@@ -76,7 +76,6 @@
             this.Controls.Add(this.btnClose);
             this.Controls.Add(this.textBox1);
             this.DoubleBuffered = true;
-            this.Font = new System.Drawing.Font("宋体", 9F);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.KeyPreview = true;
             this.MaximizeBox = false;
