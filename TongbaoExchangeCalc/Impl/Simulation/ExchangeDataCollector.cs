@@ -101,7 +101,6 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                 AfterId = (short)tongbaoId,
             };
 
-            mResValueRecords[context.SimulationStepIndex][context.ExchangeStepIndex] = new ResRecordValue[(int)ResType.Count];
             foreach (var item in context.PlayerData.ResValues)
             {
                 mResValueRecords[context.SimulationStepIndex][context.ExchangeStepIndex][(int)item.Key] = new ResRecordValue
