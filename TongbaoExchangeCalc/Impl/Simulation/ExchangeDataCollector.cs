@@ -64,7 +64,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                         BeforeTongbaoId = beforeTongbaoId,
                         AfterTongbaoId = record.TongbaoId,
                         ExchangeStepResult = record.ExchangeStepResult,
-                        ResValueRecords = new ResValueRecord[(byte)ResType.Count - 1],
+                        ResValueRecords = new ResValueRecord[(int)ResType.Count - 1],
                     };
 
                     unsafe
@@ -146,7 +146,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
 
                 var record = new ExchangeResultRecord
                 {
-                    SlotIndex = (byte)context.SlotIndex,
+                    SlotIndex = (sbyte)context.SlotIndex,
                     TongbaoId = (Int16)tongbaoId,
                     ExchangeStepResult = mLastExchangeStepResult,
                 };
@@ -155,7 +155,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                 {
                     foreach (var item in context.PlayerData.ResValuesInternal)
                     {
-                        record.ResRecords[(byte)item.Key - 1] = (Int16)item.Value;
+                        record.ResRecords[(int)item.Key - 1] = (Int16)item.Value;
                     }
                 }
 
@@ -190,7 +190,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
 
             var record = new ExchangeResultRecord
             {
-                SlotIndex = (byte)context.SlotIndex,
+                SlotIndex = (sbyte)context.SlotIndex,
                 TongbaoId = (Int16)tongbaoId,
                 ExchangeStepResult = mLastExchangeStepResult,
             };
@@ -199,7 +199,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
             {
                 foreach (var item in context.PlayerData.ResValuesInternal)
                 {
-                    record.ResRecords[(byte)item.Key - 1] = (Int16)item.Value;
+                    record.ResRecords[(int)item.Key - 1] = (Int16)item.Value;
                 }
             }
 
