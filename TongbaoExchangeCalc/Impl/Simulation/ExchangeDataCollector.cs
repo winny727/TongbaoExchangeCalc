@@ -37,6 +37,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                 return;
             }
 
+            int resCount = (int)ResType.Count - 1;
             var tempTongbaoBox = new int[mInitialPlayerData.MaxTongbaoCount];
             for (int i = 0; i < mSimulationRecords.Length; i++)
             {
@@ -64,12 +65,12 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                         BeforeTongbaoId = beforeTongbaoId,
                         AfterTongbaoId = record.TongbaoId,
                         ExchangeStepResult = record.ExchangeStepResult,
-                        ResValueRecords = new ResValueRecord[(int)ResType.Count - 1],
+                        ResValueRecords = new ResValueRecord[resCount],
                     };
 
                     unsafe
                     {
-                        for (int k = 0; k < (int)ResType.Count - 1; k++)
+                        for (int k = 0; k < resCount; k++)
                         {
                             ResType resType = (ResType)(k + 1);
                             int beforeValue;
@@ -153,7 +154,8 @@ namespace TongbaoExchangeCalc.Impl.Simulation
 
                 unsafe
                 {
-                    for (int i = 0; i < (int)ResType.Count - 1; i++)
+                    int resCount = (int)ResType.Count - 1;
+                    for (int i = 0; i < resCount; i++)
                     {
                         int resValue = context.PlayerData.GetResValue((ResType)(i + 1));
                         record.ResRecords[i] = (Int16)resValue;
@@ -198,7 +200,8 @@ namespace TongbaoExchangeCalc.Impl.Simulation
 
             unsafe
             {
-                for (int i = 0; i < (int)ResType.Count - 1; i++)
+                int resCount = (int)ResType.Count - 1;
+                for (int i = 0; i < resCount; i++)
                 {
                     int resValue = context.PlayerData.GetResValue((ResType)(i + 1));
                     record.ResRecords[i] = (Int16)resValue;
