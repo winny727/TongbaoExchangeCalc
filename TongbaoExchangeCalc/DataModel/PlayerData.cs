@@ -35,7 +35,7 @@ namespace TongbaoExchangeCalc.DataModel
         {
             if (!Define.SquadDefines.ContainsKey(squadType))
             {
-                throw new ArgumentException($"Unknown SquadType：{squadType}", nameof(squadType));
+                throw new ArgumentException($"Unknown SquadType: {squadType}", nameof(squadType));
             }
 
             ExchangeCount = 0;
@@ -71,7 +71,7 @@ namespace TongbaoExchangeCalc.DataModel
         {
             if (!Define.SquadDefines.ContainsKey(squadType))
             {
-                throw new ArgumentException($"Unknown SquadType：{squadType}", nameof(squadType));
+                throw new ArgumentException($"Unknown SquadType: {squadType}", nameof(squadType));
             }
 
             SquadType = squadType;

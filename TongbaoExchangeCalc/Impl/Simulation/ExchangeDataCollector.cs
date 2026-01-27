@@ -40,8 +40,8 @@ namespace TongbaoExchangeCalc.Impl.Simulation
         /// 传入当前轮次模拟的最后一次交换的ExchangeStepIndex和所有跳过/省略交换次数的资源变化值总结ResValueRecords
         /// 此轮总结回调ExchangeRecord中SlotIndex/BeforeTongbaoId/AfterTongbaoId/ExchangeStepResult为无效值
         /// </summary>
-        /// <param name="callback"></param>
-        public void ForEachExchangeRecords(Action<ExchangeRecord> callback)
+        /// <param name="callback">回调，若返回false则取消终止遍历</param>
+        public void ForEachExchangeRecords(Func<ExchangeRecord, bool> callback)
         {
             if (mSimulationRecords == null || callback == null)
             {
@@ -109,7 +109,10 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                         }
                     }
 
-                    callback(retRecord);
+                    if (!callback(retRecord))
+                    {
+                        return;
+                    }
                     tempTongbaoBox[record.SlotIndex] = record.TongbaoId;
                 }
             }

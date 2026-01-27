@@ -55,7 +55,7 @@ namespace TongbaoExchangeCalc
             InitDataModel();
             InitView();
 
-            //DataModelTest();
+            //DebugTestDataModel();
             UpdateView();
         }
 
@@ -104,44 +104,6 @@ namespace TongbaoExchangeCalc
                 squadType = item.Value;
             }
             mPlayerData.Init(squadType, mTempResValues);
-        }
-
-        private void DataModelTest()
-        {
-            string[] names = new string[] { "大炎通宝", "奇土生金", "水生木护", "金寒水衍", "投木炎延",
-            "西廉贞", "北刺面", "南见山", "东缺角", };
-
-            foreach (var name in names)
-            {
-                TongbaoConfig config = Helper.GetTongbaoConfigByName(name);
-                if (config != null)
-                {
-                    Tongbao tongbao = mPlayerData.CreateTongbao(config.Id);
-                    mPlayerData.AddTongbao(tongbao);
-                }
-            }
-
-            using (CodeTimer.StartNew("Test"))
-            {
-                for (int i = 0; i < 1000; i++)
-                {
-                    SelectTongbaoSlot(i % names.Length);
-                    ExchangeOnce(true);
-                }
-            }
-
-            for (int i = 0; i < mPlayerData.MaxTongbaoCount; i++)
-            {
-                Tongbao tongbao = mPlayerData.GetTongbao(i);
-                string tongbaoName = tongbao != null ?
-                    Helper.GetTongbaoFullName(tongbao.Id) : "Empty";
-                Helper.Log($"[{i}]={tongbaoName}");
-            }
-
-            foreach (ResType type in Enum.GetValues(typeof(ResType)))
-            {
-                Helper.Log($"[{Define.GetResName(type)}]={mPlayerData.GetResValue(type)}");
-            }
         }
 
         private void InitView()
@@ -374,6 +336,7 @@ namespace TongbaoExchangeCalc
                 item.Enabled = enabled;
             }
             btnSimulation.Text = asyncSimulating ? "停止模拟" : "开始模拟";
+            toolStripProgressBar1.Visible = asyncSimulating;
         }
 
         private void OnSelectNewRandomTongbao(int id, int slotIndex)
@@ -473,6 +436,25 @@ namespace TongbaoExchangeCalc
             UpdateView();
         }
 
+        private IProgress<int> CreateProgress(string title, int total)
+        {
+            int lastUpdateTick = 0;
+            Progress<int> progress = new Progress<int>(value =>
+            {
+                int now = Environment.TickCount;
+                if (lastUpdateTick != 0 && now - lastUpdateTick < 50 && value != total)
+                {
+                    return;
+                }
+
+                lastUpdateTick = now;
+                float percent = value * 100f / total;
+                toolStripProgressBar1.Value = value;
+                toolStripStatusLabel1.Text = $"{title}: {value}/{total} ({percent:F1}%)";
+            });
+            return progress;
+        }
+
         private async Task ExchangeSimulate(SimulationType type)
         {
             if (checkBoxAutoRevert.Checked)
@@ -506,7 +488,7 @@ namespace TongbaoExchangeCalc
                 UseMultiThreadOptimize = checkBoxOptimize.Checked,
             };
 
-            //mSimulationController.Simulate(options);
+            //mSimulationController.Simulate(options); // 同步
 
             string simulationName = SimulationDefine.GetSimulationName(options.SimulationType);
             int total = options.TotalSimulationCount;
@@ -515,41 +497,15 @@ namespace TongbaoExchangeCalc
             toolStripProgressBar1.Maximum = total;
             toolStripProgressBar1.Value = 0;
 
-            int lastUpdateTick = 0;
-            Progress<int> progress = new Progress<int>(value =>
-            {
-                int now = Environment.TickCount;
-                if (lastUpdateTick != 0 && now - lastUpdateTick < 50 && value != total)
-                {
-                    return;
-                }
+            var simumateProgress = CreateProgress($"正在进行[{simulationName}]模拟", total);
+            await mSimulationController.SimulateAsync(options, simumateProgress);
 
-                lastUpdateTick = now;
-                float percent = value * 100f / total;
-                toolStripProgressBar1.Value = value;
-                toolStripStatusLabel1.Text = $"正在进行[{simulationName}]模拟: {value}/{total} ({percent:F1}%)";
-            });
+            var resultProgress = CreateProgress($"正在构建详细交换结果", total);
+            await mExchangeDataParser.BuildOutputResultAsync(resultProgress);
 
-            await mSimulationController.SimulateAsync(options, progress);
+            //DebugCompareOutputResult();
 
-            using (CodeTimer ct = new CodeTimer("BuildOutputResult"))
-            {
-                mExchangeDataParser.BuildOutputResult(); // TODO 改为异步await
-
-                // 测试代码，用于对比两种打印是否相同
-                //string result1 = mExchangeDataParser.OutputResult;
-                //string result2 = mPrintDataCollector.OutputResult;
-                //for (int i = 0; i < result1.Length; i++)
-                //{
-                //    if (result1[i] != result2[i])
-                //    {
-                //        Helper.Log(result1.Substring(i-50,300));
-                //        Helper.Log("\n\n");
-                //        Helper.Log(result2.Substring(i-50,300));
-                //        break;
-                //    }
-                //}
-            }
+            toolStripStatusLabel1.Text = $"[{simulationName}]模拟结束";
 
             if (mRecordForm.Visible)
             {
@@ -637,6 +593,64 @@ namespace TongbaoExchangeCalc
             }
         }
 
+        #region DebugTest
+        private void DebugTestDataModel()
+        {
+            string[] names = new string[] { "大炎通宝", "奇土生金", "水生木护", "金寒水衍", "投木炎延",
+            "西廉贞", "北刺面", "南见山", "东缺角", };
+
+            foreach (var name in names)
+            {
+                TongbaoConfig config = Helper.GetTongbaoConfigByName(name);
+                if (config != null)
+                {
+                    Tongbao tongbao = mPlayerData.CreateTongbao(config.Id);
+                    mPlayerData.AddTongbao(tongbao);
+                }
+            }
+
+            using (CodeTimer.StartNew("Test"))
+            {
+                for (int i = 0; i < 1000; i++)
+                {
+                    SelectTongbaoSlot(i % names.Length);
+                    ExchangeOnce(true);
+                }
+            }
+
+            for (int i = 0; i < mPlayerData.MaxTongbaoCount; i++)
+            {
+                Tongbao tongbao = mPlayerData.GetTongbao(i);
+                string tongbaoName = tongbao != null ?
+                    Helper.GetTongbaoFullName(tongbao.Id) : "Empty";
+                Helper.Log($"[{i}]={tongbaoName}");
+            }
+
+            foreach (ResType type in Enum.GetValues(typeof(ResType)))
+            {
+                Helper.Log($"[{Define.GetResName(type)}]={mPlayerData.GetResValue(type)}");
+            }
+        }
+
+        private void DebugCompareOutputResult()
+        {
+            // 测试代码，用于对比两种打印是否相同
+            string result1 = mExchangeDataParser.OutputResult;
+            string result2 = mPrintDataCollector.OutputResult;
+            for (int i = 0; i < result1.Length; i++)
+            {
+                if (result1[i] != result2[i])
+                {
+                    Helper.Log(result1.Substring(i - 50, 200));
+                    Helper.Log("\n\n");
+                    Helper.Log(result2.Substring(i - 50, 200));
+                    break;
+                }
+            }
+        }
+
+        #endregion
+
         private void comboBoxSquad_SelectedIndexChanged(object sender, EventArgs e)
         {
             mCanRevertPlayerData = false;
@@ -706,6 +720,12 @@ namespace TongbaoExchangeCalc
             if (mSimulationController.IsAsyncSimulating)
             {
                 mSimulationController.CancelSimulate();
+                return;
+            }
+
+            if (mExchangeDataParser.IsAsyncBuilding)
+            {
+                mExchangeDataParser.CancelBuild();
                 return;
             }
 

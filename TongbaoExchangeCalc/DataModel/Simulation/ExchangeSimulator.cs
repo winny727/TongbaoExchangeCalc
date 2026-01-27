@@ -82,6 +82,7 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
             CachePlayerData();
             using (CodeTimer ct = CodeTimer.StartNew("Simulate"))
             {
+                progress?.Report(0);
                 mIsSimulating = true;
                 DataCollector?.OnSimulateBegin(SimulationType, TotalSimulationCount, PlayerData);
                 while (SimulationStepIndex < TotalSimulationCount)
@@ -116,6 +117,7 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
 
                 mIsSimulating = false;
                 DataCollector?.OnSimulateEnd(SimulationStepIndex, (float)ct.ElapsedMilliseconds, PlayerData);
+                progress?.Report(SimulationStepIndex + 1); // Count = Index + 1
             }
         }
 

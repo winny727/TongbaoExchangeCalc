@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using TongbaoExchangeCalc.DataModel;
 using TongbaoExchangeCalc.DataModel.Simulation;
 
@@ -9,6 +11,10 @@ namespace TongbaoExchangeCalc.Impl.Simulation
     public class ExchangeDataParser
     {
         private readonly ExchangeDataCollector mExchangeDataCollector;
+        private CancellationTokenSource mCancellationTokenSource;
+        private IProgress<int> mAsyncProgress;
+
+        public bool IsAsyncBuilding => mCancellationTokenSource != null;
 
         public StringBuilder OutputResultSB { get; private set; } = new StringBuilder();
         public string OutputResult => OutputResultSB.ToString();
@@ -17,6 +23,29 @@ namespace TongbaoExchangeCalc.Impl.Simulation
         public ExchangeDataParser(ExchangeDataCollector collector)
         {
             mExchangeDataCollector = collector ?? throw new ArgumentNullException(nameof(collector));
+        }
+
+        public async Task BuildOutputResultAsync(IProgress<int> progress = null)
+        {
+            mCancellationTokenSource = new CancellationTokenSource();
+            mAsyncProgress = progress;
+            try
+            {
+                using CodeTimer ct = new CodeTimer("BuildOutputResult");
+                await Task.Run(BuildOutputResult, mCancellationTokenSource.Token);
+            }
+            finally
+            {
+                OutputResultSB.AppendLine("交换结果未构建完成: 用户取消");
+                mCancellationTokenSource?.Dispose();
+                mCancellationTokenSource = null;
+                mAsyncProgress = null;
+            }
+        }
+
+        public void CancelBuild()
+        {
+            mCancellationTokenSource?.Cancel();
         }
 
         public void BuildOutputResult()
@@ -32,8 +61,10 @@ namespace TongbaoExchangeCalc.Impl.Simulation
               .Append(collector.TotalSimulateStep)
               .AppendLine("次模拟");
 
+            mAsyncProgress?.Report(0);
             collector.ForEachExchangeRecords(ExchangeRecordCallback);
             AppendSimulateStepEnd(mLastSimulationStepIndex);
+            mAsyncProgress?.Report(mLastSimulationStepIndex + 1); // Count = Index + 1
 
             sb.Append('[')
               .Append(SimulationDefine.GetSimulationName(collector.SimulationType))
@@ -50,10 +81,15 @@ namespace TongbaoExchangeCalc.Impl.Simulation
             OutputResultSB.Clear();
         }
 
-        private void ExchangeRecordCallback(ExchangeRecord record)
+        private bool ExchangeRecordCallback(ExchangeRecord record)
         {
             var sb = OutputResultSB;
             var collector = mExchangeDataCollector;
+
+            if (mCancellationTokenSource != null && mCancellationTokenSource.IsCancellationRequested)
+            {
+                return false;
+            }
 
             if (mLastSimulationStepIndex != record.SimulationStepIndex)
             {
@@ -64,25 +100,33 @@ namespace TongbaoExchangeCalc.Impl.Simulation
 
                 AppendSimulateStepBegin(record.SimulationStepIndex);
                 mLastSimulationStepIndex = record.SimulationStepIndex;
+                mAsyncProgress?.Report(record.SimulationStepIndex);
             }
 
             if (!collector.RecordEachExchange)
             {
                 AppendSkippedExchangeStep(record);
-                return;
+                return true;
             }
 
             if (collector.OmitExcessiveExchanges && record.ExchangeStepIndex >= collector.MaxExchangeRecord)
             {
                 AppendSkippedExchangeStep(record);
-                return;
+                return true;
             }
 
             AppendExchangeStep(record);
+
+            return true;
         }
 
         private void AppendSimulateStepBegin(int simulationStepIndex)
         {
+            if (simulationStepIndex < 0)
+            {
+                return;
+            }
+
             var sb = OutputResultSB;
             var collector = mExchangeDataCollector;
 
@@ -154,6 +198,11 @@ namespace TongbaoExchangeCalc.Impl.Simulation
 
         private void AppendSimulateStepEnd(int simulationStepIndex)
         {
+            if (simulationStepIndex < 0)
+            {
+                return;
+            }
+
             var sb = OutputResultSB;
             var collector = mExchangeDataCollector;
 
