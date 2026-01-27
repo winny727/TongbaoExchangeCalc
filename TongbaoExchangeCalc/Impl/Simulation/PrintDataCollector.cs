@@ -131,7 +131,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                 AppendResChangedResult(OutputResultSB, context);
                 OutputResultSB.AppendLine();
             }
-            else if (OmitExcessiveExchanges && context.ExchangeStepIndex > MaxExchangeRecord)
+            else if (OmitExcessiveExchanges && context.ExchangeStepIndex >= MaxExchangeRecord)
             {
                 OutputResultSB.Append('(')
                               .Append(context.SimulationStepIndex + 1)
@@ -278,21 +278,24 @@ namespace TongbaoExchangeCalc.Impl.Simulation
         {
             // PlayerData的项只增加不删除，所以这里不需要考虑并集
             bool isEmpty = true;
-            foreach (var item in context.PlayerData.ResValues)
+
+            // 这里本来是foreach context.PlayerData.ResValues，不过为了方便跟新增的ExchangeDataCollector
+            // 和ExchangeDataParser对比结果，这里调整一下输出顺序为固定顺序
+            for (int i = 0; i < (int)ResType.Count - 1; i++)
             {
-                ResType type = item.Key;
+                ResType type = (ResType)(i + 1);
                 mTempResBefore[context.SimulationStepIndex].TryGetValue(type, out int beforeValue);
-                int afterValue = item.Value;
+                int afterValue = context.PlayerData.GetResValue(type);
                 int changedValue = afterValue - beforeValue;
                 if (beforeValue != afterValue)
                 {
                     if (isEmpty)
                     {
-                        sb.Append("，");
+                        sb.Append('(');
                     }
                     else
                     {
-                        sb.Append('(');
+                        sb.Append("，");
                     }
                     sb.Append(Define.GetResName(type));
 
@@ -310,6 +313,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                     isEmpty = false;
                 }
             }
+
             if (!isEmpty)
             {
                 sb.Append(')');

@@ -19,6 +19,8 @@ namespace TongbaoExchangeCalc
         private RandomGenerator mRandom;
         private TongbaoSelector mTongbaoSelector;
         private SimulationController mSimulationController;
+        private ExchangeDataParser mExchangeDataParser;
+
         private PrintDataCollector mPrintDataCollector;
         private ExchangeDataCollector mExchangeDataCollector;
         private StatisticDataCollector mStatisticDataCollector;
@@ -71,15 +73,18 @@ namespace TongbaoExchangeCalc
         private void InitSimulationData()
         {
             // 单轮循环内交换次数超过2000就不收集详细信息
-            mPrintDataCollector = new PrintDataCollector(2000);
+            //mPrintDataCollector = new PrintDataCollector(2000);
+            mPrintDataCollector = new PrintDataCollector(); // 单次交换的简单文本输出还是用原来的PrintDataCollector
             mExchangeDataCollector = new ExchangeDataCollector(2000);
             mStatisticDataCollector = new StatisticDataCollector();
             mCompositeDataCollector = new CompositeDataCollector();
-            mCompositeDataCollector.AddDataCollector(mPrintDataCollector); // 简单文本输出
-            //mCompositeDataCollector.AddDataCollector(mExchangeDataCollector); // 详细数据收集
-            mCompositeDataCollector.AddDataCollector(mStatisticDataCollector);
+            //mCompositeDataCollector.AddDataCollector(mPrintDataCollector); // 简单文本输出
+            mCompositeDataCollector.AddDataCollector(mExchangeDataCollector); // 详细数据收集
+            mCompositeDataCollector.AddDataCollector(mStatisticDataCollector); // TODO 改为通过mExchangeDataCollector获取
 
+            mExchangeDataParser = new ExchangeDataParser(mExchangeDataCollector);
             mSimulationController = new SimulationController(mPlayerData, mCompositeDataCollector);
+            //mSimulationController = new SimulationController(mPlayerData, mExchangeDataCollector);
         }
 
         private void InitPlayerData()
@@ -527,9 +532,29 @@ namespace TongbaoExchangeCalc
 
             await mSimulationController.SimulateAsync(options, progress);
 
+            using (CodeTimer ct = new CodeTimer("BuildOutputResult"))
+            {
+                mExchangeDataParser.BuildOutputResult(); // TODO 改为异步await
+
+                // 测试代码，用于对比两种打印是否相同
+                //string result1 = mExchangeDataParser.OutputResult;
+                //string result2 = mPrintDataCollector.OutputResult;
+                //for (int i = 0; i < result1.Length; i++)
+                //{
+                //    if (result1[i] != result2[i])
+                //    {
+                //        Helper.Log(result1.Substring(i-50,300));
+                //        Helper.Log("\n\n");
+                //        Helper.Log(result2.Substring(i-50,300));
+                //        break;
+                //    }
+                //}
+            }
+
             if (mRecordForm.Visible)
             {
-                mRecordForm.SetStringBuilderText(mPrintDataCollector.OutputResultSB);
+                //mRecordForm.SetStringBuilderText(mPrintDataCollector.OutputResultSB);
+                mRecordForm.SetStringBuilderText(mExchangeDataParser.OutputResultSB);
                 mOutputResultChanged = false;
             }
             else
@@ -570,6 +595,7 @@ namespace TongbaoExchangeCalc
         private void ClearRecord()
         {
             mPrintDataCollector.ClearData();
+            mExchangeDataParser.Clear();
             mRecordForm.ClearText();
             mOutputResultChanged = false;
             GC.Collect();
@@ -723,7 +749,8 @@ namespace TongbaoExchangeCalc
             mRecordForm.Focus();
             if (mOutputResultChanged)
             {
-                mRecordForm.SetStringBuilderText(mPrintDataCollector.OutputResultSB);
+                //mRecordForm.SetStringBuilderText(mPrintDataCollector.OutputResultSB);
+                mRecordForm.SetStringBuilderText(mExchangeDataParser.OutputResultSB);
                 mOutputResultChanged = false;
             }
         }

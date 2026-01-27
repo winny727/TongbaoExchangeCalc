@@ -400,7 +400,7 @@ namespace TongbaoExchangeCalc.DataModel
                 {
                     // 升级通宝保留品相重复触发一次
                     newTongbao = CreateTongbao(newTongbaoId);
-                    newTongbao.ApplyRandomRes(tongbao.RandomResType, tongbao.RandomResCount);
+                    newTongbao?.ApplyRandomRes(tongbao.RandomResType, tongbao.RandomResCount);
                 }
                 else
                 {

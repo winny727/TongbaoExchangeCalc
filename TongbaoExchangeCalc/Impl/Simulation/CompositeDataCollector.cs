@@ -58,11 +58,11 @@ namespace TongbaoExchangeCalc.Impl.Simulation
             }
         }
 
-        public void OnSimulateParallel(int estimatedLeftExchangeStep, int remainSimStep)
+        public void OnSimulateParallel(int estimatedLeftExchangeStep, int curSimStep)
         {
             for (int i = 0; i < mDataCollectors.Count; i++)
             {
-                mDataCollectors[i].OnSimulateParallel(estimatedLeftExchangeStep, remainSimStep);
+                mDataCollectors[i].OnSimulateParallel(estimatedLeftExchangeStep, curSimStep);
             }
         }
 

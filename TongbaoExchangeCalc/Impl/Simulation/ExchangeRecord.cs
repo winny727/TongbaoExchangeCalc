@@ -9,6 +9,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
     {
         public List<ExchangeResultRecord> ExchangeRecords; // [ExchangeStepIndex]
         public SimulateStepResult SimulateStepResult;
+        public Int16 FinalExchangeStepIndex; // <=10000
     }
 
     public unsafe struct ExchangeResultRecord

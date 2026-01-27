@@ -15,7 +15,10 @@ namespace TongbaoExchangeCalc.Impl.Simulation
         public int ExecSimulateStep { get; private set; }
         public float TotalSimulateTime { get; private set; }
         public int TotalExecExchangeStep { get; private set; }
+
+        public bool IsParallel => SwitchParallelSimStepIndex >= 0;
         public int EstimatedExchangeStep { get; private set; }
+        public int SwitchParallelSimStepIndex { get; private set; } = -1; // 触发并行优化时的Index
 
         private PlayerData mInitialPlayerData;
         private int mExecSimulationStep; // local
@@ -23,6 +26,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
         private ExchangeStepResult mLastExchangeStepResult;
 
         // 不同线程对这个数组ShareContainer之后分别写入不同Index线程安全
+        // 若省略X条后的多余信息，会将X~LIMIT的资源变化信息存在X+1（即最后一个位置）位置里
         private SimulationRecord[] mSimulationRecords; // [SimulateStepIndex]
 
         public ExchangeDataCollector(int maxExchangeRecord = -1)
@@ -30,7 +34,14 @@ namespace TongbaoExchangeCalc.Impl.Simulation
             MaxExchangeRecord = maxExchangeRecord;
         }
 
-        public void ForEachTongbaoRecords(Action<ExchangeRecord> callback)
+        /// <summary>
+        /// 遍历所有交换数据
+        /// 如果开启了不记录详细数据或省略过多交换数据，则会在当轮模拟的最后一次回调作为剩余总结回调，
+        /// 传入当前轮次模拟的最后一次交换的ExchangeStepIndex和所有跳过/省略交换次数的资源变化值总结ResValueRecords
+        /// 此轮总结回调ExchangeRecord中SlotIndex/BeforeTongbaoId/AfterTongbaoId/ExchangeStepResult为无效值
+        /// </summary>
+        /// <param name="callback"></param>
+        public void ForEachExchangeRecords(Action<ExchangeRecord> callback)
         {
             if (mSimulationRecords == null || callback == null)
             {
@@ -56,11 +67,17 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                 {
                     var record = records[j];
 
+                    int exchangeStepIndex = j;
+                    if (!RecordEachExchange || (OmitExcessiveExchanges && j >= MaxExchangeRecord))
+                    {
+                        exchangeStepIndex = mSimulationRecords[i].FinalExchangeStepIndex;
+                    }
+
                     int beforeTongbaoId = tempTongbaoBox[record.SlotIndex];
                     var retRecord = new ExchangeRecord
                     {
                         SimulationStepIndex = i,
-                        ExchangeStepIndex = j,
+                        ExchangeStepIndex = exchangeStepIndex,
                         SlotIndex = record.SlotIndex,
                         BeforeTongbaoId = beforeTongbaoId,
                         AfterTongbaoId = record.TongbaoId,
@@ -72,11 +89,11 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                     {
                         for (int k = 0; k < resCount; k++)
                         {
-                            ResType resType = (ResType)(k + 1);
+                            ResType type = (ResType)(k + 1);
                             int beforeValue;
                             if (j == 0)
                             {
-                                beforeValue = mInitialPlayerData.GetResValue(resType);
+                                beforeValue = mInitialPlayerData.GetResValue(type);
                             }
                             else
                             {
@@ -85,7 +102,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                             }
                             retRecord.ResValueRecords[k] = new ResValueRecord
                             {
-                                ResType = resType,
+                                ResType = type,
                                 BeforeValue = beforeValue,
                                 AfterValue = record.ResRecords[k]
                             };
@@ -123,9 +140,10 @@ namespace TongbaoExchangeCalc.Impl.Simulation
             TotalSimulateTime = simCostTimeMS;
         }
 
-        public void OnSimulateParallel(int estimatedLeftExchangeStep, int remainSimStep)
+        public void OnSimulateParallel(int estimatedLeftExchangeStep, int curSimStep)
         {
             EstimatedExchangeStep = estimatedLeftExchangeStep;
+            SwitchParallelSimStepIndex = curSimStep;
         }
 
         public void OnSimulateStepBegin(in SimulateContext context)
@@ -138,9 +156,10 @@ namespace TongbaoExchangeCalc.Impl.Simulation
         public void OnSimulateStepEnd(in SimulateContext context, SimulateStepResult result)
         {
             mSimulationRecords[context.SimulationStepIndex].SimulateStepResult = result;
+            mSimulationRecords[context.SimulationStepIndex].FinalExchangeStepIndex = (short)context.ExchangeStepIndex;
 
             // 若省略X条后的多余信息，会将X~LIMIT的资源变化信息存在X+1位置里
-            if (OmitExcessiveExchanges)
+            if (OmitExcessiveExchanges && context.ExchangeStepIndex >= MaxExchangeRecord)
             {
                 Tongbao tongbao = context.PlayerData.GetTongbao(context.SlotIndex);
                 int tongbaoId = tongbao != null ? tongbao.Id : -1;
@@ -246,6 +265,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
             TotalSimulateTime = 0;
             TotalExecExchangeStep = 0;
             EstimatedExchangeStep = 0;
+            SwitchParallelSimStepIndex = -1;
             mExecSimulationStep = 0;
             mTotalExchangeRecord = 0;
             mLastExchangeStepResult = default;

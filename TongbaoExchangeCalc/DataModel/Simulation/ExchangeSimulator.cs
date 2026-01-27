@@ -39,7 +39,7 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
         public int MaxParallelism { get; set; } = Math.Max(1, Environment.ProcessorCount - 1); // 最大线程数
         private bool mUseParallel;
 
-        private void Log(string msg) => Helper.Log(msg);
+        //private void Log(string msg) => System.Diagnostics.Debug.WriteLine(msg);
 
         public ExchangeSimulator(PlayerData playerData, IDataCollector<SimulateContext> collector = null)
         {
