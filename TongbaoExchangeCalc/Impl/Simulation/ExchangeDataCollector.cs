@@ -15,6 +15,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
         public int ExecSimulateStep { get; private set; }
         public float TotalSimulateTime { get; private set; }
         public int TotalExecExchangeStep { get; private set; }
+        public int TotalSuccessExchangeStep { get; private set; }
 
         public bool IsParallel => SwitchParallelSimStepIndex >= 0;
         public int EstimatedExchangeStep { get; private set; }
@@ -41,80 +42,82 @@ namespace TongbaoExchangeCalc.Impl.Simulation
         /// 此轮总结回调ExchangeRecord中SlotIndex/BeforeTongbaoId/AfterTongbaoId/ExchangeStepResult为无效值
         /// </summary>
         /// <param name="callback">回调，若返回false则取消终止遍历</param>
-        public void ForEachExchangeRecords(Func<ExchangeRecord, bool> callback)
+        public void ForEachExchangeRecords(int simulationStepIndex, Func<ExchangeRecord, bool> callback)
         {
             if (mSimulationRecords == null || callback == null)
             {
                 return;
             }
 
+            if (simulationStepIndex < 0 || simulationStepIndex >= mSimulationRecords.Length)
+            {
+                return;
+            }
+
+            var records = mSimulationRecords[simulationStepIndex].ExchangeRecords;
+            if (records == null || records.Count <= 0)
+            {
+                return;
+            }
+
             int resCount = (int)ResType.Count - 1;
             var tempTongbaoBox = new int[mInitialPlayerData.MaxTongbaoCount];
-            for (int i = 0; i < mSimulationRecords.Length; i++)
+            for (int i = 0; i < mInitialPlayerData.MaxTongbaoCount; i++)
             {
-                var records = mSimulationRecords[i].ExchangeRecords;
-                if (records == null || records.Count <= 0)
+                tempTongbaoBox[i] = mInitialPlayerData.GetTongbao(i)?.Id ?? -1;
+            }
+
+            for (int i = 0; i < records.Count; i++)
+            {
+                var record = records[i];
+
+                int exchangeStepIndex = i;
+                if (!RecordEachExchange || (OmitExcessiveExchanges && i >= MaxExchangeRecord))
                 {
-                    continue;
+                    exchangeStepIndex = mSimulationRecords[simulationStepIndex].FinalExchangeStepIndex;
                 }
 
-                for (int j = 0; j < mInitialPlayerData.MaxTongbaoCount; j++)
+                int beforeTongbaoId = tempTongbaoBox[record.SlotIndex];
+                var retRecord = new ExchangeRecord
                 {
-                    tempTongbaoBox[j] = mInitialPlayerData.GetTongbao(j)?.Id ?? -1;
-                }
+                    SimulationStepIndex = simulationStepIndex,
+                    ExchangeStepIndex = exchangeStepIndex,
+                    SlotIndex = record.SlotIndex,
+                    BeforeTongbaoId = beforeTongbaoId,
+                    AfterTongbaoId = record.TongbaoId,
+                    ExchangeStepResult = record.ExchangeStepResult,
+                    ResValueRecords = new ResValueRecord[resCount],
+                };
 
-                for (int j = 0; j < records.Count; j++)
+                unsafe
                 {
-                    var record = records[j];
-
-                    int exchangeStepIndex = j;
-                    if (!RecordEachExchange || (OmitExcessiveExchanges && j >= MaxExchangeRecord))
+                    for (int k = 0; k < resCount; k++)
                     {
-                        exchangeStepIndex = mSimulationRecords[i].FinalExchangeStepIndex;
-                    }
-
-                    int beforeTongbaoId = tempTongbaoBox[record.SlotIndex];
-                    var retRecord = new ExchangeRecord
-                    {
-                        SimulationStepIndex = i,
-                        ExchangeStepIndex = exchangeStepIndex,
-                        SlotIndex = record.SlotIndex,
-                        BeforeTongbaoId = beforeTongbaoId,
-                        AfterTongbaoId = record.TongbaoId,
-                        ExchangeStepResult = record.ExchangeStepResult,
-                        ResValueRecords = new ResValueRecord[resCount],
-                    };
-
-                    unsafe
-                    {
-                        for (int k = 0; k < resCount; k++)
+                        ResType type = (ResType)(k + 1);
+                        int beforeValue;
+                        if (i == 0)
                         {
-                            ResType type = (ResType)(k + 1);
-                            int beforeValue;
-                            if (j == 0)
-                            {
-                                beforeValue = mInitialPlayerData.GetResValue(type);
-                            }
-                            else
-                            {
-                                var lastRecord = records[j - 1];
-                                beforeValue = lastRecord.ResRecords[k];
-                            }
-                            retRecord.ResValueRecords[k] = new ResValueRecord
-                            {
-                                ResType = type,
-                                BeforeValue = beforeValue,
-                                AfterValue = record.ResRecords[k]
-                            };
+                            beforeValue = mInitialPlayerData.GetResValue(type);
                         }
+                        else
+                        {
+                            var lastRecord = records[i - 1];
+                            beforeValue = lastRecord.ResRecords[k];
+                        }
+                        retRecord.ResValueRecords[k] = new ResValueRecord
+                        {
+                            ResType = type,
+                            BeforeValue = beforeValue,
+                            AfterValue = record.ResRecords[k]
+                        };
                     }
-
-                    if (!callback(retRecord))
-                    {
-                        return;
-                    }
-                    tempTongbaoBox[record.SlotIndex] = record.TongbaoId;
                 }
+
+                if (!callback(retRecord))
+                {
+                    return;
+                }
+                tempTongbaoBox[record.SlotIndex] = record.TongbaoId;
             }
         }
 
@@ -199,6 +202,11 @@ namespace TongbaoExchangeCalc.Impl.Simulation
         public void OnExchangeStepEnd(in SimulateContext context, ExchangeStepResult result)
         {
             TotalExecExchangeStep++;
+            if (result == ExchangeStepResult.Success)
+            {
+                TotalSuccessExchangeStep++;
+            }
+
             if (!RecordEachExchange)
             {
                 return;
@@ -258,6 +266,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
             if (other is ExchangeDataCollector collector)
             {
                 TotalExecExchangeStep += collector.TotalExecExchangeStep;
+                TotalSuccessExchangeStep += collector.TotalSuccessExchangeStep;
             }
         }
 
@@ -267,6 +276,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
             ExecSimulateStep = 0;
             TotalSimulateTime = 0;
             TotalExecExchangeStep = 0;
+            TotalSuccessExchangeStep = 0;
             EstimatedExchangeStep = 0;
             SwitchParallelSimStepIndex = -1;
             mExecSimulationStep = 0;

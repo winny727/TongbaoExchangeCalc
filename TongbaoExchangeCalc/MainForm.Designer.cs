@@ -608,9 +608,9 @@
             this.checkBoxEnableRecord.AutoSize = true;
             this.checkBoxEnableRecord.Location = new System.Drawing.Point(518, 419);
             this.checkBoxEnableRecord.Name = "checkBoxEnableRecord";
-            this.checkBoxEnableRecord.Size = new System.Drawing.Size(132, 28);
+            this.checkBoxEnableRecord.Size = new System.Drawing.Size(168, 28);
             this.checkBoxEnableRecord.TabIndex = 16;
-            this.checkBoxEnableRecord.Text = "模拟时记录每次交换\r\n(会使模拟性能下降)";
+            this.checkBoxEnableRecord.Text = "模拟时记录每次交换\r\n(需消耗更多时间处理数据)";
             this.checkBoxEnableRecord.UseVisualStyleBackColor = true;
             // 
             // btnRandom

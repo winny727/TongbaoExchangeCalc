@@ -84,7 +84,7 @@ namespace TongbaoExchangeCalc
             //mCompositeDataCollector.AddDataCollector(mStatisticDataCollector); // 数据统计
             //mSimulationController = new SimulationController(mPlayerData, new SimulationTimer(), mCompositeDataCollector);
 
-            // 新版逻辑改为先用ExchangeDataCollector收集数据再用ExchangeDataParser解析并构建为文本结果
+            // 新版逻辑改为先用ExchangeDataCollector收集数据再用ExchangeDataParser解析为文本结果
             mPrintDataCollector = new PrintDataCollector(); // 单次交换的简单文本输出还是用原来的PrintDataCollector
             mExchangeDataCollector = new ExchangeDataCollector(2000);
             mExchangeDataParser = new ExchangeDataParser(mExchangeDataCollector);
@@ -206,7 +206,6 @@ namespace TongbaoExchangeCalc
                 {
                     Name = "TongbaoSlot_" + (i + 1),
                     Text = $"[{i + 1}] (空)",
-                    ToolTipText = "双击添加/更改通宝",
                     ImageKey = "Empty",
                 };
                 listViewTongbao.Items.Add(item);
@@ -251,6 +250,7 @@ namespace TongbaoExchangeCalc
                 }
                 item.Text = sb.ToString();
                 item.ImageKey = tongbao.Id.ToString();
+                item.ToolTipText = Helper.GetTongbaoToolTip(mPlayerData, tongbao);
             }
             else
             {
@@ -259,6 +259,7 @@ namespace TongbaoExchangeCalc
                   .Append("] (空)");
                 item.Text = sb.ToString();
                 item.ImageKey = "Empty";
+                item.ToolTipText = Helper.GetTongbaoToolTip(mPlayerData, null);
             }
             sb.Clear();
         }
@@ -409,7 +410,7 @@ namespace TongbaoExchangeCalc
                 if (!tongbao.CanExchange())
                 {
                     mPrintDataCollector?.OnExchangeStepEnd(new SimulateContext(0, mPlayerData.ExchangeCount, slotIndex, mPlayerData), ExchangeStepResult.TongbaoUnexchangeable);
-                    MessageBox.Show($"交换失败，选中通宝[{Helper.GetTongbaoFullName(tongbao.Id)}]无法交换。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show($"交换失败，选中通宝[{Helper.GetTongbaoName(tongbao.Id)}]无法交换。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
@@ -442,6 +443,10 @@ namespace TongbaoExchangeCalc
 
         private IProgress<int> CreateProgress(string title, int total)
         {
+            toolStripProgressBar1.Minimum = 0;
+            toolStripProgressBar1.Maximum = total;
+            toolStripProgressBar1.Value = 0;
+
             int lastUpdateTick = 0;
             Progress<int> progress = new Progress<int>(value =>
             {
@@ -495,16 +500,12 @@ namespace TongbaoExchangeCalc
             //mSimulationController.Simulate(options); // 同步
 
             string simulationName = SimulationDefine.GetSimulationName(options.SimulationType);
-            int total = options.TotalSimulationCount;
             UpdateAsyncSimulateView(true);
-            toolStripProgressBar1.Minimum = 0;
-            toolStripProgressBar1.Maximum = total;
-            toolStripProgressBar1.Value = 0;
 
-            var simumateProgress = CreateProgress($"正在进行[{simulationName}]模拟", total);
+            var simumateProgress = CreateProgress($"正在进行[{simulationName}]模拟", options.TotalSimulationCount);
             await mSimulationController.SimulateAsync(options, simumateProgress);
 
-            var resultProgress = CreateProgress($"正在构建详细模拟结果信息", total);
+            var resultProgress = CreateProgress($"正在处理数据", mExchangeDataCollector.ExecSimulateStep);
             await mExchangeDataParser.BuildResultAsync(resultProgress);
 
             //DebugCompareOutputResult(); // 测试

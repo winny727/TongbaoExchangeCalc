@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace TongbaoExchangeCalc.DataModel
 {
-    internal static class ExchangePool
+    public static class ExchangePool
     {
         private static readonly Dictionary<int, List<int>> mExchangeOutPools = new Dictionary<int, List<int>>(); // <poolId, <out tongbaoId>>
 
@@ -30,9 +30,9 @@ namespace TongbaoExchangeCalc.DataModel
             mExchangeOutPools.Clear();
         }
 
-        internal static IReadOnlyList<int> GetExchangeOutTongbaoIds(int id)
+        public static IReadOnlyList<int> GetExchangeOutTongbaoIds(int poolId)
         {
-            if (mExchangeOutPools.TryGetValue(id, out var tongbaoIds))
+            if (mExchangeOutPools.TryGetValue(poolId, out var tongbaoIds))
             {
                 return tongbaoIds;
             }
@@ -77,9 +77,10 @@ namespace TongbaoExchangeCalc.DataModel
                 if (config.IsUpgrade)
                 {
                     bool isExistUpgrade = false;
-                    for (int j = 0; j < mExchangeOutPools[config.ExchangeInPool].Count; j++)
+                    var upgradeTongbaoIds = GetExchangeOutTongbaoIds(config.ExchangeInPool);
+                    for (int j = 0; j < upgradeTongbaoIds.Count; j++)
                     {
-                        int upgradeTongbaoId = mExchangeOutPools[config.ExchangeInPool][j];
+                        int upgradeTongbaoId = upgradeTongbaoIds[j];
                         if (playerData.IsTongbaoExist(upgradeTongbaoId))
                         {
                             isExistUpgrade = true;

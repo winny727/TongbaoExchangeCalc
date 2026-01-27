@@ -20,12 +20,10 @@ namespace TongbaoExchangeCalc.Impl.Simulation
         // 打印数据
         public StringBuilder OutputResultSB { get; private set; } = new StringBuilder();
         public string OutputResult => OutputResultSB.ToString();
-        private int mLastSimulationStepIndex = -1;
 
         // 统计数据
         private readonly Dictionary<SimulateStepResult, int> mTotalSimulateStepResult = new Dictionary<SimulateStepResult, int>();
         private readonly Dictionary<ResType, int> mTotalResChanged = new Dictionary<ResType, int>();
-        private int mTotalSuccessExchangeStep;
         public StringBuilder StatisticResultSB { get; private set; } = new StringBuilder();
         public string StatisticResult => StatisticResultSB.ToString();
 
@@ -48,8 +46,8 @@ namespace TongbaoExchangeCalc.Impl.Simulation
             {
                 if (mCancellationTokenSource.IsCancellationRequested)
                 {
-                    OutputResultSB.AppendLine("交换结果未构建完成: 用户取消");
-                    StatisticResultSB.AppendLine("统计结果未构建完成: 用户取消");
+                    OutputResultSB.AppendLine("交换结果未解析完成: 用户取消");
+                    StatisticResultSB.AppendLine("数据统计结果未解析完成: 用户取消");
                 }
                 mCancellationTokenSource?.Dispose();
                 mCancellationTokenSource = null;
@@ -80,8 +78,18 @@ namespace TongbaoExchangeCalc.Impl.Simulation
               .Append(collector.TotalSimulateStep)
               .AppendLine("次模拟");
 
-            collector.ForEachExchangeRecords(ExchangeRecordCallback);
-            AppendSimulateStepEnd(mLastSimulationStepIndex);
+            for (int i = 0; i < collector.ExecSimulateStep; i++)
+            {
+                if (mCancellationTokenSource != null && mCancellationTokenSource.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                AppendSimulateStepBegin(i);
+                collector.ForEachExchangeRecords(i, ExchangeRecordCallback);
+                AppendSimulateStepEnd(i);
+                mAsyncProgress?.Report(i);
+            }
 
             sb.Append('[')
               .Append(SimulationDefine.GetSimulationName(collector.SimulationType))
@@ -93,7 +101,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
 
             BuildStatisticResult();
 
-            mAsyncProgress?.Report(mLastSimulationStepIndex + 1); // Count = Index + 1
+            mAsyncProgress?.Report(collector.ExecSimulateStep);
         }
 
         private void BuildStatisticResult()
@@ -116,7 +124,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
               .Append(collector.TotalSimulateTime)
               .Append("ms")
               .Append(", 成功交换总次数: ")
-              .Append(mTotalSuccessExchangeStep)
+              .Append(collector.TotalSuccessExchangeStep)
               .AppendLine()
               .AppendLine();
 
@@ -163,10 +171,8 @@ namespace TongbaoExchangeCalc.Impl.Simulation
         {
             mIsClearDataRequested = false;
             OutputResultSB.Clear();
-            mLastSimulationStepIndex = -1;
             mTotalSimulateStepResult.Clear();
             mTotalResChanged.Clear();
-            mTotalSuccessExchangeStep = 0;
             StatisticResultSB.Clear();
         }
 
@@ -180,18 +186,14 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                 return false;
             }
 
-            CollectResStatistic(record);
-
-            if (mLastSimulationStepIndex != record.SimulationStepIndex)
+            for (int i = 0; i < record.ResValueRecords.Length; i++)
             {
-                if (record.SimulationStepIndex > 0)
+                var r = record.ResValueRecords[i];
+                if (!mTotalResChanged.ContainsKey(r.ResType))
                 {
-                    AppendSimulateStepEnd(mLastSimulationStepIndex);
+                    mTotalResChanged.Add(r.ResType, 0);
                 }
-
-                AppendSimulateStepBegin(record.SimulationStepIndex);
-                mLastSimulationStepIndex = record.SimulationStepIndex;
-                mAsyncProgress?.Report(record.SimulationStepIndex);
+                mTotalResChanged[r.ResType] += r.ChangedValue;
             }
 
             if (!collector.RecordEachExchange)
@@ -419,28 +421,10 @@ namespace TongbaoExchangeCalc.Impl.Simulation
             }
         }
 
-        private void CollectResStatistic(in ExchangeRecord record)
-        {
-            if (record.ExchangeStepResult == ExchangeStepResult.Success)
-            {
-                mTotalSuccessExchangeStep++;
-            }
-
-            for (int i = 0; i < record.ResValueRecords.Length; i++)
-            {
-                var r = record.ResValueRecords[i];
-                if (!mTotalResChanged.ContainsKey(r.ResType))
-                {
-                    mTotalResChanged.Add(r.ResType, 0);
-                }
-                mTotalResChanged[r.ResType] += r.ChangedValue;
-            }
-        }
-
         private string GetTongbaoName(int tongbaoId)
         {
-            TongbaoConfig config = TongbaoConfig.GetTongbaoConfigById(tongbaoId);
-            return config?.Name ?? string.Empty;
+            return Helper.GetTongbaoName(tongbaoId);
+            //return Helper.GetTongbaoFullName(tongbaoId);
         }
     }
 }

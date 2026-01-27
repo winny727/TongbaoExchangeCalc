@@ -42,6 +42,17 @@ namespace TongbaoExchangeCalc
             return null;
         }
 
+        public static string GetTongbaoName(int id)
+        {
+            TongbaoConfig config = TongbaoConfig.GetTongbaoConfigById(id);
+            if (config != null)
+            {
+                string typeName = Define.GetTongbaoTypeName(config.Type);
+                return config.Name;
+            }
+            return string.Empty;
+        }
+
         public static string GetTongbaoFullName(int id)
         {
             TongbaoConfig config = TongbaoConfig.GetTongbaoConfigById(id);
@@ -335,6 +346,83 @@ namespace TongbaoExchangeCalc
 
             numeric.ValueChanged -= OnValueChanged;
             numeric.ValueChanged += OnValueChanged;
+        }
+
+        public static string GetTongbaoToolTip(PlayerData playerData, Tongbao tongbao)
+        {
+            if (tongbao == null)
+            {
+                return "双击添加通宝";
+            }
+
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append("双击修改通宝");
+            var exchangeOutTongbaoIds = ExchangePool.GetExchangeOutTongbaoIds(tongbao.ExchangeInPool);
+            if (tongbao.CanExchange() && exchangeOutTongbaoIds != null && exchangeOutTongbaoIds.Count > 0)
+            {
+                sb.AppendLine().Append("可交换出以下通宝");
+                if (tongbao.IsUpgrade)
+                {
+                    if (exchangeOutTongbaoIds.Count == 1)
+                    {
+                        sb.Append("(固定获得升级通宝)");
+                    }
+                    else
+                    {
+                        sb.Append("(玩家选择其中一个升级通宝)");
+                    }
+                }
+                sb.Append(": ");
+                foreach (var tongbaoId in exchangeOutTongbaoIds)
+                {
+                    TongbaoConfig config = TongbaoConfig.GetTongbaoConfigById(tongbaoId);
+                    if (config == null)
+                    {
+                        continue;
+                    }
+
+                    sb.AppendLine().Append(GetTongbaoFullName(tongbaoId));
+
+                    if (playerData == null)
+                    {
+                        continue;
+                    }
+
+                    // 可以自己换出自己
+                    if (playerData.IsTongbaoExist(tongbaoId) && tongbaoId != tongbao.Id)
+                    {
+                        sb.Append("(该通宝已在钱盒)");
+                    }
+
+                    if (config.IsUpgrade)
+                    {
+                        var upgradeTongbaoIds = ExchangePool.GetExchangeOutTongbaoIds(config.ExchangeInPool);
+                        for (int j = 0; j < upgradeTongbaoIds.Count; j++)
+                        {
+                            int upgradeTongbaoId = upgradeTongbaoIds[j];
+                            if (playerData.IsTongbaoExist(upgradeTongbaoId))
+                            {
+                                sb.Append($"(升级后通宝[{GetTongbaoName(upgradeTongbaoId)}]已在钱盒)");
+                                break;
+                            }
+                        }
+                    }
+
+                    if (playerData.IsTongbaoLocked(tongbaoId))
+                    {
+                        sb.Append("(已被商店锁定)");
+                    }
+                }
+            }
+            else
+            {
+                sb.AppendLine().Append("通宝无法交换");
+            }
+
+
+
+            return sb.ToString();
         }
 
         // 获取需要多选一的升级通宝
