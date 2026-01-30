@@ -27,16 +27,6 @@ namespace TongbaoExchangeCalc
 
             switch (Type)
             {
-                case SimulationRuleType.UnexchangeableTongbao:
-                    label2.Text = "选择不可交换通宝:";
-                    label4.Text = "模拟时若交换出不可交换通宝，切换到下一个可交换槽位；通常不可交换通宝为目标通宝或降级通宝";
-                    InitTongbaoIdView();
-                    break;
-                case SimulationRuleType.ExpectationTongbao:
-                    label2.Text = "选择期望获得通宝:";
-                    label4.Text = "持有所有期望通宝时停止此轮模拟";
-                    InitTongbaoIdView();
-                    break;
                 case SimulationRuleType.ExchangeableSlot:
                     label2.Text = "输入可交换钱盒槽位索引:";
                     label4.Text = "模拟时会按顺序在可交换钱盒槽位中交换";
@@ -45,6 +35,16 @@ namespace TongbaoExchangeCalc
                 case SimulationRuleType.PriorityExchangeTongbao:
                     label2.Text = "选择优先交换通宝:";
                     label4.Text = "模拟时会先将所有可交换槽位内的优先交换通宝用于交换";
+                    InitTongbaoIdView();
+                    break;
+                case SimulationRuleType.UnexchangeableTongbao:
+                    label2.Text = "选择不可交换通宝:";
+                    label4.Text = "模拟时若交换出不可交换通宝，切换到下一个可交换槽位；通常不可交换通宝为目标通宝或降级通宝";
+                    InitTongbaoIdView();
+                    break;
+                case SimulationRuleType.ExpectationTongbao:
+                    label2.Text = "选择期望获得通宝:";
+                    label4.Text = "持有所有期望通宝时停止此轮模拟";
                     InitTongbaoIdView();
                     break;
                 default:
@@ -78,16 +78,16 @@ namespace TongbaoExchangeCalc
             SelectedParams = args;
             switch (Type)
             {
-                case SimulationRuleType.UnexchangeableTongbao:
-                    UpdateTongbaoInfo(GetArg<int>(0));
-                    break;
-                case SimulationRuleType.ExpectationTongbao:
-                    UpdateTongbaoInfo(GetArg<int>(0));
-                    break;
                 case SimulationRuleType.ExchangeableSlot:
                     numericUpDown1.Value = GetArg<int>(0) + 1;
                     break;
                 case SimulationRuleType.PriorityExchangeTongbao:
+                    UpdateTongbaoInfo(GetArg<int>(0));
+                    break;
+                case SimulationRuleType.UnexchangeableTongbao:
+                    UpdateTongbaoInfo(GetArg<int>(0));
+                    break;
+                case SimulationRuleType.ExpectationTongbao:
                     UpdateTongbaoInfo(GetArg<int>(0));
                     break;
                 default:

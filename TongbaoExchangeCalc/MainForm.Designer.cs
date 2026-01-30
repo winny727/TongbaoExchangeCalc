@@ -635,6 +635,7 @@
             this.treeViewRule.CheckBoxes = true;
             this.treeViewRule.Location = new System.Drawing.Point(6, 49);
             this.treeViewRule.Name = "treeViewRule";
+            this.treeViewRule.ShowNodeToolTips = true;
             this.treeViewRule.Size = new System.Drawing.Size(258, 376);
             this.treeViewRule.TabIndex = 0;
             // 

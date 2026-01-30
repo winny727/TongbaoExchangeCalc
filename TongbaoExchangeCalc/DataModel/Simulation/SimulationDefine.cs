@@ -50,14 +50,14 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
         {
             switch (type)
             {
-                case SimulationRuleType.UnexchangeableTongbao:
-                    return "不可交换通宝";
-                case SimulationRuleType.ExpectationTongbao:
-                    return "交换出期望通宝后停止交换";
                 case SimulationRuleType.ExchangeableSlot:
                     return "可交换钱盒槽位";
                 case SimulationRuleType.PriorityExchangeTongbao:
                     return "优先用于交换的通宝";
+                case SimulationRuleType.UnexchangeableTongbao:
+                    return "不可交换通宝";
+                case SimulationRuleType.ExpectationTongbao:
+                    return "交换出期望通宝后停止交换";
                 default:
                     break;
             }
@@ -68,18 +68,6 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
         {
             switch (type)
             {
-                case SimulationRuleType.UnexchangeableTongbao:
-                    if (args != null && args.Length > 0 && args[0] is int targetTongbaoId)
-                    {
-                        return new UnexchangeableTongbaoRule(targetTongbaoId);
-                    }
-                    break;
-                case SimulationRuleType.ExpectationTongbao:
-                    if (args != null && args.Length > 0 && args[0] is int expectedTongbaoId)
-                    {
-                        return new ExpectationTongbaoRule(expectedTongbaoId);
-                    }
-                    break;
                 case SimulationRuleType.ExchangeableSlot:
                     if (args != null && args.Length > 0 && args[0] is int exchangeableSlot)
                     {
@@ -90,6 +78,18 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
                     if (args != null && args.Length > 0 && args[0] is int priorityTongbaoId)
                     {
                         return new PriorityExchangeTongbaoRule(priorityTongbaoId);
+                    }
+                    break;
+                case SimulationRuleType.UnexchangeableTongbao:
+                    if (args != null && args.Length > 0 && args[0] is int targetTongbaoId)
+                    {
+                        return new UnexchangeableTongbaoRule(targetTongbaoId);
+                    }
+                    break;
+                case SimulationRuleType.ExpectationTongbao:
+                    if (args != null && args.Length > 0 && args[0] is int expectedTongbaoId)
+                    {
+                        return new ExpectationTongbaoRule(expectedTongbaoId);
                     }
                     break;
                 default:
@@ -154,9 +154,9 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
 
     public enum SimulationRuleType : sbyte
     {
-        UnexchangeableTongbao = 0, // 不可交换通宝，交换出不可交换通宝就切换槽位
-        ExpectationTongbao = 1, // 期望通宝，交换出所有期望通宝就停止交换
-        ExchangeableSlot = 2, // 可交换槽位
-        PriorityExchangeTongbao = 3, // 优先交换通宝
+        ExchangeableSlot = 0, // 可交换槽位
+        PriorityExchangeTongbao = 1, // 优先交换通宝
+        UnexchangeableTongbao = 2, // 不可交换通宝，交换出不可交换通宝就切换槽位
+        ExpectationTongbao = 3, // 期望通宝，交换出所有期望通宝就停止交换
     }
 }

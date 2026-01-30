@@ -18,10 +18,10 @@ namespace TongbaoExchangeCalc
 
         public static readonly Dictionary<SimulationRuleType, List<SimulationRule>> SimulationRulePresets = new Dictionary<SimulationRuleType, List<SimulationRule>>()
         {
-            { SimulationRuleType.UnexchangeableTongbao, new List<SimulationRule>() },
-            { SimulationRuleType.ExpectationTongbao, new List<SimulationRule>() },
             { SimulationRuleType.ExchangeableSlot, new List<SimulationRule>() },
             { SimulationRuleType.PriorityExchangeTongbao, new List<SimulationRule>() },
+            { SimulationRuleType.UnexchangeableTongbao, new List<SimulationRule>() },
+            { SimulationRuleType.ExpectationTongbao, new List<SimulationRule>() },
         };
 
         public static TongbaoConfig GetTongbaoConfigByName(string name)
@@ -161,13 +161,28 @@ namespace TongbaoExchangeCalc
                 }
             }
 
-            SimulationRulePresets[SimulationRuleType.UnexchangeableTongbao].Clear();
-            SimulationRulePresets[SimulationRuleType.ExpectationTongbao].Clear();
             SimulationRulePresets[SimulationRuleType.ExchangeableSlot].Clear();
             SimulationRulePresets[SimulationRuleType.PriorityExchangeTongbao].Clear();
+            SimulationRulePresets[SimulationRuleType.UnexchangeableTongbao].Clear();
+            SimulationRulePresets[SimulationRuleType.ExpectationTongbao].Clear();
 
-            SimulationRulePresets[SimulationRuleType.ExchangeableSlot].Add(new ExchangeableSlotRule(0));
+            // 可交换槽位
+            for (int i = 0; i < Define.SquadDefines[SquadType.Flower].MaxTongbaoCount; i++)
+            {
+                SimulationRulePresets[SimulationRuleType.ExchangeableSlot].Add(new ExchangeableSlotRule(i, i == 0));
+            }
 
+            // 优先交换通宝
+            string[] priorityTongbaoNames = new string[] { "聚力则强", "人间长存", /*"茧成绢",*/
+                "火上之灶", "鸭爵金币", "鸿蒙开荒", "圣诏封神", "神秘商贾", "诛邪雷法", 
+                /*"商路难行",*/ "孜孜不倦", "平沙之盾" };
+            foreach (var name in priorityTongbaoNames)
+            {
+                AddTongbaoRuleByName(name, SimulationRuleType.PriorityExchangeTongbao,
+                    (id) => new PriorityExchangeTongbaoRule(id));
+            }
+
+            // 不可交换通宝
             string[] unexchangeableTongbaoNames = new string[] { "驰道长", "武人之争", "百业俱兴",
                 "寒窗志", "志欲遂", "慧避灾", "茧成绢" };
             foreach (var name in unexchangeableTongbaoNames)
@@ -176,20 +191,12 @@ namespace TongbaoExchangeCalc
                     (id) => new UnexchangeableTongbaoRule(id));
             }
 
+            // 期望通宝
             string[] expectationTongbaoNames = new string[] { "茧成绢" };
             foreach (var name in expectationTongbaoNames)
             {
                 AddTongbaoRuleByName(name, SimulationRuleType.ExpectationTongbao,
                     (id) => new ExpectationTongbaoRule(id));
-            }
-
-            string[] priorityTongbaoNames = new string[] { "聚力则强", "人间长存", /*"茧成绢",*/
-                "火上之灶", "鸭爵金币", "鸿蒙开荒", "圣诏封神", "神秘商贾", "诛邪雷法", 
-                /*"商路难行",*/ "孜孜不倦", "平沙之盾" };
-            foreach (var name in priorityTongbaoNames)
-            {
-                AddTongbaoRuleByName(name, SimulationRuleType.PriorityExchangeTongbao,
-                    (id) => new PriorityExchangeTongbaoRule(id));
             }
         }
 

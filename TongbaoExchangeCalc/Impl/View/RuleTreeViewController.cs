@@ -75,6 +75,7 @@ namespace TongbaoExchangeCalc.Impl.View
                             child.Text = text;
                             child.Checked = rule.Enabled;
                             child.Tag = rule;
+                            child.ToolTipText = "双击修改规则";
                         }
                         for (int i = treeNode.Nodes.Count - 1; i >= collection.Count; i--)
                         {
