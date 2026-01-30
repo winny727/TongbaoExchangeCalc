@@ -114,7 +114,7 @@ namespace TongbaoExchangeCalc
         {
             mSimulatingDisableControls.AddRange(new Control[]
             {
-                groupBox1, groupBox2, groupBox3, groupBox5,
+                tabPage1, tabPage2, tabPage3,
                 listViewTongbao, btnRandom, btnRandomEmpty, btnClear,
                 checkBoxOptimize, checkBoxAutoRevert, checkBoxEnableRecord,
                 btnExchange, btnReset,
@@ -272,7 +272,7 @@ namespace TongbaoExchangeCalc
             var sb = mTempStringBuilder;
             sb.Clear();
 
-            void AppendResValue(ResType resType, NumericUpDown numeric)
+            StringBuilder AppendResValue(ResType resType, NumericUpDown numeric)
             {
                 int value = mPlayerData.GetResValue(resType);
                 sb.Append(Define.GetResName(resType)).Append(": ").Append(value);
@@ -280,19 +280,20 @@ namespace TongbaoExchangeCalc
                 {
                     int beforeValue = (int)numeric.Value;
                     int deltaValue = value - beforeValue;
-                    sb.Append('(');
+                    sb.Append(" (");
                     if (deltaValue > 0) sb.Append('+');
                     sb.Append(deltaValue).Append(")");
                 }
-                sb.AppendLine();
+                return sb;
             }
 
-            AppendResValue(ResType.LifePoint, numHp);
-            AppendResValue(ResType.OriginiumIngots, numIngots);
-            AppendResValue(ResType.Coupon, numCoupon);
-            AppendResValue(ResType.Candles, numCandle);
-            AppendResValue(ResType.PrimalFarmingCandles, null);
-            AppendResValue(ResType.Shield, numShield);
+            //sb.AppendLine("当前实时资源:").AppendLine();
+            AppendResValue(ResType.LifePoint, numHp).AppendLine();
+            AppendResValue(ResType.OriginiumIngots, numIngots).AppendLine();
+            AppendResValue(ResType.Coupon, numCoupon).AppendLine();
+            AppendResValue(ResType.Candles, numCandle).AppendLine();
+            AppendResValue(ResType.PrimalFarmingCandles, null).AppendLine();
+            AppendResValue(ResType.Shield, numShield).AppendLine();
             AppendResValue(ResType.Hope, numHope);
 
             lblRes.Text = sb.ToString();
@@ -303,29 +304,22 @@ namespace TongbaoExchangeCalc
 
             if (tongbao == null)
             {
-                sb.AppendLine("选中通宝:")
-                  .AppendLine()
-                  .AppendLine("(无)")
-                  .AppendLine();
+                sb.AppendLine("当前选中通宝: (无)");
             }
             else
             {
-                sb.AppendLine("选中通宝:")
-                  .AppendLine()
-                  .Append('[')
+                sb.Append("当前选中通宝:[")
                   .Append(slotIndex + 1)
                   .Append(']');
                 Helper.AppendTongbaoFullName(sb, tongbao.Id);
-                sb.AppendLine()
-                  .AppendLine();
+                sb.AppendLine();
             }
 
-            sb.Append("交换次数: ")
+            sb.Append("当前交换次数: ")
               .Append(mPlayerData.ExchangeCount)
-              .AppendLine()
               .AppendLine();
 
-            sb.Append("消耗生命值: ")
+            sb.Append("下次交换消耗生命值: ")
               .Append(mPlayerData.NextExchangeCostLifePoint);
 
             lblCurrent.Text = sb.ToString();

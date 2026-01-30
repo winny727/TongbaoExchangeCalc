@@ -11,12 +11,14 @@ namespace TongbaoExchangeCalc
         private Action mOnClearClick;
         private int mTextVersion = 0;
         private bool mIsProcessing;
-        private readonly Queue<Func<Task>> mTaskQueue = new Queue<Func<Task>>(); // 用于保存任务
+        private readonly Queue<Func<Task>> mTaskQueue = new Queue<Func<Task>>();
 
         public RecordForm(MainForm mainForm)
         {
             InitializeComponent();
             this.Icon = mainForm.Icon;
+
+            this.CreateHandle(); // 强制创建Handle
         }
 
         private async Task ExecuteNextTask()
@@ -53,9 +55,10 @@ namespace TongbaoExchangeCalc
 
         public void UpdateScroll()
         {
-            if (textBox1.Text.Length > 0)
+            if (textBox1.TextLength > 0)
             {
-                textBox1.SelectionLength = textBox1.Text.Length - 1;
+                textBox1.SelectionStart = textBox1.TextLength - 1;
+                textBox1.SelectionLength = 0;
                 textBox1.ScrollToCaret();
             }
         }

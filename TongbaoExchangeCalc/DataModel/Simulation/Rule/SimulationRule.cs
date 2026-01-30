@@ -64,7 +64,7 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
 
         public override string GetRuleString()
         {
-            return $"优先交换钱盒槽位{SlotIndex + 1}里的通宝";
+            return $"可交换钱盒槽位{SlotIndex + 1}里的通宝";
         }
     }
 

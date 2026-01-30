@@ -11,6 +11,7 @@ namespace TongbaoExchangeCalc.Impl.View
     {
         private readonly TreeView mRuleTreeView;
         private readonly PlayerData mPlayerData;
+        private bool mIsUpdating;
 
         public RuleTreeViewController(TreeView treeView, PlayerData playerData)
         {
@@ -51,6 +52,7 @@ namespace TongbaoExchangeCalc.Impl.View
 
         public void UpdateRuleTreeView()
         {
+            mIsUpdating = true;
             mRuleTreeView.BeginUpdate();
             try
             {
@@ -87,6 +89,7 @@ namespace TongbaoExchangeCalc.Impl.View
             finally
             {
                 mRuleTreeView.EndUpdate();
+                mIsUpdating = false;
             }
         }
 
@@ -188,6 +191,10 @@ namespace TongbaoExchangeCalc.Impl.View
                     }
                 }
             }
+            else
+            {
+                MessageBox.Show("请选中有效节点", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
 
         private void OnRemoveClick(object sender, EventArgs e)
@@ -205,6 +212,10 @@ namespace TongbaoExchangeCalc.Impl.View
                     selectedNode.TreeView.SelectedNode = parentNode.Nodes[index];
                 }
             }
+            else
+            {
+                MessageBox.Show("请选中有效节点", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
 
         private void OnMoveUpClick(object sender, EventArgs e)
@@ -220,6 +231,10 @@ namespace TongbaoExchangeCalc.Impl.View
                     UpdateRuleTreeView();
                     selectedNode.TreeView.SelectedNode = parentNode.Nodes[index - 1];
                 }
+            }
+            else
+            {
+                MessageBox.Show("请选中有效节点", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
@@ -237,10 +252,19 @@ namespace TongbaoExchangeCalc.Impl.View
                     selectedNode.TreeView.SelectedNode = parentNode.Nodes[index + 1];
                 }
             }
+            else
+            {
+                MessageBox.Show("请选中有效节点", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
 
         private void OnRuleAfterCheck(object sender, TreeViewEventArgs e)
         {
+            if (mIsUpdating)
+            {
+                return;
+            }
+
             if (e.Node?.Tag is SimulationRule rule)
             {
                 rule.Enabled = e.Node.Checked;
