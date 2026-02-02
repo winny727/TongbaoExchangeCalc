@@ -23,7 +23,7 @@ namespace TongbaoExchangeCalc.DataModel
         public static readonly IReadOnlyDictionary<SquadType, SquadDefine> SquadDefines = new Dictionary<SquadType, SquadDefine>()
         {
             { SquadType.Flower, new SquadDefine(10, new int[]{ 1 }) },
-            { SquadType.Tourist, new SquadDefine(13, new int[]{ 1, 1, 2, 2, 3 }) },
+            { SquadType.Tourist, new SquadDefine(12, new int[]{ 1, 1, 2, 2, 3 }) },
             { SquadType.Other, new SquadDefine(10, new int[]{ 1, 1, 2, 2, 3 }) },
         };
 
