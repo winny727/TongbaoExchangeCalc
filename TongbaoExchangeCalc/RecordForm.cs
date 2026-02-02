@@ -23,13 +23,11 @@ namespace TongbaoExchangeCalc
 
         private async Task ExecuteNextTask()
         {
-            Func<Task> task = null;
-
             if (mIsProcessing || mTaskQueue.Count == 0)
                 return;
 
             mIsProcessing = true;
-            task = mTaskQueue.Dequeue();
+            Func<Task> task = mTaskQueue.Dequeue();
 
             try
             {
@@ -67,6 +65,7 @@ namespace TongbaoExchangeCalc
         {
             mTextVersion++;
             textBox1.Clear();
+            mTaskQueue.Clear();
         }
 
         public void SetText(string text)

@@ -31,6 +31,7 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
             mPriorityPhaseFinished = false;
             mSimulateStepResult = SimulateStepResult.Success;
             mUseParallel = false;
+            PlayerData.CheckResValue = SimulationType != SimulationType.ExpectationTongbao;
             CachePlayerData();
             progress?.Report(0);
             mIsSimulating = true;

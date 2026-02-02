@@ -68,6 +68,7 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
             mExchangeableSlotsPosIndex = 0;
             mPriorityPhaseFinished = false;
             mSimulateStepResult = SimulateStepResult.Success;
+            PlayerData.CheckResValue = SimulationType != SimulationType.ExpectationTongbao;
             CachePlayerData();
             mIsSimulating = true;
             DataCollector?.OnSimulateBegin(SimulationType, TotalSimulationCount, PlayerData);
@@ -228,7 +229,7 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
 
             bool force = SimulationType == SimulationType.ExpectationTongbao;
             DataCollector?.OnExchangeStepBegin(new SimulateContext(SimulationStepIndex, ExchangeStepIndex, ExchangeSlotIndex, PlayerData));
-            bool isSuccess = PlayerData.ExchangeTongbao(ExchangeSlotIndex, force);
+            bool isSuccess = PlayerData.ExchangeTongbao(ExchangeSlotIndex);
             ExchangeStepResult result;
             if (isSuccess)
             {

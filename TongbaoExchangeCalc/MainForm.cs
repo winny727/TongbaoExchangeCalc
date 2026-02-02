@@ -289,10 +289,10 @@ namespace TongbaoExchangeCalc
             var sb = mTempStringBuilder;
             sb.Clear();
 
-            StringBuilder AppendResValue(ResType resType, NumericUpDown numeric)
+            StringBuilder AppendResValue(ResType type, NumericUpDown numeric)
             {
-                int value = mPlayerData.GetResValue(resType);
-                sb.Append(Define.GetResName(resType)).Append(": ").Append(value);
+                int value = mPlayerData.GetResValue(type);
+                sb.Append(Define.GetResName(type)).Append(": ").Append(value);
                 if (numeric != null)
                 {
                     int beforeValue = (int)numeric.Value;
@@ -419,7 +419,8 @@ namespace TongbaoExchangeCalc
             mTongbaoSelector.TongbaoSelectMode = TongbaoSelectMode.Dialog; //弹窗询问
             int slotIndex = mSelectedTongbaoSlotIndex;
             mPrintDataCollector?.OnExchangeStepBegin(new SimulateContext(0, mPlayerData.ExchangeCount, slotIndex, mPlayerData));
-            if (!mPlayerData.ExchangeTongbao(slotIndex, force))
+            mPlayerData.CheckResValue = !force;
+            if (!mPlayerData.ExchangeTongbao(slotIndex))
             {
                 Tongbao tongbao = mPlayerData.GetTongbao(slotIndex);
                 if (tongbao == null)

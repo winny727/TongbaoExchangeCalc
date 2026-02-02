@@ -10,6 +10,7 @@ namespace TongbaoExchangeCalc.DataModel
 
         private SquadDefine mSquadDefine;
         private readonly Dictionary<ResType, int> mResValues = new Dictionary<ResType, int>(); // 资源数值
+        public bool CheckResValue { get; set; } = true; // 检测资源数值是否小于最小值
 
         public IReadOnlyDictionary<ResType, int> ResValues => mResValues; // 资源数值只读接口
         public Tongbao[] TongbaoBox { get; private set; } // 钱盒
@@ -49,7 +50,7 @@ namespace TongbaoExchangeCalc.DataModel
 
             InitResValues(resValues);
 
-            if (GetResValue(ResType.LifePoint) <= 0)
+            if (CheckResValue && GetResValue(ResType.LifePoint) <= 0)
             {
                 SetResValue(ResType.LifePoint, 1); // 默认至少1血
             }
@@ -107,6 +108,7 @@ namespace TongbaoExchangeCalc.DataModel
                 // 可选不重置Setting类的数据
                 SquadType = playerData.SquadType;
                 mSquadDefine = Define.SquadDefines[SquadType];
+                CheckResValue = playerData.CheckResValue;
                 SpecialConditionFlag = playerData.SpecialConditionFlag;
                 LockedTongbaoList.Clear();
                 LockedTongbaoList.AddRange(playerData.LockedTongbaoList);
@@ -225,11 +227,11 @@ namespace TongbaoExchangeCalc.DataModel
                 // 添加通宝自带效果
                 for (int i = 0; i < tongbao.ExtraResTypes.Count && i < tongbao.ExtraResCounts.Count; i++)
                 {
-                    ResType resType = tongbao.ExtraResTypes[i];
+                    ResType type = tongbao.ExtraResTypes[i];
                     int resCount = tongbao.ExtraResCounts[i];
-                    if (resType != ResType.None && resCount > 0)
+                    if (type != ResType.None)
                     {
-                        AddResValue(resType, resCount);
+                        AddResValue(type, resCount);
                     }
                 }
                 // 添加通宝品相效果
@@ -330,22 +332,19 @@ namespace TongbaoExchangeCalc.DataModel
                 {
                     mResValues.Add(type, 0);
                 }
+
                 int beforeValue = mResValues[type];
                 int afterValue = beforeValue + value;
-                if (type == ResType.LifePoint)
+
+                if (CheckResValue)
                 {
-                    if (beforeValue > 0 && afterValue <= 0)
+                    int minValue = type == ResType.LifePoint ? 1 : 0;
+                    if (afterValue < minValue)
                     {
-                        afterValue = 1;
+                        afterValue = minValue;
                     }
                 }
-                else
-                {
-                    if (beforeValue >= 0 && afterValue < 0)
-                    {
-                        afterValue = 0;
-                    }
-                }
+
                 mResValues[type] = afterValue;
 
                 if (Define.ParentResType.TryGetValue(type, out var parentResType))
@@ -399,7 +398,7 @@ namespace TongbaoExchangeCalc.DataModel
             return (SpecialConditionFlag & specialCondition) != 0;
         }
 
-        public bool ExchangeTongbao(int slotIndex, bool force = false)
+        public bool ExchangeTongbao(int slotIndex)
         {
             Tongbao tongbao = GetTongbao(slotIndex);
             if (tongbao == null)
@@ -414,7 +413,7 @@ namespace TongbaoExchangeCalc.DataModel
 
             int costLifePoint = NextExchangeCostLifePoint;
             int lifePoint = GetResValue(ResType.LifePoint);
-            if (lifePoint > costLifePoint || force)
+            if (lifePoint > costLifePoint || !CheckResValue)
             {
                 ExchangePool.ExchangeTongbao(Random, this, tongbao, mTempExchangeResults);
                 int newTongbaoId = TongbaoSelector.SelectTongbao(mTempExchangeResults);
