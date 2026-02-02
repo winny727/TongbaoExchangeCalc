@@ -75,7 +75,7 @@ namespace TongbaoExchangeCalc.DataModel
         public int MutexGroup { get; private set; }
         public List<ResType> ExtraResTypes { get; private set; } //通宝自带效果
         public List<int> ExtraResCounts { get; private set; }
-        public RandomRes RandomRes {  get; private set; }
+        public RandomEff RandomEff {  get; private set; }
 
         public bool CanExchange()
         {
@@ -109,23 +109,23 @@ namespace TongbaoExchangeCalc.DataModel
             tongbao.MutexGroup = config.MutexGroup;
             tongbao.ExtraResTypes = config.ExtraResTypes;
             tongbao.ExtraResCounts = config.ExtraResCounts;
-            tongbao.SetupRandomRes(random);
+            tongbao.SetupRandomEff(random);
         }
 
-        public void ApplyRandomRes(RandomRes randomRes)
+        public void ApplyRandomEff(RandomEff randomEff)
         {
-            if (randomRes != null && randomRes.ResType == ResType.None)
+            if (randomEff != null && randomEff.ResType == ResType.None)
             {
-                RandomRes = null;
+                RandomEff = null;
                 return;
             }
 
-            RandomRes = randomRes;
+            RandomEff = randomEff;
         }
 
-        private void SetupRandomRes(IRandomGenerator random)
+        private void SetupRandomEff(IRandomGenerator random)
         {
-            ApplyRandomRes(null);
+            ApplyRandomEff(null);
             if (random == null)
             {
                 return;
@@ -133,20 +133,20 @@ namespace TongbaoExchangeCalc.DataModel
 
             float randomValue = (float)random.NextDouble();
             float cumulativeProbability = 0f;
-            RandomRes randomRes = null;
-            for (int i = 0; i < Define.RandomResDefines.Count; i++)
+            RandomEff randomEff = null;
+            for (int i = 0; i < Define.RandomEffDefines.Count; i++)
             {
-                var define = Define.RandomResDefines[i];
-                cumulativeProbability += define.Probability;
+                var curRandomEff = Define.RandomEffDefines[i];
+                cumulativeProbability += curRandomEff.Probability;
                 if (cumulativeProbability > randomValue)
                 {
-                    randomRes = define;
+                    randomEff = curRandomEff;
                     break;
                 }
             }
-            if (randomRes != null)
+            if (randomEff != null)
             {
-                ApplyRandomRes(randomRes);
+                ApplyRandomEff(randomEff);
             }
         }
     }

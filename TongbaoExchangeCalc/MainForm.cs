@@ -242,16 +242,16 @@ namespace TongbaoExchangeCalc
                   .Append(slotIndex + 1)
                   .Append(']');
                 Helper.AppendTongbaoFullName(sb, tongbao.Id);
-                var randomRes = tongbao.RandomRes;
-                if (randomRes != null && randomRes.ResType != ResType.None)
+                var randomEff = tongbao.RandomEff;
+                if (randomEff != null && randomEff.ResType != ResType.None)
                 {
                     sb.AppendLine()
                       .Append('(')
-                      .Append(randomRes.Name)
+                      .Append(randomEff.Name)
                       .Append(": ")
-                      .Append(Define.GetResName(randomRes.ResType))
+                      .Append(Define.GetResName(randomEff.ResType))
                       .Append('+')
-                      .Append(randomRes.ResCount)
+                      .Append(randomEff.ResCount)
                       .Append(')');
                 }
                 item.Text = sb.ToString();
@@ -378,13 +378,13 @@ namespace TongbaoExchangeCalc
             UpdateView();
         }
 
-        private void OnSelectNewCustomTongbao(int id, int slotIndex, RandomRes randomRes = null)
+        private void OnSelectNewCustomTongbao(int id, int slotIndex, RandomEff randomEff = null)
         {
             mCanRevertPlayerData = false;
             Tongbao tongbao = mPlayerData.CreateTongbao(id);
             if (tongbao != null)
             {
-                tongbao.ApplyRandomRes(randomRes);
+                tongbao.ApplyRandomEff(randomEff);
                 mPlayerData.InsertTongbao(tongbao, slotIndex);
             }
             else
@@ -736,15 +736,15 @@ namespace TongbaoExchangeCalc
                 }
                 if (selectorForm.ShowDialog() == DialogResult.OK)
                 {
-                    if (selectorForm.SelectedRandomRes != null)
+                    if (selectorForm.SelectedRandomEff != null)
                     {
-                        if (selectorForm.SelectedRandomRes.ResType == ResType.None)
+                        if (selectorForm.SelectedRandomEff.ResType == ResType.None)
                         {
                             OnSelectNewCustomTongbao(selectorForm.SelectedId, slotIndex);
                         }
                         else
                         {
-                            OnSelectNewCustomTongbao(selectorForm.SelectedId, slotIndex, selectorForm.SelectedRandomRes);
+                            OnSelectNewCustomTongbao(selectorForm.SelectedId, slotIndex, selectorForm.SelectedRandomEff);
                         }
                     }
                     else

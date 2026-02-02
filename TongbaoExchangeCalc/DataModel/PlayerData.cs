@@ -126,7 +126,7 @@ namespace TongbaoExchangeCalc.DataModel
                     if (tongbao != null)
                     {
                         TongbaoBox[i] = CreateTongbao(tongbao.Id);
-                        TongbaoBox[i].ApplyRandomRes(tongbao.RandomRes);
+                        TongbaoBox[i].ApplyRandomEff(tongbao.RandomEff);
                     }
                 }
             }
@@ -233,10 +233,10 @@ namespace TongbaoExchangeCalc.DataModel
                     }
                 }
                 // 添加通宝品相效果
-                var randomRes = tongbao.RandomRes;
-                if (randomRes != null && randomRes.ResType != ResType.None && randomRes.ResCount != 0)
+                var randomEff = tongbao.RandomEff;
+                if (randomEff != null && randomEff.ResType != ResType.None && randomEff.ResCount != 0)
                 {
-                    AddResValue(randomRes.ResType, randomRes.ResCount);
+                    AddResValue(randomEff.ResType, randomEff.ResCount);
                 }
                 // 福祸相依
                 if (HasSpecialCondition(SpecialConditionFlag.Collectible_Fortune))
@@ -423,7 +423,7 @@ namespace TongbaoExchangeCalc.DataModel
                 {
                     // 升级通宝保留品相重复触发一次
                     newTongbao = CreateTongbao(newTongbaoId);
-                    newTongbao?.ApplyRandomRes(tongbao.RandomRes);
+                    newTongbao?.ApplyRandomEff(tongbao.RandomEff);
                 }
                 else
                 {

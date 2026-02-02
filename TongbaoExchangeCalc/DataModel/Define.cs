@@ -5,13 +5,18 @@ namespace TongbaoExchangeCalc.DataModel
 {
     public static class Define
     {
-        public static readonly IReadOnlyList<RandomRes> RandomResDefines = new List<RandomRes>()
+        public static readonly IReadOnlyList<RandomEff> RandomEffDefines = new List<RandomEff>()
         {
-            new RandomRes("锈色", 0f, ResType.OriginiumIngots, 0), // 投出时，每经过一个节点，获得源石锭+1
-            new RandomRes("存护", 0.0393f, ResType.Shield, 2), // 加入钱盒时，获得护盾值+2
-            new RandomRes("入幻", 0.0291f, ResType.Hope, 1), // 加入钱盒时，获得希望+1
-            new RandomRes("引光", 0.0094f, ResType.Candles, 1), // 加入钱盒时，获得烛火+1
-            new RandomRes("巡游", 0f, ResType.Coupon, 0), // 投出时，每完成一场战斗，获得票券+1
+            //new RandomEff("锈色", 0f, ResType.OriginiumIngots, 0), // 投出时，每经过一个节点，获得源石锭+1
+            new RandomEff("存护", 0.0393f, ResType.Shield, 2), // 加入钱盒时，获得护盾值+2
+            new RandomEff("入幻", 0.0291f, ResType.Hope, 1), // 加入钱盒时，获得希望+1
+            new RandomEff("引光", 0.0094f, ResType.Candles, 1), // 加入钱盒时，获得烛火+1
+            //new RandomEff("巡游", 0f, ResType.Coupon, 0), // 投出时，每完成一场战斗，获得票券+1
+            //new RandomEff("相合", 0f, ResType.None, 0), // 同时被视为花钱、衡钱、厉钱
+            //new RandomEff("易变", 0f, ResType.None, 0), // 通宝回到钱盒时，变化为随机通宝
+            //new RandomEff("易花", 0f, ResType.None, 0), // 通宝回到钱盒时，变化为随机花钱
+            //new RandomEff("易厉", 0f, ResType.None, 0), // 通宝回到钱盒时，变化为随机厉钱
+            //new RandomEff("受引", 0f, ResType.None, 0), // 通宝有概率被额外投出
         };
 
         // 不同分队的钱盒容量/交换消耗生命值
@@ -135,14 +140,14 @@ namespace TongbaoExchangeCalc.DataModel
         Collectible_Fortune = 1 << 0, //福祸相依
     }
 
-    public class RandomRes
+    public class RandomEff
     {
         public readonly string Name;
         public readonly float Probability;
         public readonly ResType ResType;
         public readonly int ResCount;
 
-        public RandomRes(string name, float probability, ResType resType, int resCount)
+        public RandomEff(string name, float probability, ResType resType, int resCount)
         {
             Name = name;
             Probability = probability;
