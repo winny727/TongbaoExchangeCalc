@@ -594,7 +594,7 @@ namespace TongbaoExchangeCalc
                         Tongbao tongbao = playerData.GetTongbao(i);
                         if (tongbao != null)
                         {
-                            // 存名字避免Id修改
+                            // 存名字避免ID修改
                             text += tongbao.Name;
                             var randomEff = tongbao.RandomEff;
                             if (randomEff != null)
