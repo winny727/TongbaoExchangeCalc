@@ -80,7 +80,8 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                     exchangeStepIndex = mSimulationRecords[simulationStepIndex].FinalExchangeStepIndex;
                 }
 
-                int beforeTongbaoId = tempTongbaoBox[record.SlotIndex];
+                bool isSlotIndexValid = record.SlotIndex >= 0 && record.SlotIndex < tempTongbaoBox.Length;
+                int beforeTongbaoId = isSlotIndexValid ? tempTongbaoBox[record.SlotIndex] : -1;
                 var retRecord = new ExchangeRecord
                 {
                     SimulationStepIndex = simulationStepIndex,
@@ -120,7 +121,10 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                 {
                     return;
                 }
-                tempTongbaoBox[record.SlotIndex] = record.TongbaoId;
+                if (isSlotIndexValid)
+                {
+                    tempTongbaoBox[record.SlotIndex] = record.TongbaoId;
+                }
             }
         }
 

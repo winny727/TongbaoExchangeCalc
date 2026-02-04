@@ -521,7 +521,8 @@ namespace TongbaoExchangeCalc
                 SimulationType = type,
                 TotalSimulationCount = (int)numSimCnt.Value,
                 MinimumLifePoint = (int)numMinHp.Value,
-                ExchangeSlotIndex = mSelectedTongbaoSlotIndex,
+                //ExchangeSlotIndex = mSelectedTongbaoSlotIndex,
+                ExchangeSlotIndex = -1,
                 RuleController = RuleTreeViewController,
                 UseMultiThreadOptimize = checkBoxOptimize.Checked,
             };
@@ -531,8 +532,8 @@ namespace TongbaoExchangeCalc
             string simulationName = SimulationDefine.GetSimulationName(options.SimulationType);
             UpdateAsyncSimulateView(true);
 
-            var simumateProgress = CreateProgress($"正在进行[{simulationName}]模拟", options.TotalSimulationCount);
-            await mSimulationController.SimulateAsync(options, simumateProgress);
+            var simulateProgress = CreateProgress($"正在进行[{simulationName}]模拟", options.TotalSimulationCount);
+            await mSimulationController.SimulateAsync(options, simulateProgress);
 
             var resultProgress = CreateProgress($"正在处理数据", mExchangeDataCollector.ExecSimulateStep);
             await mExchangeDataParser.BuildResultAsync(resultProgress);

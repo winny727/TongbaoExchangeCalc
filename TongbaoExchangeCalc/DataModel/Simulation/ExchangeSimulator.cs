@@ -188,15 +188,15 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
 
                     if (tongbao == null)
                     {
-                        // 当前槽位为空，切到下个槽位
-                        mExchangeableSlotsPosIndex++;
-                        continue;
+                        //// 当前槽位为空，切到下个槽位
+                        //mExchangeableSlotsPosIndex++;
+                        //continue;
                     }
                     else if (!tongbao.CanExchange())
                     {
-                        // 当前通宝不可交换，切到下个槽位
-                        mExchangeableSlotsPosIndex++;
-                        continue;
+                        //// 当前通宝不可交换，切到下个槽位
+                        //mExchangeableSlotsPosIndex++;
+                        //continue;
                     }
                     else if (ExpectedTongbaoIds.Contains(tongbao.Id))
                     {
