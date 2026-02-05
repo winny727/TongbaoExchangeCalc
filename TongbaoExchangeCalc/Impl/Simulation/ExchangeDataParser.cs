@@ -197,7 +197,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                 {
                     OutputResultSB.AppendLine("交换结果未解析完成: 用户取消");
                     StatisticResultSB.AppendLine("数据统计结果未解析完成: 用户取消");
-                    SlotStatisticResultSB.Clear();
+                    SlotStatisticResultSB.AppendLine("槽位数据统计结果未解析完成: 用户取消");
                 }
                 mCodeTimer?.Dispose();
                 mCodeTimer = null;
@@ -316,6 +316,10 @@ namespace TongbaoExchangeCalc.Impl.Simulation
             if (!collector.HasOmitRecord)
             {
                 BuildSlotStatisticResult();
+            }
+            else
+            {
+                sb.AppendLine("无法进行槽位统计，未记录全部交换记录 (无记录交换记录/超过省略记录阈值)");
             }
         }
 
