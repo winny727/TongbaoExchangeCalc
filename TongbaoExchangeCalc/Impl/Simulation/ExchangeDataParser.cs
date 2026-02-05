@@ -319,7 +319,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
             }
             else
             {
-                sb.AppendLine("无法进行槽位统计，未记录全部交换记录 (无记录交换记录/超过省略记录阈值)");
+                SlotStatisticResultSB.AppendLine("无法进行槽位统计，未记录全部交换记录 (无记录交换记录/超过省略记录阈值)");
             }
         }
 

@@ -685,9 +685,13 @@ namespace TongbaoExchangeCalc
 
         private void SetRecordFormText()
         {
-            //mRecordForm.SetStringBuilderText(mPrintDataCollector.OutputResultSB);
-            mRecordForm.SetStringBuilderText(mExchangeDataParser.OutputResultSB);
-            mRecordForm.AppendText($"{new string('=', 64)}{Environment.NewLine}");
+            mRecordForm.ClearText();
+            if (checkBoxLogExchange.Checked)
+            {
+                //mRecordForm.SetStringBuilderText(mPrintDataCollector.OutputResultSB);
+                mRecordForm.SetStringBuilderText(mExchangeDataParser.OutputResultSB);
+                mRecordForm.AppendText($"{new string('=', 64)}{Environment.NewLine}");
+            }
             mRecordForm.AppendStringBuilderText(mExchangeDataParser.StatisticResultSB);
             mRecordForm.AppendText(Environment.NewLine);
             mRecordForm.AppendStringBuilderText(mExchangeDataParser.SlotStatisticResultSB);

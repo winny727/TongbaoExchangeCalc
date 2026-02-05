@@ -114,6 +114,7 @@
             this.btnRecordBox = new System.Windows.Forms.Button();
             this.btnSaveBox = new System.Windows.Forms.Button();
             this.btnLoadBox = new System.Windows.Forms.Button();
+            this.checkBoxLogExchange = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.numSimCnt)).BeginInit();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numShield)).BeginInit();
@@ -564,7 +565,7 @@
             // 
             // numMaxRecord
             // 
-            this.numMaxRecord.Location = new System.Drawing.Point(9, 98);
+            this.numMaxRecord.Location = new System.Drawing.Point(9, 120);
             this.numMaxRecord.Maximum = new decimal(new int[] {
             9999,
             0,
@@ -583,7 +584,7 @@
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(65, 100);
+            this.label11.Location = new System.Drawing.Point(65, 125);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(101, 12);
             this.label11.TabIndex = 20;
@@ -618,7 +619,7 @@
             this.checkBoxEnableRecord.AutoSize = true;
             this.checkBoxEnableRecord.Checked = true;
             this.checkBoxEnableRecord.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxEnableRecord.Location = new System.Drawing.Point(9, 64);
+            this.checkBoxEnableRecord.Location = new System.Drawing.Point(9, 86);
             this.checkBoxEnableRecord.Name = "checkBoxEnableRecord";
             this.checkBoxEnableRecord.Size = new System.Drawing.Size(168, 28);
             this.checkBoxEnableRecord.TabIndex = 16;
@@ -766,9 +767,9 @@
             this.groupBox7.Controls.Add(this.btnRemove);
             this.groupBox7.Controls.Add(this.btnAdd);
             this.groupBox7.Controls.Add(this.treeViewRule);
-            this.groupBox7.Location = new System.Drawing.Point(3, 266);
+            this.groupBox7.Location = new System.Drawing.Point(3, 288);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(253, 400);
+            this.groupBox7.Size = new System.Drawing.Size(253, 397);
             this.groupBox7.TabIndex = 22;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "自定义模拟策略";
@@ -824,6 +825,7 @@
             // 
             // groupBox6
             // 
+            this.groupBox6.Controls.Add(this.checkBoxLogExchange);
             this.groupBox6.Controls.Add(this.checkBoxOptimize);
             this.groupBox6.Controls.Add(this.numMaxRecord);
             this.groupBox6.Controls.Add(this.checkBoxEnableRecord);
@@ -831,7 +833,7 @@
             this.groupBox6.Controls.Add(this.label11);
             this.groupBox6.Location = new System.Drawing.Point(3, 135);
             this.groupBox6.Name = "groupBox6";
-            this.groupBox6.Size = new System.Drawing.Size(253, 125);
+            this.groupBox6.Size = new System.Drawing.Size(253, 147);
             this.groupBox6.TabIndex = 13;
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "高级设置";
@@ -1064,6 +1066,18 @@
             this.btnLoadBox.UseVisualStyleBackColor = true;
             this.btnLoadBox.Click += new System.EventHandler(this.btnLoadBox_Click);
             // 
+            // checkBoxLogExchange
+            // 
+            this.checkBoxLogExchange.AutoSize = true;
+            this.checkBoxLogExchange.Checked = true;
+            this.checkBoxLogExchange.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxLogExchange.Location = new System.Drawing.Point(9, 64);
+            this.checkBoxLogExchange.Name = "checkBoxLogExchange";
+            this.checkBoxLogExchange.Size = new System.Drawing.Size(120, 16);
+            this.checkBoxLogExchange.TabIndex = 22;
+            this.checkBoxLogExchange.Text = "输出详细交换记录";
+            this.checkBoxLogExchange.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             this.AcceptButton = this.btnExchange;
@@ -1209,5 +1223,6 @@
         private System.Windows.Forms.ToolStripMenuItem RecordBoxToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ResetBoxToolStripMenuItem;
         private System.Windows.Forms.Panel panelRecordBox;
+        private System.Windows.Forms.CheckBox checkBoxLogExchange;
     }
 }
