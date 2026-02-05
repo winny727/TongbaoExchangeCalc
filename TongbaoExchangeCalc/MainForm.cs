@@ -505,7 +505,7 @@ namespace TongbaoExchangeCalc
                 }
 
                 lastUpdateTick = now;
-                float percent = value * 100f / total;
+                float percent = total > 0 ? value * 100f / total : 0;
                 toolStripProgressBar1.Value = value;
                 toolStripStatusLabel1.Text = $"{title}: {value}/{total} ({percent:F1}%)";
             });

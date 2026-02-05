@@ -20,7 +20,7 @@ namespace TongbaoExchangeCalc.View
                 if (availableWidth <= 0)
                     return 1;
 
-                int full = CellSize + Spacing;
+                int full = Math.Max(1, CellSize + Spacing);
                 int columns = availableWidth / full;
                 return Math.Max(1, columns);
             }

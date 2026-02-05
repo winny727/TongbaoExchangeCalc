@@ -74,6 +74,20 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                 mTotalExchangeCountSum[Type] += exchangeCount;
             }
 
+            public void MergeExchangeCount(ExchangeCount other)
+            {
+                SimulationStepCount += other.SimulationStepCount;
+                if (MinExchangeCount < 0 || other.MinExchangeCount < MinExchangeCount)
+                {
+                    MinExchangeCount = other.MinExchangeCount;
+                }
+                if (MaxExchangeCount < 0 || other.MaxExchangeCount > MaxExchangeCount)
+                {
+                    MaxExchangeCount = other.MaxExchangeCount;
+                }
+                TotalExchangeCount += other.TotalExchangeCount;
+            }
+
             public readonly StringBuilder AppendExchangeCount(StringBuilder sb)
             {
                 if (sb == null)
@@ -83,6 +97,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
 
                 sb.Append("总交换次数: ")
                   .Append(TotalExchangeCount);
+
                 if (mTotalExchangeCountSum.TryGetValue(Type, out int totalExchangedCountSum))
                 {
                     float percent = TotalExchangeCount * 100f / totalExchangedCountSum;
@@ -92,9 +107,12 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                       .Append($"{percent:F2}")
                       .Append("%)");
                 }
-                float avgExchangeCount = SimulationStepCount > 0 ? (float)TotalExchangeCount / SimulationStepCount : 0;
-                sb.Append(", 平均交换次数: ")
-                  .Append($"{avgExchangeCount:F2}");
+                if (SimulationStepCount > 0)
+                {
+                    float avgExchangeCount = (float)TotalExchangeCount / SimulationStepCount;
+                    sb.Append(", 平均交换次数: ")
+                      .Append($"{avgExchangeCount:F2}");
+                }
                 if (MinExchangeCount >= 0)
                 {
                     sb.Append(", 最小交换次数: ")
@@ -120,8 +138,13 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                 return new SlotTongbaoData
                 {
                     TotalCount = 0,
-                    ExchangeCount = ExchangeCount.Create($"Slot{slotIndex}Tongbao"),
+                    ExchangeCount = ExchangeCount.Create(GetExchangeCountKey(slotIndex)),
                 };
+            }
+
+            public static string GetExchangeCountKey(int slotIndex)
+            {
+                return $"Slot{slotIndex}Tongbao";
             }
         }
 
@@ -272,13 +295,10 @@ namespace TongbaoExchangeCalc.Impl.Simulation
             foreach (var item in mTotalSimulateStepResult)
             {
                 string name = SimulationDefine.GetSimulateStepEndReason(item.Key);
-                float percent = item.Value * 100f / collector.ExecSimulateStep;
                 sb.Append(name)
-                  .Append(": ")
-                  .Append(item.Value)
-                  .Append(" (")
-                  .Append($"{percent:F2}")
-                  .AppendLine("%)");
+                  .Append(": ");
+                AppendPercent(sb, item.Value, collector.ExecSimulateStep);
+                sb.AppendLine();
             }
             sb.AppendLine();
 
@@ -319,8 +339,10 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                   .Append("] ");
                 data.ExchangeCount.AppendExchangeCount(sb);
 
-                int totalCount = 0;
-                int otherCount = 0;
+                int totalTongbaoCount = 0;
+                int otherTongbaoCount = 0;
+                string key = SlotTongbaoData.GetExchangeCountKey(i);
+                ExchangeCount otherExchangeCount = ExchangeCount.Create(key);
                 unexchangeableTongbaoDict.Clear();
                 expectedTongbaoDict.Clear();
                 foreach (var item in data.SlotTongbaoDatas)
@@ -346,9 +368,10 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                     }
                     else
                     {
-                        otherCount += item.Value.ExchangeCount.TotalExchangeCount;
+                        otherTongbaoCount += item.Value.TotalCount;
+                        otherExchangeCount.MergeExchangeCount(item.Value.ExchangeCount);
                     }
-                    totalCount += item.Value.ExchangeCount.TotalExchangeCount;
+                    totalTongbaoCount += item.Value.TotalCount;
                 }
                 if (unexchangeableTongbaoDict.Count > 0)
                 {
@@ -358,7 +381,9 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                     {
                         sb.AppendLine()
                           .Append(item.Key)
-                          .Append(' ');
+                          .Append(" [");
+                        AppendPercent(sb, item.Value.TotalCount, totalTongbaoCount);
+                        sb.Append("] ");
                         item.Value.ExchangeCount.AppendExchangeCount(sb);
                     }
                 }
@@ -370,21 +395,20 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                     {
                         sb.AppendLine()
                           .Append(item.Key)
-                          .Append(' ');
+                          .Append(" [");
+                        AppendPercent(sb, item.Value.TotalCount, totalTongbaoCount);
+                        sb.Append("] ");
                         item.Value.ExchangeCount.AppendExchangeCount(sb);
                     }
                 }
-                if (otherCount > 0)
+                if (otherExchangeCount.TotalExchangeCount > 0)
                 {
-                    float percent = otherCount * 100f / totalCount;
+                    //otherExchangeCount.SimulationStepCount = ExchangeCount.GetTotalExchangeCountSum(key);
                     sb.AppendLine()
-                      .Append("其它原因停止交换/切换槽位 (生命值限制/通宝无法交换/槽位为空): ")
-                      .Append(otherCount)
-                      .Append('/')
-                      .Append(totalCount)
-                      .Append(" (")
-                      .Append($"{percent:F2}")
-                      .Append("%)");
+                      .Append("其它原因停止交换/切换槽位 (生命值限制/通宝无法交换/槽位为空) [");
+                    AppendPercent(sb, otherTongbaoCount, totalTongbaoCount);
+                    sb.Append("] ");
+                    otherExchangeCount.AppendExchangeCount(sb);
                 }
 
                 sb.AppendLine()
@@ -418,6 +442,24 @@ namespace TongbaoExchangeCalc.Impl.Simulation
             StatisticResultSB.Clear();
             SlotStatisticResultSB.Clear();
             ExchangeCount.ClearTotalExchangeCountSum();
+        }
+
+        private StringBuilder AppendPercent(StringBuilder sb, int value, int total)
+        {
+            if (sb == null)
+            {
+                return null;
+            }
+
+            float percent = total > 0 ? value * 100f / total : 0;
+            sb.Append(value)
+              .Append("/")
+              .Append(total)
+              .Append(" (")
+              .Append($"{percent:F2}")
+              .Append("%)");
+
+            return sb;
         }
 
         private bool ExchangeRecordCallback(ExchangeRecord record)

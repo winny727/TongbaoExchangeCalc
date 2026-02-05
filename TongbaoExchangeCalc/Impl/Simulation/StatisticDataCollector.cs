@@ -129,7 +129,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
             foreach (var item in mTotalSimulateStepResult)
             {
                 string name = SimulationDefine.GetSimulateStepEndReason(item.Key);
-                float percent = item.Value * 100f / mExecSimulateStep;
+                float percent = mExecSimulateStep > 0 ? item.Value * 100f / mExecSimulateStep : 0;
                 mTempStringBuilder.Append(name)
                                   .Append(": ")
                                   .Append(item.Value)

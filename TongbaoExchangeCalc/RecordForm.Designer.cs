@@ -44,14 +44,14 @@
             this.textBox1.Name = "textBox1";
             this.textBox1.ReadOnly = true;
             this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox1.Size = new System.Drawing.Size(661, 369);
+            this.textBox1.Size = new System.Drawing.Size(725, 393);
             this.textBox1.TabIndex = 0;
             // 
             // btnClose
             // 
             this.btnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnClose.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnClose.Location = new System.Drawing.Point(571, 385);
+            this.btnClose.Location = new System.Drawing.Point(635, 409);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(100, 23);
             this.btnClose.TabIndex = 2;
@@ -63,7 +63,7 @@
             // 
             this.btnClear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnClear.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnClear.Location = new System.Drawing.Point(466, 385);
+            this.btnClear.Location = new System.Drawing.Point(530, 409);
             this.btnClear.Name = "btnClear";
             this.btnClear.Size = new System.Drawing.Size(100, 23);
             this.btnClear.TabIndex = 3;
@@ -76,7 +76,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnClose;
-            this.ClientSize = new System.Drawing.Size(680, 417);
+            this.ClientSize = new System.Drawing.Size(744, 441);
             this.Controls.Add(this.btnClear);
             this.Controls.Add(this.btnClose);
             this.Controls.Add(this.textBox1);
