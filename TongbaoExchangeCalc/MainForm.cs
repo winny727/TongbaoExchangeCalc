@@ -90,8 +90,8 @@ namespace TongbaoExchangeCalc
             // 新版逻辑改为先用ExchangeDataCollector收集数据再用ExchangeDataParser解析为文本结果
             mPrintDataCollector = new PrintDataCollector(); // 单次交换的简单文本输出还是用原来的PrintDataCollector
             mExchangeDataCollector = new ExchangeDataCollector(2000);
-            mExchangeDataParser = new ExchangeDataParser(mExchangeDataCollector);
             mSimulationController = new SimulationController(mPlayerData, new SimulationTimer(), mExchangeDataCollector);
+            mExchangeDataParser = new ExchangeDataParser(mExchangeDataCollector, mSimulationController.ExchangeSimulator);
         }
 
         private void InitPlayerData()
@@ -577,8 +577,8 @@ namespace TongbaoExchangeCalc
             UpdateAsyncSimulateView(false);
             GC.Collect();
 
-            //MessageBox.Show(mStatisticDataCollector.GetOutputResult(), "模拟期望", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            MessageBox.Show(mExchangeDataParser.StatisticResult, "模拟期望", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //MessageBox.Show(mStatisticDataCollector.GetOutputResult(), "模拟统计结果", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show($"{mExchangeDataParser.StatisticResult}\n\n(各个槽位的详细统计数据请在交换记录查看窗口查看。)", "模拟统计结果", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             toolStripStatusLabel1.Text = "单击选中通宝，双击添加/更改通宝";
             toolStripProgressBar1.Value = 0;
@@ -689,6 +689,8 @@ namespace TongbaoExchangeCalc
             mRecordForm.SetStringBuilderText(mExchangeDataParser.OutputResultSB);
             mRecordForm.AppendText($"{new string('=', 64)}{Environment.NewLine}");
             mRecordForm.AppendStringBuilderText(mExchangeDataParser.StatisticResultSB);
+            mRecordForm.AppendText(Environment.NewLine);
+            mRecordForm.AppendStringBuilderText(mExchangeDataParser.SlotStatisticResultSB);
             mOutputResultChanged = false;
         }
 

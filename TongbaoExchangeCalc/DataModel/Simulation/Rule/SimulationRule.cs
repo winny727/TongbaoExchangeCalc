@@ -15,7 +15,7 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
 
     public abstract class IntParamRule : SimulationRule
     {
-        public int IntParam { get; private set; }
+        public int IntParam { get; }
 
         public IntParamRule(int param, bool enabled = true)
         {

@@ -32,6 +32,8 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
                     return "已达目标生命值限制";
                 case SimulateStepResult.ExpectationAchieved:
                     return "已获得期望通宝";
+                case SimulateStepResult.ValidTongbaoNotExist:
+                    return "没有可以交换的通宝";
                 case SimulateStepResult.TargetFilledExchangeableSlots:
                     return "不可交换通宝已填满可交换槽位";
                 case SimulateStepResult.ExchangeStepLimitReached:
@@ -108,12 +110,12 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
         }
     }
 
-    public struct SimulateContext
+    public readonly struct SimulateContext
     {
-        public int SimulationStepIndex { get; private set; }
-        public int ExchangeStepIndex { get; private set; }
-        public int SlotIndex { get; private set; }
-        public PlayerData PlayerData { get; private set; }
+        public int SimulationStepIndex { get; }
+        public int ExchangeStepIndex { get; }
+        public int SlotIndex { get; }
+        public PlayerData PlayerData { get; }
 
         public SimulateContext(int simulationStepIndex, int exchangeStepIndex, int slotIndex, PlayerData playerData)
         {
@@ -136,10 +138,11 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
         Success = 0,
         LifePointLimitReached = 1,
         ExpectationAchieved = 2,
-        TargetFilledExchangeableSlots = 3,
-        ExchangeStepLimitReached = 4,
-        ExchangeFailed = 5,
-        CancellationRequested = 6,
+        ValidTongbaoNotExist = 3,
+        TargetFilledExchangeableSlots = 4,
+        ExchangeStepLimitReached = 5,
+        ExchangeFailed = 6,
+        CancellationRequested = 7,
     }
 
     public enum ExchangeStepResult : sbyte

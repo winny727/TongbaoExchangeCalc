@@ -18,6 +18,7 @@ namespace TongbaoExchangeCalc.Impl.View
             mRuleTreeView = treeView ?? throw new ArgumentNullException(nameof(treeView));
             mPlayerData = playerData ?? throw new ArgumentNullException(nameof(playerData));
 
+            mRuleTreeView.AfterSelect += OnRuleAfterSelect;
             mRuleTreeView.AfterCheck += OnRuleAfterCheck;
             mRuleTreeView.DoubleClick += OnRuleDoubleClick;
             mRuleTreeView.KeyDown += OnTreeViewKeyDown;
@@ -256,6 +257,17 @@ namespace TongbaoExchangeCalc.Impl.View
             {
                 MessageBox.Show("请选中有效节点", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
+        }
+
+        private void OnRuleAfterSelect(object sender, TreeViewEventArgs e)
+        {
+            if (mIsUpdating)
+            {
+                return;
+            }
+
+            e.Node.Checked = !e.Node.Checked;
+            mRuleTreeView.Invalidate();
         }
 
         private void OnRuleAfterCheck(object sender, TreeViewEventArgs e)

@@ -46,7 +46,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
         }
 
         // 避免大量模拟时字符串拼接导致频繁GC，用StringBuilder
-        public StringBuilder OutputResultSB { get; private set; } = new StringBuilder();
+        public StringBuilder OutputResultSB { get; } = new StringBuilder();
         public string OutputResult => OutputResultSB.ToString();
 
         public PrintDataCollector(int maxExchangeRecord = -1)

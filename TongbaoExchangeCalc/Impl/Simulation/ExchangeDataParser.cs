@@ -10,7 +10,123 @@ namespace TongbaoExchangeCalc.Impl.Simulation
 {
     public class ExchangeDataParser
     {
+        private struct SlotExchangeData
+        {
+            public ExchangeCount ExchangeCount;
+            public Dictionary<int, SlotTongbaoData> SlotTongbaoDatas;
+
+            public static SlotExchangeData Create()
+            {
+                return new SlotExchangeData
+                {
+                    ExchangeCount = ExchangeCount.Create("Slot"),
+                    SlotTongbaoDatas = new Dictionary<int, SlotTongbaoData>(),
+                };
+            }
+        }
+
+        private struct ExchangeCount
+        {
+            private readonly string Type;
+            public int SimulationStepCount;
+            public int MinExchangeCount;
+            public int MaxExchangeCount;
+            public int TotalExchangeCount;
+
+            private static readonly Dictionary<string, int> mTotalExchangeCountSum = new Dictionary<string, int>();
+
+            private ExchangeCount(string type)
+            {
+                Type = type;
+                SimulationStepCount = 0;
+                MinExchangeCount = -1;
+                MaxExchangeCount = -1;
+                TotalExchangeCount = 0;
+            }
+
+            public static ExchangeCount Create(string type)
+            {
+                return new ExchangeCount(type);
+            }
+
+            public static void ClearTotalExchangeCountSum()
+            {
+                mTotalExchangeCountSum.Clear();
+            }
+
+            public void AddExchangeCount(int exchangeCount)
+            {
+                SimulationStepCount++;
+                if (MinExchangeCount < 0 || exchangeCount < MinExchangeCount)
+                {
+                    MinExchangeCount = exchangeCount;
+                }
+                if (MaxExchangeCount < 0 || exchangeCount > MaxExchangeCount)
+                {
+                    MaxExchangeCount = exchangeCount;
+                }
+                TotalExchangeCount += exchangeCount;
+
+                if (!mTotalExchangeCountSum.ContainsKey(Type))
+                {
+                    mTotalExchangeCountSum.Add(Type, 0);
+                }
+                mTotalExchangeCountSum[Type] += exchangeCount;
+            }
+
+            public readonly StringBuilder AppendExchangeCount(StringBuilder sb)
+            {
+                if (sb == null)
+                {
+                    return null;
+                }
+
+                sb.Append("总交换次数: ")
+                  .Append(TotalExchangeCount);
+                if (mTotalExchangeCountSum.TryGetValue(Type, out int totalExchangedCountSum))
+                {
+                    float percent = TotalExchangeCount * 100f / totalExchangedCountSum;
+                    sb.Append('/')
+                      .Append(totalExchangedCountSum)
+                      .Append(" (")
+                      .Append($"{percent:F2}")
+                      .Append("%)");
+                }
+                float avgExchangeCount = SimulationStepCount > 0 ? (float)TotalExchangeCount / SimulationStepCount : 0;
+                sb.Append(", 平均交换次数: ")
+                  .Append($"{avgExchangeCount:F2}");
+                if (MinExchangeCount >= 0)
+                {
+                    sb.Append(", 最小交换次数: ")
+                      .Append(MinExchangeCount);
+                }
+                if (MaxExchangeCount >= 0)
+                {
+                    sb.Append(", 最大交换次数: ")
+                      .Append(MaxExchangeCount);
+                }
+
+                return sb;
+            }
+        }
+
+        private struct SlotTongbaoData
+        {
+            public int TotalCount; // 通宝在这个槽位的总出现次数
+            public ExchangeCount ExchangeCount; // 交换出该通宝的交换次数
+
+            public static SlotTongbaoData Create(int slotIndex)
+            {
+                return new SlotTongbaoData
+                {
+                    TotalCount = 0,
+                    ExchangeCount = ExchangeCount.Create($"Slot{slotIndex}Tongbao"),
+                };
+            }
+        }
+
         private readonly ExchangeDataCollector mExchangeDataCollector;
+        private readonly ExchangeSimulator mExchangeSimulator;
         private CancellationTokenSource mCancellationTokenSource;
         private IProgress<int> mAsyncProgress;
 
@@ -18,21 +134,29 @@ namespace TongbaoExchangeCalc.Impl.Simulation
         private bool mIsClearDataRequested = false;
 
         // 打印数据
-        public StringBuilder OutputResultSB { get; private set; } = new StringBuilder();
+        public StringBuilder OutputResultSB { get; } = new StringBuilder();
         public string OutputResult => OutputResultSB.ToString();
 
         // 统计数据
+        private int mCurrentSlotIndex = -1;
+        private int mSlotExchangeCount = 0;
+        private int mSlotLastTongbaoId = -1;
         private readonly Dictionary<SimulateStepResult, int> mTotalSimulateStepResult = new Dictionary<SimulateStepResult, int>();
+        private readonly Dictionary<int, SlotExchangeData> mSlotExchangeDatas = new Dictionary<int, SlotExchangeData>();
         private readonly Dictionary<ResType, int> mTotalResChanged = new Dictionary<ResType, int>();
-        public StringBuilder StatisticResultSB { get; private set; } = new StringBuilder();
+        public StringBuilder StatisticResultSB { get; } = new StringBuilder();
         public string StatisticResult => StatisticResultSB.ToString();
+
+        public StringBuilder SlotStatisticResultSB { get; } = new StringBuilder();
+        public string SlotStatisticResult => SlotStatisticResultSB.ToString();
 
         private CodeTimer mCodeTimer;
 
 
-        public ExchangeDataParser(ExchangeDataCollector collector)
+        public ExchangeDataParser(ExchangeDataCollector collector, ExchangeSimulator simulator)
         {
             mExchangeDataCollector = collector ?? throw new ArgumentNullException(nameof(collector));
+            mExchangeSimulator = simulator ?? throw new ArgumentNullException(nameof(simulator));
         }
 
         public async Task BuildResultAsync(IProgress<int> progress = null)
@@ -50,6 +174,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                 {
                     OutputResultSB.AppendLine("交换结果未解析完成: 用户取消");
                     StatisticResultSB.AppendLine("数据统计结果未解析完成: 用户取消");
+                    SlotStatisticResultSB.Clear();
                 }
                 mCodeTimer?.Dispose();
                 mCodeTimer = null;
@@ -90,7 +215,9 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                 }
 
                 AppendSimulateStepBegin(i);
+                mCurrentSlotIndex = -1;
                 collector.ForEachExchangeRecords(i, ExchangeRecordCallback);
+                RecordSlotData();
                 AppendSimulateStepEnd(i);
                 mAsyncProgress?.Report(i);
             }
@@ -150,22 +277,120 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                   .Append(": ")
                   .Append(item.Value)
                   .Append(" (")
-                  .Append(percent)
+                  .Append($"{percent:F2}")
                   .AppendLine("%)");
             }
             sb.AppendLine();
-
 
             sb.AppendLine("期望资源变化:");
             foreach (var item in mTotalResChanged)
             {
                 string name = Define.GetResName(item.Key);
-                float expectation = (float)item.Value / collector.ExecSimulateStep;
+                float expectation = collector.ExecSimulateStep > 0 ? (float)item.Value / collector.ExecSimulateStep : 0;
                 sb.Append(name)
                   .Append(": ")
                   .Append(expectation)
                   .AppendLine();
             }
+
+            if (!collector.HasOmitRecord)
+            {
+                BuildSlotStatisticResult();
+            }
+        }
+
+        private void BuildSlotStatisticResult()
+        {
+            var sb = SlotStatisticResultSB;
+
+            var unexchangeableTongbaoDict = new Dictionary<string, SlotTongbaoData>();
+            var expectedTongbaoDict = new Dictionary<string, SlotTongbaoData>();
+
+            sb.AppendLine("槽位统计: ");
+            for (int i = 0; i < mExchangeSimulator.PlayerData.MaxTongbaoCount; i++)
+            {
+                if (!mSlotExchangeDatas.TryGetValue(i, out var data))
+                {
+                    continue;
+                }
+
+                sb.Append('[')
+                  .Append(i + 1)
+                  .Append("] ");
+                data.ExchangeCount.AppendExchangeCount(sb);
+
+                int totalCount = 0;
+                int otherCount = 0;
+                unexchangeableTongbaoDict.Clear();
+                expectedTongbaoDict.Clear();
+                foreach (var item in data.SlotTongbaoDatas)
+                {
+                    int tongbaoId = item.Key;
+                    if (mExchangeSimulator.UnexchangeableTongbaoIds.Contains(tongbaoId))
+                    {
+                        // 不可交换通宝
+                        string name = Helper.GetTongbaoFullName(tongbaoId);
+                        if (!string.IsNullOrEmpty(name))
+                        {
+                            unexchangeableTongbaoDict.Add(name, item.Value);
+                        }
+                    }
+                    else if (mExchangeSimulator.ExpectedTongbaoIds.Contains(tongbaoId))
+                    {
+                        // 期望通宝
+                        string name = Helper.GetTongbaoFullName(tongbaoId);
+                        if (!string.IsNullOrEmpty(name))
+                        {
+                            expectedTongbaoDict.Add(name, item.Value);
+                        }
+                    }
+                    else
+                    {
+                        otherCount += item.Value.ExchangeCount.TotalExchangeCount;
+                    }
+                    totalCount += item.Value.ExchangeCount.TotalExchangeCount;
+                }
+                if (unexchangeableTongbaoDict.Count > 0)
+                {
+                    sb.AppendLine()
+                      .Append("交换出不可交换通宝: ");
+                    foreach (var item in unexchangeableTongbaoDict)
+                    {
+                        sb.AppendLine()
+                          .Append(item.Key)
+                          .Append(' ');
+                        item.Value.ExchangeCount.AppendExchangeCount(sb);
+                    }
+                }
+                if (expectedTongbaoDict.Count > 0)
+                {
+                    sb.AppendLine()
+                      .Append("交换出期望通宝: ");
+                    foreach (var item in expectedTongbaoDict)
+                    {
+                        sb.AppendLine()
+                          .Append(item.Key)
+                          .Append(' ');
+                        item.Value.ExchangeCount.AppendExchangeCount(sb);
+                    }
+                }
+                if (otherCount > 0)
+                {
+                    float percent = otherCount * 100f / totalCount;
+                    sb.AppendLine()
+                      .Append("其它原因停止交换/切换槽位 (生命值限制/通宝无法交换/槽位为空): ")
+                      .Append(otherCount)
+                      .Append('/')
+                      .Append(totalCount)
+                      .Append(" (")
+                      .Append($"{percent:F2}")
+                      .Append("%)");
+                }
+
+                sb.AppendLine()
+                  .AppendLine();
+            }
+            sb.AppendLine();
         }
 
         public void ClearData()
@@ -184,14 +409,19 @@ namespace TongbaoExchangeCalc.Impl.Simulation
         {
             mIsClearDataRequested = false;
             OutputResultSB.Clear();
+            mCurrentSlotIndex = -1;
+            mSlotExchangeCount = 0;
+            mSlotLastTongbaoId = -1;
             mTotalSimulateStepResult.Clear();
+            mSlotExchangeDatas.Clear();
             mTotalResChanged.Clear();
             StatisticResultSB.Clear();
+            SlotStatisticResultSB.Clear();
+            ExchangeCount.ClearTotalExchangeCountSum();
         }
 
         private bool ExchangeRecordCallback(ExchangeRecord record)
         {
-            var sb = OutputResultSB;
             var collector = mExchangeDataCollector;
 
             if (mCancellationTokenSource != null && mCancellationTokenSource.IsCancellationRequested)
@@ -221,9 +451,52 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                 return true;
             }
 
+            if (mCurrentSlotIndex != record.SlotIndex)
+            {
+                RecordSlotData();
+                mSlotExchangeCount = 0;
+                mCurrentSlotIndex = record.SlotIndex;
+            }
+
+            mSlotExchangeCount++;
+            mSlotLastTongbaoId = record.AfterTongbaoId;
+
             AppendExchangeStep(record);
 
             return true;
+        }
+
+        private void RecordSlotData()
+        {
+            var collector = mExchangeDataCollector;
+            if (collector.HasOmitRecord)
+            {
+                return;
+            }
+
+            if (mCurrentSlotIndex >= 0)
+            {
+                // 统计上个槽位的数据
+                if (!mSlotExchangeDatas.TryGetValue(mCurrentSlotIndex, out var data))
+                {
+                    data = SlotExchangeData.Create();
+                }
+                data.ExchangeCount.AddExchangeCount(mSlotExchangeCount);
+
+                TongbaoConfig config = TongbaoConfig.GetTongbaoConfigById(mSlotLastTongbaoId);
+                if (config != null)
+                {
+                    if (!data.SlotTongbaoDatas.TryGetValue(mSlotLastTongbaoId, out var tongbaoData))
+                    {
+                        tongbaoData = SlotTongbaoData.Create(mCurrentSlotIndex);
+                    }
+                    tongbaoData.ExchangeCount.AddExchangeCount(mSlotExchangeCount);
+                    tongbaoData.TotalCount++;
+                    data.SlotTongbaoDatas[mSlotLastTongbaoId] = tongbaoData;
+                }
+
+                mSlotExchangeDatas[mCurrentSlotIndex] = data;
+            }
         }
 
         private void AppendSimulateStepBegin(int simulationStepIndex)
@@ -334,7 +607,6 @@ namespace TongbaoExchangeCalc.Impl.Simulation
         private void AppendExchangeStep(in ExchangeRecord record)
         {
             var sb = OutputResultSB;
-            var collector = mExchangeDataCollector;
 
             sb.Append('(')
               .Append(record.SimulationStepIndex + 1)

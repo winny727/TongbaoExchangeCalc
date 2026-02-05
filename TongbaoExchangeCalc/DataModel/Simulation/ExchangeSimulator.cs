@@ -164,6 +164,26 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
                 }
             }
 
+            // 可交换槽位/可交换通宝检测
+            if (ExchangeableSlots.Count > 0)
+            {
+                bool hasValidTongbao = false;
+                for (int i = 0; i < ExchangeableSlots.Count; i++)
+                {
+                    Tongbao slotTongbao = PlayerData.GetTongbao(i);
+                    if (slotTongbao != null && slotTongbao.CanExchange())
+                    {
+                        hasValidTongbao = true;
+                        break;
+                    }
+                }
+                if (!hasValidTongbao)
+                {
+                    BreakSimulationStep(SimulateStepResult.ValidTongbaoNotExist);
+                    return;
+                }
+            }
+
             Tongbao tongbao = PlayerData.GetTongbao(ExchangeSlotIndex);
             if (ExchangeableSlots.Count > 0)
             {
@@ -188,15 +208,15 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
 
                     if (tongbao == null)
                     {
-                        //// 当前槽位为空，切到下个槽位
-                        //mExchangeableSlotsPosIndex++;
-                        //continue;
+                        // 当前槽位为空，切到下个槽位
+                        mExchangeableSlotsPosIndex++;
+                        continue;
                     }
                     else if (!tongbao.CanExchange())
                     {
-                        //// 当前通宝不可交换，切到下个槽位
-                        //mExchangeableSlotsPosIndex++;
-                        //continue;
+                        // 当前通宝不可交换，切到下个槽位
+                        mExchangeableSlotsPosIndex++;
+                        continue;
                     }
                     else if (ExpectedTongbaoIds.Contains(tongbao.Id))
                     {

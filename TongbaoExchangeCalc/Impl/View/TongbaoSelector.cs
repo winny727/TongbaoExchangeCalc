@@ -17,7 +17,7 @@ namespace TongbaoExchangeCalc.Impl.View
     {
         public TongbaoSelectMode TongbaoSelectMode { get; set; }
         public int SpecificTongbaoId { get; set; }
-        public IRandomGenerator Random { get; private set; }
+        public IRandomGenerator Random { get; }
 
         public TongbaoSelector(IRandomGenerator random)
         {

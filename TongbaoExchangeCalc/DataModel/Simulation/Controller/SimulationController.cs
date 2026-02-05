@@ -7,7 +7,7 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
 {
     public class SimulationController
     {
-        private readonly ExchangeSimulator mExchangeSimulator;
+        public ExchangeSimulator ExchangeSimulator { get; }
 
         private CancellationTokenSource mCancellationTokenSource;
         public bool IsAsyncSimulating => mCancellationTokenSource != null;
@@ -22,8 +22,8 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
             {
                 throw new ArgumentNullException(nameof(timer));
             }
-            //mExchangeSimulator = new ExchangeSimulator(playerData, timer, dataCollector);
-            mExchangeSimulator = new ParallelExchangeSimulator(playerData, timer, dataCollector);
+            //ExchangeSimulator = new ExchangeSimulator(playerData, timer, dataCollector);
+            ExchangeSimulator = new ParallelExchangeSimulator(playerData, timer, dataCollector);
         }
 
         public void Simulate(SimulationOptions options)
@@ -33,7 +33,7 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
                 throw new ArgumentNullException(nameof(options));
             }
 
-            ApplySimulationOptions(mExchangeSimulator, options);
+            ApplySimulationOptions(ExchangeSimulator, options);
             SimulateInternal(CancellationToken.None);
         }
 
@@ -44,7 +44,7 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
                 throw new InvalidOperationException("Simulation Executing.");
             }
 
-            ApplySimulationOptions(mExchangeSimulator, options);
+            ApplySimulationOptions(ExchangeSimulator, options);
             mCancellationTokenSource = new CancellationTokenSource();
 
             try
@@ -65,18 +65,18 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
 
         public void RevertPlayerData()
         {
-            mExchangeSimulator?.RevertPlayerData();
+            ExchangeSimulator?.RevertPlayerData();
         }
 
         private void SimulateInternal(CancellationToken token, IProgress<int> progress = null)
         {
-            if (mExchangeSimulator is ParallelExchangeSimulator parallelSimulator)
+            if (ExchangeSimulator is ParallelExchangeSimulator parallelSimulator)
             {
                 parallelSimulator.Simulate(token, progress);
             }
             else
             {
-                mExchangeSimulator.Simulate();
+                ExchangeSimulator.Simulate();
             }
         }
 

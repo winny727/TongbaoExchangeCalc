@@ -13,6 +13,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
         public bool RecordEachExchange { get; set; } = true;
         public int MaxExchangeRecord { get; set; } = -1; // 交换次数过多则省略，-1表示无限制
         public bool OmitExcessiveExchanges => MaxExchangeRecord >= 0; // 省略过多的交换信息
+        public bool HasOmitRecord { get; private set; } = false;
         public SimulationType SimulationType { get; private set; }
         public int TotalSimulateStep { get; private set; }
         public int ExecSimulateStep { get; private set; }
@@ -194,6 +195,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                     }
                 }
 
+                HasOmitRecord = true;
                 mSimulationRecords[context.SimulationStepIndex].ExchangeRecords.Add(record);
             }
 
@@ -279,6 +281,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
 
         public void ClearData()
         {
+            HasOmitRecord = false;
             TotalSimulateStep = 0;
             ExecSimulateStep = 0;
             TotalSimulateTime = 0;

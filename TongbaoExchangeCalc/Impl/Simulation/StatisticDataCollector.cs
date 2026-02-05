@@ -134,7 +134,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                                   .Append(": ")
                                   .Append(item.Value)
                                   .Append(" (")
-                                  .Append(percent)
+                                  .Append($"{percent:F2}")
                                   .AppendLine("%)");
             }
             mTempStringBuilder.AppendLine();
@@ -144,7 +144,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
             foreach (var item in mTotalResChanged)
             {
                 string name = Define.GetResName(item.Key);
-                float expectation = (float)item.Value / mExecSimulateStep;
+                float expectation = mExecSimulateStep > 0 ? (float)item.Value / mExecSimulateStep : 0;
                 mTempStringBuilder.Append(name)
                                   .Append(": ")
                                   .Append(expectation)
