@@ -54,4 +54,6 @@ namespace TongbaoExchangeCalc.Undo.Commands
         public ExchangeTongbaoCommand(PlayerData playerData, int slotIndex)
             : base(playerData, () => playerData.ExchangeTongbao(slotIndex)) { }
     }
+
+    // TODO 其它操作的UndoCommand
 }
