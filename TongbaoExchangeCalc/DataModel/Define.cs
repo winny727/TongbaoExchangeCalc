@@ -109,9 +109,12 @@ namespace TongbaoExchangeCalc.DataModel
         PrimalFarmingCandles = 5, //鸿蒙开荒烛火
         Hope = 6, //希望
         Shield = 7, //护盾
-        //Collectible = 8, //收藏品
 
-        Count,
+        // 标记通宝交换可获取资源的范围，方便模拟时区分通宝资源和其它资源（如收藏品）以及处理数据存储结构
+        MinTongbaoResIndex = 1,
+        MaxTongbaoResIndex = 7,
+
+        //Collectible = 8, //收藏品
 
         /*
         HP 目标生命

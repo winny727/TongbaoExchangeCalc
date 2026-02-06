@@ -64,7 +64,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                 return;
             }
 
-            int resCount = (int)ResType.Count - 1;
+            int resCount = ResType.MaxTongbaoResIndex - ResType.MinTongbaoResIndex + 1;
             var tempTongbaoBox = new int[mInitialPlayerData.MaxTongbaoCount];
             for (int i = 0; i < mInitialPlayerData.MaxTongbaoCount; i++)
             {
@@ -96,9 +96,12 @@ namespace TongbaoExchangeCalc.Impl.Simulation
 
                 unsafe
                 {
-                    for (int k = 0; k < resCount; k++)
+                    int minIndex = (int)ResType.MinTongbaoResIndex;
+                    int maxIndex = (int)ResType.MaxTongbaoResIndex;
+                    for (int j = minIndex; j <= maxIndex; j++)
                     {
-                        ResType type = (ResType)(k + 1);
+                        ResType type = (ResType)j;
+                        int arrIndex = j - minIndex;
                         int beforeValue;
                         if (i == 0)
                         {
@@ -107,13 +110,13 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                         else
                         {
                             var lastRecord = records[i - 1];
-                            beforeValue = lastRecord.ResRecords[k];
+                            beforeValue = lastRecord.ResRecords[arrIndex];
                         }
-                        retRecord.ResValueRecords[k] = new ResValueRecord
+                        retRecord.ResValueRecords[arrIndex] = new ResValueRecord
                         {
                             ResType = type,
                             BeforeValue = beforeValue,
-                            AfterValue = record.ResRecords[k]
+                            AfterValue = record.ResRecords[arrIndex]
                         };
                     }
                 }
@@ -187,11 +190,13 @@ namespace TongbaoExchangeCalc.Impl.Simulation
 
                 unsafe
                 {
-                    int resCount = (int)ResType.Count - 1;
-                    for (int i = 0; i < resCount; i++)
+                    int minIndex = (int)ResType.MinTongbaoResIndex;
+                    int maxIndex = (int)ResType.MaxTongbaoResIndex;
+                    for (int i = minIndex; i <= maxIndex; i++)
                     {
-                        int resValue = context.PlayerData.GetResValue((ResType)(i + 1));
-                        record.ResRecords[i] = (Int16)resValue;
+                        int arrIndex = i - minIndex;
+                        int resValue = context.PlayerData.GetResValue((ResType)i);
+                        record.ResRecords[arrIndex] = (Int16)resValue;
                     }
                 }
 
@@ -239,11 +244,13 @@ namespace TongbaoExchangeCalc.Impl.Simulation
 
             unsafe
             {
-                int resCount = (int)ResType.Count - 1;
-                for (int i = 0; i < resCount; i++)
+                int minIndex = (int)ResType.MinTongbaoResIndex;
+                int maxIndex = (int)ResType.MaxTongbaoResIndex;
+                for (int i = minIndex; i <= maxIndex; i++)
                 {
-                    int resValue = context.PlayerData.GetResValue((ResType)(i + 1));
-                    record.ResRecords[i] = (Int16)resValue;
+                    int arrIndex = i - minIndex;
+                    int resValue = context.PlayerData.GetResValue((ResType)i);
+                    record.ResRecords[arrIndex] = (Int16)resValue;
                 }
             }
 

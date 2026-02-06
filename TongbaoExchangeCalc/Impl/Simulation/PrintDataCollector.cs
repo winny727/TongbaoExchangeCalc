@@ -283,9 +283,11 @@ namespace TongbaoExchangeCalc.Impl.Simulation
 
             // 这里本来是foreach context.PlayerData.ResValues，不过为了方便跟新增的ExchangeDataCollector
             // 和ExchangeDataParser对比结果，这里调整一下输出顺序为固定顺序
-            for (int i = 0; i < (int)ResType.Count - 1; i++)
+            int minIndex = (int)ResType.MinTongbaoResIndex;
+            int maxIndex = (int)ResType.MaxTongbaoResIndex;
+            for (int i = minIndex; i <= maxIndex; i++)
             {
-                ResType type = (ResType)(i + 1);
+                ResType type = (ResType)i;
                 mTempResBefore[context.SimulationStepIndex].TryGetValue(type, out int beforeValue);
                 int afterValue = context.PlayerData.GetResValue(type);
                 int changedValue = afterValue - beforeValue;

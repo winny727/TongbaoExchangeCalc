@@ -569,7 +569,7 @@
             // 
             this.numMaxRecord.Location = new System.Drawing.Point(9, 120);
             this.numMaxRecord.Maximum = new decimal(new int[] {
-            9999,
+            10000,
             0,
             0,
             0});

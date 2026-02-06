@@ -19,7 +19,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
         public ExchangeStepResult ExchangeStepResult; // 1B
 
         // 确定数组大小，用的时候不用new
-        public fixed Int16 ResRecords[(int)ResType.Count - 1]; // index: (byte)ResType-1 (排除掉None), value: resValue after exchange
+        public fixed Int16 ResRecords[ResType.MaxTongbaoResIndex - ResType.MinTongbaoResIndex + 1]; // arrIndex = (int)ResType - ResType.MinTongbaoResIndex, value: resValue after exchange
     }
 
     public struct ExchangeRecord

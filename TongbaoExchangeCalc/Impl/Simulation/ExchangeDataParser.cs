@@ -466,7 +466,7 @@ namespace TongbaoExchangeCalc.Impl.Simulation
             return sb;
         }
 
-        private bool ExchangeRecordCallback(ExchangeRecord record)
+        private bool ExchangeRecordCallback(ExchangeRecord exchangeRecord)
         {
             var collector = mExchangeDataCollector;
 
@@ -475,39 +475,39 @@ namespace TongbaoExchangeCalc.Impl.Simulation
                 return false;
             }
 
-            for (int i = 0; i < record.ResValueRecords.Length; i++)
+            for (int i = 0; i < exchangeRecord.ResValueRecords.Length; i++)
             {
-                var r = record.ResValueRecords[i];
-                if (!mTotalResChanged.ContainsKey(r.ResType))
+                var record = exchangeRecord.ResValueRecords[i];
+                if (!mTotalResChanged.ContainsKey(record.ResType))
                 {
-                    mTotalResChanged.Add(r.ResType, 0);
+                    mTotalResChanged.Add(record.ResType, 0);
                 }
-                mTotalResChanged[r.ResType] += r.ChangedValue;
+                mTotalResChanged[record.ResType] += record.ChangedValue;
             }
 
             if (!collector.RecordEachExchange)
             {
-                AppendSkippedExchangeStep(record);
+                AppendSkippedExchangeStep(exchangeRecord);
                 return true;
             }
 
-            if (collector.OmitExcessiveExchanges && record.ExchangeStepIndex >= collector.MaxExchangeRecord)
+            if (collector.OmitExcessiveExchanges && exchangeRecord.ExchangeStepIndex >= collector.MaxExchangeRecord)
             {
-                AppendSkippedExchangeStep(record);
+                AppendSkippedExchangeStep(exchangeRecord);
                 return true;
             }
 
-            if (mCurrentSlotIndex != record.SlotIndex)
+            if (mCurrentSlotIndex != exchangeRecord.SlotIndex)
             {
                 RecordSlotData();
                 mSlotExchangeCount = 0;
-                mCurrentSlotIndex = record.SlotIndex;
+                mCurrentSlotIndex = exchangeRecord.SlotIndex;
             }
 
             mSlotExchangeCount++;
-            mSlotLastTongbaoId = record.AfterTongbaoId;
+            mSlotLastTongbaoId = exchangeRecord.AfterTongbaoId;
 
-            AppendExchangeStep(record);
+            AppendExchangeStep(exchangeRecord);
 
             return true;
         }
