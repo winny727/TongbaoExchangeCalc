@@ -109,15 +109,14 @@
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.RecordBoxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ResetBoxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.ViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.RecordToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.panelRecordBox = new System.Windows.Forms.Panel();
             this.btnResetBox = new System.Windows.Forms.Button();
             this.btnRecordBox = new System.Windows.Forms.Button();
             this.btnSaveBox = new System.Windows.Forms.Button();
             this.btnLoadBox = new System.Windows.Forms.Button();
-            this.ViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.RecordToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.numSimCnt)).BeginInit();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numShield)).BeginInit();
@@ -923,8 +922,7 @@
             this.SimulationToolStripMenuItem,
             this.ResetToolStripMenuItem,
             this.toolStripSeparator1,
-            this.BoxToolStripMenuItem,
-            this.toolStripSeparator2});
+            this.BoxToolStripMenuItem});
             this.OperationToolStripMenuItem.Name = "OperationToolStripMenuItem";
             this.OperationToolStripMenuItem.Size = new System.Drawing.Size(62, 21);
             this.OperationToolStripMenuItem.Text = "操作(&O)";
@@ -1015,10 +1013,22 @@
             this.ResetBoxToolStripMenuItem.Text = "重置钱盒(&U)";
             this.ResetBoxToolStripMenuItem.Click += new System.EventHandler(this.btnResetBox_Click);
             // 
-            // toolStripSeparator2
+            // ViewToolStripMenuItem
             // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(230, 6);
+            this.ViewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.RecordToolStripMenuItem});
+            this.ViewToolStripMenuItem.Name = "ViewToolStripMenuItem";
+            this.ViewToolStripMenuItem.Size = new System.Drawing.Size(60, 21);
+            this.ViewToolStripMenuItem.Text = "查看(&V)";
+            // 
+            // RecordToolStripMenuItem
+            // 
+            this.RecordToolStripMenuItem.Name = "RecordToolStripMenuItem";
+            this.RecordToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Alt) 
+            | System.Windows.Forms.Keys.O)));
+            this.RecordToolStripMenuItem.Size = new System.Drawing.Size(237, 22);
+            this.RecordToolStripMenuItem.Text = "查看交换记录(&O)";
+            this.RecordToolStripMenuItem.Click += new System.EventHandler(this.btnRecord_Click);
             // 
             // groupBox5
             // 
@@ -1090,23 +1100,6 @@
             this.btnLoadBox.Text = "读取钱盒";
             this.btnLoadBox.UseVisualStyleBackColor = true;
             this.btnLoadBox.Click += new System.EventHandler(this.btnLoadBox_Click);
-            // 
-            // ViewToolStripMenuItem
-            // 
-            this.ViewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.RecordToolStripMenuItem});
-            this.ViewToolStripMenuItem.Name = "ViewToolStripMenuItem";
-            this.ViewToolStripMenuItem.Size = new System.Drawing.Size(60, 21);
-            this.ViewToolStripMenuItem.Text = "查看(&V)";
-            // 
-            // RecordToolStripMenuItem
-            // 
-            this.RecordToolStripMenuItem.Name = "RecordToolStripMenuItem";
-            this.RecordToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Alt) 
-            | System.Windows.Forms.Keys.O)));
-            this.RecordToolStripMenuItem.Size = new System.Drawing.Size(237, 22);
-            this.RecordToolStripMenuItem.Text = "查看交换记录(&O)";
-            this.RecordToolStripMenuItem.Click += new System.EventHandler(this.btnRecord_Click);
             // 
             // MainForm
             // 
@@ -1238,7 +1231,6 @@
         private System.Windows.Forms.ToolStripMenuItem SimulationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ResetToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem BoxToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem RandomToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem RandomEmptyToolStripMenuItem;
