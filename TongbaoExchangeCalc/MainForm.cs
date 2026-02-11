@@ -420,7 +420,10 @@ namespace TongbaoExchangeCalc
             }
 
             UpdateView();
-            mRuleTreeViewController.UpdateRuleTreeView();
+            if(mRuleTreeViewController.UpdateRuleTreeView())
+            {
+                Helper.SwitchToTabPage(treeViewRule);
+            }
         }
 
         private void UpdateLockedListView()

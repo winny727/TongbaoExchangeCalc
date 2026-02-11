@@ -103,7 +103,7 @@ namespace TongbaoExchangeCalc
                     tempData.BeginUpdate();
                     tempData.Setter(value);
                     tempData.EndUpdate();
-                    SwitchToTabPage(tempData.Control);
+                    Helper.SwitchToTabPage(tempData.Control);
                 },
                 tempData.LastValue,
                 tempData.Getter(),
@@ -112,22 +112,6 @@ namespace TongbaoExchangeCalc
 
             UndoCommandMgr.Instance.ExecuteCommand(command);
             tempData.UpdateLastValue();
-        }
-
-        private static void SwitchToTabPage(Control control)
-        {
-            while (control != null)
-            {
-                if (control is TabPage tabPage)
-                {
-                    if (tabPage?.Parent is TabControl tabControl && tabControl.SelectedTab != tabPage)
-                    {
-                        tabControl.SelectedTab = tabPage;
-                    }
-                    return;
-                }
-                control = control.Parent;
-            }
         }
 
         public static void SetupNumericUndo(NumericUpDown numeric)

@@ -420,6 +420,22 @@ namespace TongbaoExchangeCalc
             mHandlers[numeric] = handler;
         }
 
+        public static void SwitchToTabPage(Control control)
+        {
+            while (control != null)
+            {
+                if (control is TabPage tabPage)
+                {
+                    if (tabPage?.Parent is TabControl tabControl && tabControl.SelectedTab != tabPage)
+                    {
+                        tabControl.SelectedTab = tabPage;
+                    }
+                    return;
+                }
+                control = control.Parent;
+            }
+        }
+
         public static string GetTongbaoToolTip(PlayerData playerData, Tongbao tongbao)
         {
             if (tongbao == null)

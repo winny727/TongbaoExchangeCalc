@@ -53,8 +53,9 @@ namespace TongbaoExchangeCalc.Impl.View
             mRuleTreeView.ExpandAll();
         }
 
-        public void UpdateRuleTreeView()
+        public bool UpdateRuleTreeView()
         {
+            bool dirty = false;
             mIsUpdating = true;
             mRuleTreeView.BeginUpdate();
             try
@@ -92,6 +93,7 @@ namespace TongbaoExchangeCalc.Impl.View
                             treeNode.Nodes.RemoveAt(i);
                         }
                         collection.ClearDirty();
+                        dirty = true;
                     }
                 }
             }
@@ -100,6 +102,7 @@ namespace TongbaoExchangeCalc.Impl.View
                 mRuleTreeView.EndUpdate();
                 mIsUpdating = false;
             }
+            return dirty;
         }
 
         public void ApplySimulationRule(ExchangeSimulator simulator)
