@@ -498,7 +498,7 @@ namespace TongbaoExchangeCalc.Undo.Commands
             }
 
             mRule.Enabled = mAfterChecked;
-            mCollection.SetDirty();
+            // 这里由于RuleTreeView的CheckBox状态变化会直接修改Rule的Enabled属性，所以Execute时不需要再修改一次了，直接Append命令到UndoCommandMgr就行了
             DebugMessage($"ToggleRuleEnabledCommand Execute SetEnabled({mBeforeChecked}->{mAfterChecked}): {mRule.GetRuleString()}");
             return true;
         }

@@ -420,7 +420,7 @@ namespace TongbaoExchangeCalc
             }
 
             UpdateView();
-            if(mRuleTreeViewController.UpdateRuleTreeView())
+            if (mRuleTreeViewController.UpdateRuleTreeView())
             {
                 Helper.SwitchToTabPage(treeViewRule);
             }

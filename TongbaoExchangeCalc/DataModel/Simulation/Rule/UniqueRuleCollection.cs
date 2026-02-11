@@ -42,7 +42,7 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
             if (IsUniqueRule(item))
             {
                 mItems.Add(item);
-                Dirty = true;
+                SetDirty();
                 return true;
             }
             return false;
@@ -53,7 +53,7 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
             if (IsUniqueRule(item))
             {
                 mItems.Insert(index, item);
-                Dirty = true;
+                SetDirty();
                 return true;
             }
             return false;
@@ -72,7 +72,10 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
         public bool Remove(SimulationRule item)
         {
             bool result = mItems.Remove(item);
-            Dirty |= result;
+            if (result)
+            {
+                SetDirty();
+            }
             return result;
         }
 
@@ -81,13 +84,16 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
             if (index >= 0 && index < mItems.Count)
             {
                 mItems.RemoveAt(index);
-                Dirty = true;
+                SetDirty();
             }
         }
 
         public void Clear()
         {
-            Dirty |= mItems.Count > 0;
+            if (mItems.Count > 0)
+            {
+                SetDirty();
+            }
             mItems.Clear();
         }
 
@@ -97,7 +103,7 @@ namespace TongbaoExchangeCalc.DataModel.Simulation
             {
                 mItems.Remove(item);
                 mItems.Insert(index, item);
-                Dirty = true;
+                SetDirty();
                 return true;
             }
             return false;

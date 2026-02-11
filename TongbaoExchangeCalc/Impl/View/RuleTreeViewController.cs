@@ -20,7 +20,7 @@ namespace TongbaoExchangeCalc.Impl.View
             mRuleTreeView = treeView ?? throw new ArgumentNullException(nameof(treeView));
             mPlayerData = playerData ?? throw new ArgumentNullException(nameof(playerData));
 
-            mRuleTreeView.AfterSelect += OnRuleAfterSelect;
+            mRuleTreeView.NodeMouseClick += OnRuleMouseClick;
             mRuleTreeView.AfterCheck += OnRuleAfterCheck;
             mRuleTreeView.DoubleClick += OnRuleDoubleClick;
             mRuleTreeView.KeyDown += OnTreeViewKeyDown;
@@ -270,13 +270,8 @@ namespace TongbaoExchangeCalc.Impl.View
             }
         }
 
-        private void OnRuleAfterSelect(object sender, TreeViewEventArgs e)
+        private void OnRuleMouseClick(object sender, TreeNodeMouseClickEventArgs e)
         {
-            if (mIsUpdating)
-            {
-                return;
-            }
-
             mRuleTreeView.Refresh();
         }
 
